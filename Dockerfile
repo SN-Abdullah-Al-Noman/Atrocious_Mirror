@@ -1,4 +1,4 @@
-FROM noman12/atrociousbot:latest
+FROM noman12/snwzml:latest
 
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app
