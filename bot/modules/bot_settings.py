@@ -791,7 +791,6 @@ def load_config():
                         'TIME_GAP': TIME_GAP,
                         'FINISHED_PROGRESS_STR': FINISHED_PROGRESS_STR,
                         'UN_FINISHED_PROGRESS_STR': UN_FINISHED_PROGRESS_STR,
-                        'MULTI_WORKING_PROGRESS_STR': MULTI_WORKING_PROGRESS_STR,
                         'EMOJI_THEME': EMOJI_THEME,
                         'SHOW_LIMITS_IN_STATS': SHOW_LIMITS_IN_STATS,
                         'LIST_MODE': LIST_MODE,
