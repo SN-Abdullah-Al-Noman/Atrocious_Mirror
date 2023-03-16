@@ -42,22 +42,22 @@ def bot_limit(update, context):
     user_task = 'No Limit Set' if USER_TASKS_LIMIT == '' else f'{USER_TASKS_LIMIT} Tasks/user'
 
     if config_dict['EMOJI_THEME']: 
-        limit = f"<b>🔢 Bot Limitations </b>\n"
-                f"🧲 Torrent/Direct: {torrent_direct}\n"
-                f"🔐 Zip/Unzip: {zip_unzip}\n"
-                f"🔷 Leech: {leech_limit}\n"
-                f"♻️ Clone: {clone_limit}\n"
-                f"🔰 Mega: {mega_limit}\n"
-                f"💣 Total Tasks: {total_task}\n"
+        limit = f"<b>🔢 Bot Limitations </b>\n"\
+                f"🧲 Torrent/Direct: {torrent_direct}\n"\
+                f"🔐 Zip/Unzip: {zip_unzip}\n"\
+                f"🔷 Leech: {leech_limit}\n"\
+                f"♻️ Clone: {clone_limit}\n"\
+                f"🔰 Mega: {mega_limit}\n"\
+                f"💣 Total Tasks: {total_task}\n"\
                 f"🔫 User Tasks: {user_task}\n\n"
     else: 
-        limit = f"<b>🔢 Bot Limitations </b>\n"
-                f"Torrent/Direct: {torrent_direct}\n"
-                f"Zip/Unzip: {zip_unzip}\n"
-                f"Leech: {leech_limit}\n"
-                f"Clone: {clone_limit}\n"
-                f"Mega: {mega_limit}\n"
-                f"Total Tasks: {total_task}\n"
+        limit = f"<b>🔢 Bot Limitations </b>\n"\
+                f"Torrent/Direct: {torrent_direct}\n"\
+                f"Zip/Unzip: {zip_unzip}\n"\
+                f"Leech: {leech_limit}\n"\
+                f"Clone: {clone_limit}\n"\
+                f"Mega: {mega_limit}\n"\
+                f"Total Tasks: {total_task}\n"\
                 f"User Tasks: {user_task}\n\n"
 
     if config_dict['PICS']:
