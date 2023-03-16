@@ -239,8 +239,8 @@ def get_progress_bar_string(status):
     p = min(max(p, 0), 100)
     cFull = p // 10
     cPart = p % 10 - 1
-    p_str = '■' * cFull
-    p_str += '□' * (10 - cFull)
+    p_str = config_dict['FINISHED_PROGRESS_STR'] * cFull
+    p_str += config_dict['UN_FINISHED_PROGRESS_STR']  * (10 - cFull)
     return f"[{p_str}]"
 
 
