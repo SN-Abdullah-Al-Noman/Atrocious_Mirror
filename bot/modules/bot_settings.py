@@ -43,7 +43,6 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'CAPTION_FONT': 'code',
                   'FINISHED_PROGRESS_STR': '■',
                   'UN_FINISHED_PROGRESS_STR': '□',
-                  'MULTI_WORKING_PROGRESS_STR': '□ □ □ □ □ □ □'.split(' '),
                   'IMAGE_URL': 'https://graph.org/file/6b22ef7b8a733c5131d3f.jpg',
                   'TIMEZONE': 'Asia/Kolkata',
                   'LIST_MODE': "Telegraph",
@@ -362,8 +361,6 @@ def load_config():
     if len(RSS_COMMAND) == 0:
         RSS_COMMAND = ''
 
-    SERVER_PORT = environ.get('SERVER_PORT', '')
-    SERVER_PORT = 80 if len(SERVER_PORT) == 0 else int(SERVER_PORT)
 
     DRIVES_IDS.clear()
     DRIVES_NAMES.clear()
@@ -627,14 +624,12 @@ def load_config():
     <b>Description</b>: <i>{description}</i>"""
 
     FINISHED_PROGRESS_STR = environ.get('FINISHED_PROGRESS_STR', '')
-    UN_FINISHED_PROGRESS_STR = environ.get('UN_FINISHED_PROGRESS_STR', '')
-    MULTI_WORKING_PROGRESS_STR = environ.get('MULTI_WORKING_PROGRESS_STR', '')
-    MULTI_WORKING_PROGRESS_STR = MULTI_WORKING_PROGRESS_STR.split(' ')
-    if len(FINISHED_PROGRESS_STR) == 0 or len(FINISHED_PROGRESS_STR) == 0 or len(MULTI_WORKING_PROGRESS_STR) == 0:
-        FINISHED_PROGRESS_STR = '█' # '■'
-        UN_FINISHED_PROGRESS_STR = '▒' # '□'
-        MULTI_WORKING_PROGRESS_STR = '▁ ▂ ▃ ▄ ▅ ▆ ▇'.split(' ')
+    if len(FINISHED_PROGRESS_STR) == 0:
+        FINISHED_PROGRESS_STR = '■'
 
+    UN_FINISHED_PROGRESS_STR = environ.get('UN_FINISHED_PROGRESS_STR', '')
+    if len(UN_FINISHED_PROGRESS_STR) == 0:
+        UN_FINISHED_PROGRESS_STR = '□'
 
     IMAGE_URL = environ.get('IMAGE_URL', '')
     if len(IMAGE_URL) == 0:
@@ -677,10 +672,9 @@ def load_config():
     BASE_URL = environ.get('BASE_URL', '').rstrip("/")
     if len(BASE_URL) == 0:
         BASE_URL = ''
-        srun(["pkill", "-9", "-f", "gunicorn"])
-    else:
-        srun(["pkill", "-9", "-f", "gunicorn"])
-        Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{SERVER_PORT}", shell=True)
+
+    PORT = environ.get('PORT')
+    Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{PORT}", shell=True)
 
     SAFE_MODE = environ.get('SAFE_MODE', '')
     if len(SAFE_MODE) == 0:
@@ -730,7 +724,6 @@ def load_config():
                         'SEARCH_API_LINK': SEARCH_API_LINK,
                         'SEARCH_LIMIT': SEARCH_LIMIT,
                         'SEARCH_PLUGINS': SEARCH_PLUGINS,
-                        'SERVER_PORT': SERVER_PORT,
                         'STATUS_LIMIT': STATUS_LIMIT,
                         'STATUS_UPDATE_INTERVAL': STATUS_UPDATE_INTERVAL,
                         'STOP_DUPLICATE': STOP_DUPLICATE,
@@ -952,7 +945,7 @@ def edit_variable(update, context, omsg, key):
         aria2_options['bt-stop-timeout'] = f'{value}'
     elif key == 'TG_SPLIT_SIZE':
         value = min(int(value), tgBotMaxFileSize)
-    elif key == 'SERVER_PORT':
+    elif key == 'PORT':
         value = int(value)
         srun(["pkill", "-9", "-f", "gunicorn"])
         Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{value}", shell=True)
@@ -1190,7 +1183,7 @@ def edit_bot_settings(update, context):
                 DbManger().update_aria2('bt-stop-timeout', '0')
         elif data[2] == 'BASE_URL':
             srun(["pkill", "-9", "-f", "gunicorn"])
-        elif data[2] == 'SERVER_PORT':
+        elif data[2] == 'PORT':
             value = 80
             srun(["pkill", "-9", "-f", "gunicorn"])
             Popen("gunicorn web.wserver:app --bind 0.0.0.0:80", shell=True)
