@@ -23,28 +23,8 @@ try:
 except:
     pass
 
-BOT_TOKEN = environ.get('BOT_TOKEN', '')
-if len(BOT_TOKEN) == 0:
-    log_error("BOT_TOKEN variable is missing! Exiting now")
-    exit(1)
 
-bot_id = int(BOT_TOKEN.split(':', 1)[0])
-
-DATABASE_URL = environ.get('DATABASE_URL', '')
-if len(DATABASE_URL) == 0:
-    DATABASE_URL = None
-
-if DATABASE_URL is not None:
-    conn = MongoClient(DATABASE_URL)
-    db = conn.mltb
-    if config_dict := db.settings.config.find_one({'_id': bot_id}):  #retrun config dict (all env vars)
-        environ['UPSTREAM_REPO'] = config_dict['UPSTREAM_REPO']
-        environ['UPSTREAM_BRANCH'] = config_dict['UPSTREAM_BRANCH']
-        environ['UPDATE_PACKAGES'] = config_dict.get('UPDATE_PACKAGES', 'False')
-    conn.close()
-
-
-UPSTREAM_REPO = 'https://github.com/SN-Abdullah-Al-Noman/SN_WZML"
+UPSTREAM_REPO = 'https://github.com/SN-Abdullah-Al-Noman/SN_WZML'
 UPSTREAM_BRANCH = environ.get('UPSTREAM_BRANCH', '')
 if len(UPSTREAM_BRANCH) == 0:
     UPSTREAM_BRANCH = 'master'
