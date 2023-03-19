@@ -256,7 +256,7 @@ def get_readable_message():
                 globals()['PAGE_NO'] -= 1
         for index, download in enumerate(list(download_dict.values())[COUNT:], start=1):
             if config_dict['SAFE_MODE']:
-                msg += f"<b>{download.status()}: <a href='https://github.com/SN-ABDULLAH-AL-NOMAN/SN-MLTB'>SN-MLTB</a> Safe Mode</b>"
+                msg += f"<b>{download.status()}: <a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>SN_WZML</a> Safe Mode</b>"
             else:
                 msg += f"<b><a href='{download.message.link}'>{download.status()}</a>: </b>"
                 msg += f"<code>{escape(str(download.name()))}</code>"
