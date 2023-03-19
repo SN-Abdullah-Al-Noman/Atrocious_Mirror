@@ -600,7 +600,7 @@ class MirrorLeechListener:
 
         if BOT_PM_X and self.message.chat.type != 'private':
             if config_dict['SAFE_MODE']:
-                name = "File name is hidden because Safe Mode is enabled."
+                name = "File name is hidden."
             else:
                 name = name
             if config_dict['EMOJI_THEME']:
