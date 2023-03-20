@@ -3,8 +3,6 @@ from os import path as ospath, environ, remove as osremove
 from subprocess import run as srun, call as scall
 from pkg_resources import working_set
 from requests import get as rget
-from dotenv import load_dotenv
-from pymongo import MongoClient
 
 if ospath.exists('log.txt'):
     with open('log.txt', 'r+') as f:
@@ -14,20 +12,8 @@ basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     handlers=[FileHandler('log.txt'), StreamHandler()],
                     level=INFO)
 
-load_dotenv('config.env', override=True)
-
-try:
-    if bool(environ.get('_____REMOVE_THIS_LINE_____')):
-        log_error('The README.md file there to be read! Exiting now!')
-        exit()
-except:
-    pass
-
-
 UPSTREAM_REPO = 'https://github.com/SN-Abdullah-Al-Noman/SN_WZML'
-UPSTREAM_BRANCH = environ.get('UPSTREAM_BRANCH', '')
-if len(UPSTREAM_BRANCH) == 0:
-    UPSTREAM_BRANCH = 'master'
+UPSTREAM_BRANCH = 'master'
 
 if UPSTREAM_REPO is not None:
     if ospath.exists('.git'):
