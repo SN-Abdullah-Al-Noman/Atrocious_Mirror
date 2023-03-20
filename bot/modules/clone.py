@@ -258,8 +258,11 @@ def start_clone(listelem):
                 else:
                     sendMessage(result + cc, bot, message, button)
             message.delete()
-            if msg_id is not None and config_dict['AUTO_DELETE_MESSAGE_DURATION'] == -1:
-                msg_id.delete()
+            if reply_to is not None and config_dict['AUTO_DELETE_UPLOAD_MESSAGE_DURATION'] == -1:
+                try:
+                    reply_to.delete()
+                except:
+                    pass
     else:
         drive = GoogleDriveHelper(name, user_id=user_id)
         gid = ''.join(SystemRandom().choices(ascii_letters + digits, k=12))
