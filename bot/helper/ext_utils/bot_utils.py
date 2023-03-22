@@ -706,9 +706,7 @@ Modified by {config_dict['CREDIT_NAME']}
 
 Tasks: {tasks}
 
-CPU: {progress_bar(cpu)} {cpu}%
-RAM: {progress_bar(mem)} {mem}%
-DISK: {progress_bar(disk)} {disk}%
+CPU: {cpu}% RAM: {mem}% DISK: {disk}%
 
 SENT: {sent} | RECV: {recv}
 
