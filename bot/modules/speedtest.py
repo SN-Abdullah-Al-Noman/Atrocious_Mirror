@@ -29,7 +29,7 @@ def speedtest(update, context):
 <b>Data Sent:</b> <code>{get_readable_file_size(int(result['bytes_sent']))}</code>
 <b>Data Received:</b> <code>{get_readable_file_size(int(result['bytes_received']))}</code>
 
-🌐 SPEEDTEST SERVER:
+🌍 SPEEDTEST SERVER:
 <b>Name:</b> <code>{result['server']['name']}</code>
 <b>Country:</b> <code>{result['server']['country']}, {result['server']['cc']}</code>
 <b>Sponsor:</b> <code>{result['server']['sponsor']}</code>
@@ -37,7 +37,7 @@ def speedtest(update, context):
 <b>Latitude:</b> <code>{result['server']['lat']}</code>
 <b>Longitude:</b> <code>{result['server']['lon']}</code>
 
-👤 CLIENT DETAILS:
+👨‍💻 CLIENT DETAILS:
 <b>IP Address:</b> <code>{result['client']['ip']}</code>
 <b>Latitude:</b> <code>{result['client']['lat']}</code>
 <b>Longitude:</b> <code>{result['client']['lon']}</code>
