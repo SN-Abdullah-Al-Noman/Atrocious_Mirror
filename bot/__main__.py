@@ -80,10 +80,10 @@ def stats(update, context):
     if config_dict['EMOJI_THEME']:
             stats = f'<b>       📊 Bot Statistics </b>\n' \
                     f'🛠 Updated On: {last_commit}\n'\
-                    f'⌄1�7 Uptime: {currentTime}\n'\
+                    f'⏰️ Uptime: {currentTime}\n'\
                     f'🤖 Version: {version}\n'\
                     f'🟢 OS Uptime: {osUptime}\n'\
-                    f'🖥︄1�7 CPU: [{progress_bar(cpuUsage)}] {cpuUsage}%\n'\
+                    f'🖥︄ CPU: [{progress_bar(cpuUsage)}] {cpuUsage}%\n'\
                     f'🎮 RAM: [{progress_bar(mem_p)}] {mem_p}%\n'\
                     f'💾 Disk: [{progress_bar(disk)}] {disk}%\n'\
                     f'💿 Disk Free: {free}\n'\
@@ -207,80 +207,80 @@ def log(update, context):
 
 
 help_string = '''
-<b><a href='https://github.com/SN-ABDULLAH-AL-NOMAN/SN-MLTB'>SN-MLTB</a></b> - The Ultimate Telegram MIrror-Leech Bot to Upload Your File & Link in Google Drive & Telegram
+<b><a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>SN_WZML</a></b> - The Ultimate Telegram MIrror-Leech Bot to Upload Your File & Link in Google Drive & Telegram
 Choose a help category:
 '''
 
 help_string_telegraph_user = f'''
 <b><u>👤 User Commands</u></b>
 <br><br>
- 1�7 <b>/{BotCommands.HelpCommand}</b>: To get this message
+• <b>/{BotCommands.HelpCommand}</b>: To get this message
 <br><br>
- 1�7 <b>/{BotCommands.MirrorCommand[0]}</b> [download_url][magnet_link]: Start mirroring to Google Drive. Send <b>/{BotCommands.MirrorCommand[0]}</b> for more help
+• <b>/{BotCommands.MirrorCommand[0]}</b> [download_url][magnet_link]: Start mirroring to Google Drive. Send <b>/{BotCommands.MirrorCommand[0]}</b> for more help
 <br><br>
- 1�7 <b>/{BotCommands.ZipMirrorCommand[0]}</b> [download_url][magnet_link]: Start mirroring and upload the file/folder compressed with zip extension
+• <b>/{BotCommands.ZipMirrorCommand[0]}</b> [download_url][magnet_link]: Start mirroring and upload the file/folder compressed with zip extension
 <br><br>
- 1�7 <b>/{BotCommands.UnzipMirrorCommand[0]}</b> [download_url][magnet_link]: Start mirroring and upload the file/folder extracted from any archive extension
+• <b>/{BotCommands.UnzipMirrorCommand[0]}</b> [download_url][magnet_link]: Start mirroring and upload the file/folder extracted from any archive extension
 <br><br>
- 1�7 <b>/{BotCommands.QbMirrorCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start Mirroring using qBittorrent, Use <b>/{BotCommands.QbMirrorCommand[0]} s</b> to select files before downloading
+• <b>/{BotCommands.QbMirrorCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start Mirroring using qBittorrent, Use <b>/{BotCommands.QbMirrorCommand[0]} s</b> to select files before downloading
 <br><br>
- 1�7 <b>/{BotCommands.QbZipMirrorCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start mirroring using qBittorrent and upload the file/folder compressed with zip extension
+• <b>/{BotCommands.QbZipMirrorCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start mirroring using qBittorrent and upload the file/folder compressed with zip extension
 <br><br>
- 1�7 <b>/{BotCommands.QbUnzipMirrorCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start mirroring using qBittorrent and upload the file/folder extracted from any archive extension
+• <b>/{BotCommands.QbUnzipMirrorCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start mirroring using qBittorrent and upload the file/folder extracted from any archive extension
 <br><br>
- 1�7 <b>/{BotCommands.LeechCommand[0]}</b> [download_url][magnet_link]: Start leeching to Telegram, Use <b>/{BotCommands.LeechCommand[0]} s</b> to select files before leeching
+• <b>/{BotCommands.LeechCommand[0]}</b> [download_url][magnet_link]: Start leeching to Telegram, Use <b>/{BotCommands.LeechCommand[0]} s</b> to select files before leeching
 <br><br>
- 1�7 <b>/{BotCommands.ZipLeechCommand[0]}</b> [download_url][magnet_link]: Start leeching to Telegram and upload the file/folder compressed with zip extension
+• <b>/{BotCommands.ZipLeechCommand[0]}</b> [download_url][magnet_link]: Start leeching to Telegram and upload the file/folder compressed with zip extension
 <br><br>
- 1�7 <b>/{BotCommands.UnzipLeechCommand[0]}</b> [download_url][magnet_link][torent_file]: Start leeching to Telegram and upload the file/folder extracted from any archive extension
+• <b>/{BotCommands.UnzipLeechCommand[0]}</b> [download_url][magnet_link][torent_file]: Start leeching to Telegram and upload the file/folder extracted from any archive extension
 <br><br>
- 1�7 <b>/{BotCommands.QbLeechCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start leeching to Telegram using qBittorrent, Use <b>/{BotCommands.QbLeechCommand[0]} s</b> to select files before leeching
+• <b>/{BotCommands.QbLeechCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start leeching to Telegram using qBittorrent, Use <b>/{BotCommands.QbLeechCommand[0]} s</b> to select files before leeching
 <br><br>
- 1�7 <b>/{BotCommands.QbZipLeechCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start leeching to Telegram using qBittorrent and upload the file/folder compressed with zip extension
+• <b>/{BotCommands.QbZipLeechCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start leeching to Telegram using qBittorrent and upload the file/folder compressed with zip extension
 <br><br>
- 1�7 <b>/{BotCommands.QbUnzipLeechCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start leeching to Telegram using qBittorrent and upload the file/folder extracted from any archive extension
+• <b>/{BotCommands.QbUnzipLeechCommand[0]}</b> [magnet_link][torrent_file][torrent_file_url]: Start leeching to Telegram using qBittorrent and upload the file/folder extracted from any archive extension
 <br><br>
- 1�7 <b>/{BotCommands.CloneCommand[0]}</b> [drive_url][gdtot_url]: Copy file/folder to Google Drive
+• <b>/{BotCommands.CloneCommand[0]}</b> [drive_url][gdtot_url]: Copy file/folder to Google Drive
 <br><br>
- 1�7 <b>/{BotCommands.CountCommand}</b> [drive_url][gdtot_url]: Count file/folder of Google Drive
+• <b>/{BotCommands.CountCommand}</b> [drive_url][gdtot_url]: Count file/folder of Google Drive
 <br><br>
- 1�7 <b>/{BotCommands.DeleteCommand}</b> [drive_url]: Delete file/folder from Google Drive (Only Owner & Sudo)
+• <b>/{BotCommands.DeleteCommand}</b> [drive_url]: Delete file/folder from Google Drive (Only Owner & Sudo)
 <br><br>
- 1�7 <b>/{BotCommands.YtdlCommand[0]}</b> [yt-dlp supported link]: Mirror yt-dlp supported link. Send <b>/{BotCommands.YtdlCommand[0]}</b> for more help
+• <b>/{BotCommands.YtdlCommand[0]}</b> [yt-dlp supported link]: Mirror yt-dlp supported link. Send <b>/{BotCommands.YtdlCommand[0]}</b> for more help
 <br><br>
- 1�7 <b>/{BotCommands.YtdlZipCommand[0]}</b> [yt-dlp supported link]: Mirror yt-dlp supported link as zip
+• <b>/{BotCommands.YtdlZipCommand[0]}</b> [yt-dlp supported link]: Mirror yt-dlp supported link as zip
 <br><br>
- 1�7 <b>/{BotCommands.YtdlLeechCommand[0]}</b> [yt-dlp supported link]: Leech yt-dlp supported link
+• <b>/{BotCommands.YtdlLeechCommand[0]}</b> [yt-dlp supported link]: Leech yt-dlp supported link
 <br><br>
- 1�7 <b>/{BotCommands.YtdlZipLeechCommand[0]}</b> [yt-dlp supported link]: Leech yt-dlp supported link as zip
+• <b>/{BotCommands.YtdlZipLeechCommand[0]}</b> [yt-dlp supported link]: Leech yt-dlp supported link as zip
 <br><br>
- 1�7 <b>/{BotCommands.UserSetCommand[0]}</b>: Users settings
+• <b>/{BotCommands.UserSetCommand[0]}</b>: Users settings
 <br><br>
- 1�7 <b>/{BotCommands.RssListCommand}</b>: List all subscribed rss feed info
+• <b>/{BotCommands.RssListCommand}</b>: List all subscribed rss feed info
 <br><br>
- 1�7 <b>/{BotCommands.RssGetCommand}</b>: [Title] [Number](last N links): Force fetch last N links
+• <b>/{BotCommands.RssGetCommand}</b>: [Title] [Number](last N links): Force fetch last N links
 <br><br>
- 1�7 <b>/{BotCommands.RssSubCommand}</b>: [Title] [Rss Link] f: [filter]: Subscribe new rss feed
+• <b>/{BotCommands.RssSubCommand}</b>: [Title] [Rss Link] f: [filter]: Subscribe new rss feed
 <br><br>
- 1�7 <b>/{BotCommands.RssUnSubCommand}</b>: [Title]: Unubscribe rss feed by title
+• <b>/{BotCommands.RssUnSubCommand}</b>: [Title]: Unubscribe rss feed by title
 <br><br>
- 1�7 <b>/{BotCommands.RssSettingsCommand}</b>: Rss Settings
+• <b>/{BotCommands.RssSettingsCommand}</b>: Rss Settings
 <br><br>
- 1�7 <b>/{BotCommands.CancelMirror}</b>: Reply to the message by which the download was initiated and that download will be cancelled
+• <b>/{BotCommands.CancelMirror}</b>: Reply to the message by which the download was initiated and that download will be cancelled
 <br><br>
- 1�7 <b>/{BotCommands.CancelAllCommand}</b>: Cancel all downloading tasks
+• <b>/{BotCommands.CancelAllCommand}</b>: Cancel all downloading tasks
 <br><br>
- 1�7 <b>/{BotCommands.ListCommand}</b> [query]: Search in Google Drive(s)
+• <b>/{BotCommands.ListCommand}</b> [query]: Search in Google Drive(s)
 <br><br>
- 1�7 <b>/{BotCommands.SearchCommand}</b> [query]: Search for torrents with API
+• <b>/{BotCommands.SearchCommand}</b> [query]: Search for torrents with API
 <br>sites: <code>rarbg, 1337x, yts, etzv, tgx, torlock, piratebay, nyaasi, ettv</code><br><br>
- 1�7 <b>/{BotCommands.StatusCommand}</b>: Shows a status of all the downloads
+• <b>/{BotCommands.StatusCommand}</b>: Shows a status of all the downloads
 <br><br>
- 1�7 <b>/{BotCommands.StatsCommand}</b>: Show Stats of the machine the bot is hosted on
+• <b>/{BotCommands.StatsCommand}</b>: Show Stats of the machine the bot is hosted on
 <br><br>
- 1�7 <b>/{BotCommands.SpeedCommand[0]}</b>: Speedtest of server
+• <b>/{BotCommands.SpeedCommand[0]}</b>: Speedtest of server
 <br><br>
- 1�7 <b>/weebhelp</b>: Okatu helper
+• <b>/weebhelp</b>: Okatu helper
 '''
 
 help_user = telegraph.create_page(
@@ -288,30 +288,57 @@ help_user = telegraph.create_page(
     content=help_string_telegraph_user)["path"]
 
 help_string_telegraph_admin = f'''
-<b><u>🛡︄1�7 Admin Commands</u></b>
+<b><u>🛡️ Admin Commands</u></b>
 <br><br>
- 1�7 <b>/{BotCommands.PingCommand}</b>: Check how long it takes to Ping the Bot
+• <b>/{BotCommands.PingCommand}</b>: Check how long it takes to Ping the Bot
 <br><br>
- 1�7 <b>/{BotCommands.AuthorizeCommand}</b>: Authorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
+• <b>/{BotCommands.AuthorizeCommand}</b>: Authorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
 <br><br>
- 1�7 <b>/{BotCommands.UnAuthorizeCommand}</b>: Unauthorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
+• <b>/{BotCommands.UnAuthorizeCommand}</b>: Unauthorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
 <br><br>
- 1�7 <b>/{BotCommands.UsersCommand}</b>: show users settings (Only Owner & Sudo).
+• <b>/{BotCommands.UsersCommand}</b>: show users settings (Only Owner & Sudo).
 <br><br>
- 1�7 <b>/{BotCommands.AddSudoCommand}</b>: Add sudo user (Only Owner)
+• <b>/{BotCommands.AddSudoCommand}</b>: Add sudo user (Only Owner)
 <br><br>
- 1�7 <b>/{BotCommands.RmSudoCommand}</b>: Remove sudo users (Only Owner)
+• <b>/{BotCommands.RmSudoCommand}</b>: Remove sudo users (Only Owner)
 <br><br>
- 1�7 <b>/{BotCommands.PaidUsersCommand}</b>: Show Paid users (Only Owner & Sudo)
+• <b>/{BotCommands.PaidUsersCommand}</b>: Show Paid users (Only Owner & Sudo)
 <br><br>
- 1�7 <b>/{BotCommands.AddPaidCommand}</b>: Authorize Paid users (Only Owner)
+• <b>/{BotCommands.AddPaidCommand}</b>: Authorize Paid users (Only Owner)
 <br><br>
- 1�7 <b>/{BotCommands.RmPaidCommand}</b>: Unauthorize Paid users (Only Owner)
+• <b>/{BotCommands.RmPaidCommand}</b>: Unauthorize Paid users (Only Owner)
 <br><br>
- 1�7 <b>/{BotCommands.RestartCommand}</b>: Restart and update the bot (Only Owner & Sudo)
+• <b>/{BotCommands.RestartCommand}</b>: Restart and update the bot (Only Owner & Sudo)
 <br><br>
- 1�7 <b>/{BotCommands.LogCommand}</b>: Get a log file of the bot. Handy for getting crash reports
+• <b>/{BotCommands.LogCommand}</b>: Get a log file of the bot. Handy for getting crash reports
 '''
+
+help_string_telegraph_admin = f'''
+<b><u>🛡️ Admin Commands</u></b>
+<br><br>
+• <b>/{BotCommands.PingCommand}</b>: Check how long it takes to Ping the Bot
+<br><br>
+• <b>/{BotCommands.AuthorizeCommand}</b>: Authorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
+<br><br>
+• <b>/{BotCommands.UnAuthorizeCommand}</b>: Unauthorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
+<br><br>
+• <b>/{BotCommands.UsersCommand}</b>: show users settings (Only Owner & Sudo).
+<br><br>
+• <b>/{BotCommands.AddSudoCommand}</b>: Add sudo user (Only Owner)
+<br><br>
+• <b>/{BotCommands.RmSudoCommand}</b>: Remove sudo users (Only Owner)
+<br><br>
+• <b>/{BotCommands.PaidUsersCommand}</b>: Show Paid users (Only Owner & Sudo)
+<br><br>
+• <b>/{BotCommands.AddPaidCommand}</b>: Authorize Paid users (Only Owner)
+<br><br>
+• <b>/{BotCommands.RmPaidCommand}</b>: Unauthorize Paid users (Only Owner)
+<br><br>
+• <b>/{BotCommands.RestartCommand}</b>: Restart and update the bot (Only Owner & Sudo)
+<br><br>
+• <b>/{BotCommands.LogCommand}</b>: Get a log file of the bot. Handy for getting crash reports
+'''
+
 
 help_admin = telegraph.create_page(
     title=f"{config_dict['TITLE_NAME']} Help",
@@ -322,7 +349,7 @@ def bot_help(update, context):
     button = ButtonMaker()
     if config_dict['EMOJI_THEME']:
         button.buildbutton("👤 User", f"https://telegra.ph/{help_user}")
-        button.buildbutton("🛡︄1�7 Admin", f"https://telegra.ph/{help_admin}")
+        button.buildbutton("🔰 Admin", f"https://telegra.ph/{help_admin}")
     else:
         button.buildbutton("User", f"https://telegra.ph/{help_user}")
         button.buildbutton("Admin", f"https://telegra.ph/{help_admin}")
@@ -440,7 +467,7 @@ def main():
                     for index, link in enumerate(links, start=1):
                         msg += f" <a href='{link}'>{index}</a> |"
                         if len(msg.encode()) > 4000:
-                            if 'Bot Restarted Successfully❄1�7' in msg and cid == chat_id:
+                            if 'Bot Restarted Successfully❗' in msg and cid == chat_id:
                                 try:
                                     bot.editMessageText(msg, chat_id, msg_id)
                                 except:
@@ -452,7 +479,7 @@ def main():
                                 except Exception as e:
                                     LOGGER.error(e)
                             msg = ''
-                if 'Bot Restarted Successfully❄1�7' in msg and cid == chat_id:
+                if 'Bot Restarted Successfully❗' in msg and cid == chat_id:
                     try:
                         bot.editMessageText(msg, chat_id, msg_id)
                     except:
