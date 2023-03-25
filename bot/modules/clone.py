@@ -213,7 +213,7 @@ def start_clone(listelem):
         if smsg:
             tegr, html, tgdi = userlistype(user_id)
             if tegr:
-                return sendMessage("Someone already mirrored it for you !\nHere you go:", bot, message, button)
+                return sendMessage("Someone already cloned it for yo❗️ Here you go:", bot, message, button)
             elif html:
                 return sendFile(bot, message, button, f"File/Folder is already available in Drive. Here are the search results:\n\n{smsg}")
             else: return sendMessage(smsg, bot, message, button)
