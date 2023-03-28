@@ -362,7 +362,7 @@ def get_readable_message():
         if config_dict['TOTAL_TASKS_LIMIT']:
             TASKS_COUNT = f"<b>Task Limit: </b>{config_dict['TOTAL_TASKS_LIMIT']} | <b>Run:</b> {len(download_dict)} | <b>Free:</b> {config_dict['TOTAL_TASKS_LIMIT'] - len(download_dict)}\n"
         else:
-            TASKS_COUNT = f""
+            TASKS_COUNT = f"<b>Tasks Running:</b> {len(download_dict)}\n"
         if config_dict['EMOJI_THEME']:
             bmsg = f"🖥 {TASKS_COUNT}"
             bmsg += f"<b>🖥 CPU:</b> {cpu_percent()}% | <b>💿 FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
@@ -704,7 +704,7 @@ def bot_sys_stats():
     return f"""
 Modified by {config_dict['CREDIT_NAME']}
 
-Tasks: {tasks}
+Tasks Running: {tasks}
 
 CPU: {progress_bar(cpu)} {cpu}%
 RAM: {progress_bar(mem)} {mem}%
