@@ -667,15 +667,10 @@ def sharer_scraper(url):
 
         
 def parse_info(res):
-
     info_parsed = {}
-
     info_chunks = re_findall(">(.*?)<\/td>", res.text)
-
     for i in range(0, len(info_chunks), 2):
-
         info_parsed[info_chunks[i]] = info_chunks[i + 1]
-
     return info_parsed
   
   
