@@ -664,8 +664,21 @@ def sharer_scraper(url):
         return drive_link[0]
     else:
         raise DirectDownloadLinkException('ERROR: Drive Link not found, Try in your broswer')
-        
 
+        
+def parse_info(res):
+
+    info_parsed = {}
+
+    info_chunks = re_findall(">(.*?)<\/td>", res.text)
+
+    for i in range(0, len(info_chunks), 2):
+
+        info_parsed[info_chunks[i]] = info_chunks[i + 1]
+
+    return info_parsed
+  
+  
 def udrive(url: str) -> str:
     siteName = urlparse(url).netloc.split('.', 1)[0]
     if 'katdrive' or 'hubdrive' in url:
