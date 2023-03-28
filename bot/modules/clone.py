@@ -4,19 +4,19 @@ from string import ascii_letters, digits
 from threading import Thread
 from time import sleep, time
 
-from bot.helper.ext_utils.bot_utils import is_sudo, is_paid, get_user_task, get_category_buttons, get_readable_file_size, getUserTDs, \
+from AtrociousBot.helper.ext_utils.bot_utils import is_sudo, is_paid, get_user_task, get_category_buttons, get_readable_file_size, getUserTDs, \
                     new_thread, get_bot_pm, is_url, is_gdrive_link, is_gdtot_link, is_udrive_link, is_sharer_link, is_unified_link, \
                     is_sharedrive_link, is_filepress_link, userlistype
-from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
-from bot.helper.ext_utils.timegap import timegap_check
-from bot.helper.mirror_utils.download_utils.direct_link_generator import gdtot, udrive, sharer_pw_dl, shareDrive, filepress, unified
-from bot.helper.mirror_utils.status_utils.clone_status import CloneStatus
-from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
-from bot.helper.telegram_helper.bot_commands import BotCommands
-from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, deleteMessage, delete_all_messages, update_all_messages, sendStatusMessage, auto_delete_upload_message, sendFile, sendPhoto, forcesub, isAdmin
-from bot import LOGGER, download_dict, config_dict, user_data, OWNER_ID, TIME_GAP_STORE, CATEGORY_NAMES, btn_listener, download_dict_lock, \
+from AtrociousBot.helper.ext_utils.exceptions import DirectDownloadLinkException
+from AtrociousBot.helper.ext_utils.timegap import timegap_check
+from AtrociousBot.helper.mirror_utils.download_utils.direct_link_generator import gdtot, udrive, sharer_pw_dl, shareDrive, filepress, unified
+from AtrociousBot.helper.mirror_utils.status_utils.clone_status import CloneStatus
+from AtrociousBot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
+from AtrociousBot.helper.telegram_helper.bot_commands import BotCommands
+from AtrociousBot.helper.telegram_helper.button_build import ButtonMaker
+from AtrociousBot.helper.telegram_helper.filters import CustomFilters
+from AtrociousBot.helper.telegram_helper.message_utils import sendMessage, editMessage, deleteMessage, delete_all_messages, update_all_messages, sendStatusMessage, auto_delete_upload_message, sendFile, sendPhoto, forcesub, isAdmin
+from AtrociousBot import LOGGER, download_dict, config_dict, user_data, OWNER_ID, TIME_GAP_STORE, CATEGORY_NAMES, btn_listener, download_dict_lock, \
                     Interval, dispatcher
 from telegram import ParseMode
 from telegram.ext import CallbackQueryHandler, CommandHandler
@@ -476,8 +476,7 @@ def cloneNode(update, context):
 
 
 authfilter = CustomFilters.authorized_chat if config_dict['CLONE_ENABLED'] is True else CustomFilters.owner_filter
-clone_handler = CommandHandler(BotCommands.CloneCommand, cloneNode,
-                                    filters=authfilter | CustomFilters.authorized_user)
+clone_handler = CommandHandler(BotCommands.CloneCommand, cloneNode)
 clone_confirm_handler = CallbackQueryHandler(confirm_clone, pattern="clone")
 dispatcher.add_handler(clone_confirm_handler)
 dispatcher.add_handler(clone_handler)
