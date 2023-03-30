@@ -20,7 +20,7 @@ def authorize(update, context):
         update_user_ldata(id_, 'is_auth', True)
         if DATABASE_URL:
             DbManger().update_user_data(id_)
-        msg = 'Authorized 🚫'
+        msg = 'Successfully Authorized 🔰'
     sendMessage(msg, context.bot, update.message)
 
 def unauthorize(update, context):
