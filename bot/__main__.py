@@ -193,7 +193,7 @@ def restart(update, context):
 def ping(update, context):
     if config_dict['EMOJI_THEME']:
         start_time = int(round(time() * 1000))
-        reply = sendMessage("Starting_Ping ⛄1�7", context.bot, update.message)
+        reply = sendMessage("Starting_Ping", context.bot, update.message)
         end_time = int(round(time() * 1000))
         editMessage(f'{end_time - start_time} ms 🔥', reply)
     else:
