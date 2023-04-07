@@ -18,8 +18,16 @@ SCOPES = ["https://mail.google.com/", "https://www.googleapis.com/auth/drive"]
 if ospath.exists('token.pickle'):
     with open('token.pickle', 'rb') as token:
         credentials = pload(token)
+        if not credentials or not credentials.valid:
+            raise Exception("Invalid or missing credentials")
+        elif not all(scope in credentials.scopes for scope in SCOPES):
+            raise Exception("Missing required Gmail API scopes in credentials")
 else:
     credentials = None
+
+if 'https://mail.google.com/' not in credentials.scopes:
+    print('Gmail API not enabled in token.pickle. Exiting...')
+    exit()
 
 service = build('gmail', 'v1', credentials)
 
