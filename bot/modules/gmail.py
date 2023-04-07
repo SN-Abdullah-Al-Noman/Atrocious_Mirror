@@ -8,6 +8,7 @@ from pickle import load as pload
 from base64 import urlsafe_b64decode
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
 from telegram.ext import CommandHandler, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
