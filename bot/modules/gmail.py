@@ -7,8 +7,6 @@ from datetime import datetime
 from pickle import load as pload
 from base64 import urlsafe_b64decode
 from googleapiclient.discovery import build
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow
 from telegram.ext import CommandHandler, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -20,15 +18,6 @@ if ospath.exists('token.pickle'):
     with open('token.pickle', 'rb') as token:
         creds = pload(token)
 
-    if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-else:
-    flow = InstalledAppFlow.from_client_secrets_file(
-        'credentials.json', SCOPES)
-    creds = flow.run_local_server(port=0)
-
-    with open('token.pickle', 'rb') as token:
-        creds = pload(token)
 
 service = build('gmail', 'v1', credentials=creds)
 
