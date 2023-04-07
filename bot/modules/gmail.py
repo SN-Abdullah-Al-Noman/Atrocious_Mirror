@@ -14,12 +14,14 @@ from bot import bot, dispatcher, updater, OWNER_ID
 
 SCOPES = ["https://mail.google.com/", "https://www.googleapis.com/auth/drive"]
 
+
 if ospath.exists('token.pickle'):
     with open('token.pickle', 'rb') as token:
-        creds = pload(token)
+        credentials = pload(token)
+else:
+    credentials = None
 
-
-service = build('gmail', 'v1', credentials=creds)
+service = build('gmail', 'v1', credentials)
 
 def fetch_unread_messages():
     query = 'is:unread from:(drivesafety-noreply@google.com)'
