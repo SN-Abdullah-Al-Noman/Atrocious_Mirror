@@ -12,8 +12,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import bot, dispatcher, updater, OWNER_ID
 
-SCOPES = ["https://mail.google.com/", "https://www.googleapis.com/auth/drive"]
-
+SCOPES = ["https://mail.google.com/"]
 
 if ospath.exists('token.pickle'):
     with open('token.pickle', 'rb') as token:
