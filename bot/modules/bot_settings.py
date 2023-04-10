@@ -1070,7 +1070,6 @@ def update_private_file(update, context, omsg):
             if ospath.exists('accounts'):
                 srun(["rm", "-rf", "accounts"])
             srun(["7z", "x", "-o.", "-aoa", "accounts.zip", "accounts/*.json"])
-                srun(["chmod", "-R", "777", "accounts"])
             srun(["chmod", "-R", "777", "accounts"])
         elif file_name == 'list_drives.txt':
             DRIVES_IDS.clear()
