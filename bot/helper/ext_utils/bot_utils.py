@@ -12,13 +12,10 @@ from urllib.request import urlopen
 from bot.helper.ext_utils.db_handler import DbManger
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot import LOGGER, CATEGORY_IDS, CATEGORY_INDEX, CATEGORY_NAMES, DATABASE_URL, dispatcher, download_dict, \
-                download_dict_lock, botStartTime, DOWNLOAD_DIR, user_data, config_dict
+from bot import LOGGER, CATEGORY_IDS, CATEGORY_INDEX, CATEGORY_NAMES, DATABASE_URL, dispatcher, download_dict, download_dict_lock, botStartTime, DOWNLOAD_DIR, user_data, config_dict
 from telegram.ext import CallbackQueryHandler
 
-
 MAGNET_REGEX = r"magnet:\?xt=urn:btih:[a-zA-Z0-9]*"
-
 URL_REGEX = r"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+"
 
 COUNT = 0
@@ -232,21 +229,18 @@ def timeformatter(milliseconds: int) -> str:
         ((str(milliseconds) + " millisec, ") if milliseconds else "")
     return tmp[:-2]
 
-def get_progress_bar_string(status):
-    completed = status.processed_bytes() / 10
-    total = status.size_raw() / 10
-    p = 0 if total == 0 else round(completed * 100 / total)
-    p = min(max(p, 0), 100)
-    cFull = p // 10
-    cPart = p % 10 - 1
+def get_progress_bar_string(pct):
+    pct = float(pct.strip('%'))
+    p = min(max(pct, 0), 100)
+    cFull = int(p / 10)
+    cIncomplete = int(round(p / 10 - cFull))
     p_str = config_dict['FINISHED_PROGRESS_STR'] * cFull
-    p_str += config_dict['UN_FINISHED_PROGRESS_STR']  * (10 - cFull)
-    return f"[{p_str}]"
-
+    p_str += config_dict['UN_FINISHED_PROGRESS_STR']  * (10 - len(p_str))
+    return f"{p_str}"
 
 def get_readable_message():
     with download_dict_lock:
-        msg = f""
+        msg = f"<b>‎ ‎ ‎ ‎‎ ‎ ‎ ‎ <a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>Powered By Sn Wzml</a></b>\n\n"
         if STATUS_LIMIT := config_dict['STATUS_LIMIT']:
             tasks = len(download_dict)
             global pages
@@ -262,15 +256,14 @@ def get_readable_message():
                 msg += f"<code>{escape(str(download.name()))}</code>"
             if download.status() not in [MirrorStatus.STATUS_SEEDING, MirrorStatus.STATUS_SPLITTING, MirrorStatus.STATUS_CONVERTING, MirrorStatus.STATUS_QUEUEDL, MirrorStatus.STATUS_QUEUEUP]:
                 if config_dict['EMOJI_THEME']:
-                    msg += f"\n<b></b>{get_progress_bar_string(download)} {download.progress()}"
+                    msg += f"\n<b><a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>{get_progress_bar_string(download.progress())}</a></b> {download.progress()}"
                     msg += f"\n<b>🔄 Process:</b> {get_readable_file_size(download.processed_bytes())} of {download.size()}"
                     msg += f"\n<b>⚡ Speed:</b> {download.speed()}"
                     msg += f"\n<b>⏳ ETA:</b> {download.eta()}"
                     msg += f"<b> | Elapsed: </b>{get_readable_time(time() - download.message.date.timestamp())}"
                     msg += f"\n<b>⛓️ Engine:</b> {download.eng()}"
-
                 else:
-                    msg += f"\n<b></b>{get_progress_bar_string(download)} {download.progress()}"
+                    msg += f"\n<b><a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>{get_progress_bar_string(download.progress())}</a></b> {download.progress()}"
                     msg += f"\n<b>Process:</b> {get_readable_file_size(download.processed_bytes())} of {download.size()}"
                     msg += f"\n<b>Speed:</b> {download.speed()}"
                     msg += f"\n<b>ETA:</b> {download.eta()}"
@@ -700,7 +693,7 @@ def bot_sys_stats():
     mem = virtual_memory().percent
     disk = disk_usage("/").percent
     return f"""
-Modified by {config_dict['CREDIT_NAME']}
+Modified by @ItsBitDefender
 
 Tasks Running: {tasks}
 
@@ -714,6 +707,4 @@ DLs: {num_active} | ULs: {num_upload} | SEEDING: {num_seeding}
 ZIP: {num_zip} | UNZIP: {num_unzip} | SPLIT: {num_split}
 """
     return stats
-dispatcher.add_handler(
-    CallbackQueryHandler(pop_up_stats, pattern="^" + str(THREE) + "$")
-)
+dispatcher.add_handler(CallbackQueryHandler(pop_up_stats, pattern="^" + str(THREE) + "$"))
