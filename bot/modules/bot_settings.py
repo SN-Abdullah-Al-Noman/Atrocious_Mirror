@@ -1054,9 +1054,9 @@ def update_private_file(update, context, omsg):
         if fn == 'accounts':
             if ospath.exists('accounts'):
                 srun(["rm", "-rf", "accounts"])
-            config_dict['USE_SERVICE_ACCOUNTS'] = False
+            config_dict['USE_SERVICE_ACCOUNTS'] = True
             if DATABASE_URL:
-                DbManger().update_config({'USE_SERVICE_ACCOUNTS': False})
+                DbManger().update_config({'USE_SERVICE_ACCOUNTS': True})
         elif file_name in ['.netrc', 'netrc']:
             srun(["touch", ".netrc"])
             srun(["cp", ".netrc", "/root/.netrc"])
@@ -1067,10 +1067,11 @@ def update_private_file(update, context, omsg):
         file_name = doc.file_name
         doc.get_file().download(custom_path=file_name)
         if file_name == 'accounts.zip':
-            if ospath.exists('accounts'):
+            if ospath.exists('accounts.zip'):
                 srun(["rm", "-rf", "accounts"])
-            srun(["unzip", "-q", "-o", "accounts.zip", "-x", "accounts/emails.txt"])
-            srun(["chmod", "-R", "777", "accounts"])
+                srun(["7z", "x", "-o.", "-aoa", "accounts.zip", "accounts/*.json"])
+                srun(["chmod", "-R", "777", "accounts"])
+                
         elif file_name == 'list_drives.txt':
             DRIVES_IDS.clear()
             DRIVES_NAMES.clear()
@@ -1116,14 +1117,7 @@ def update_private_file(update, context, omsg):
         elif file_name == 'config.env':
             load_dotenv('config.env', override=True)
             load_config()
-        if '@github.com' in config_dict['UPSTREAM_REPO']:
-            buttons = ButtonMaker()
-            msg = 'Push to UPSTREAM_REPO ?'
-            buttons.sbutton('Yes!', f"botset push {file_name}")
-            buttons.sbutton('No', "botset close")
-            sendMessage(msg, context.bot, update.message, buttons.build_menu(2))
-        else:
-            update.message.delete()
+        update.message.delete()
     update_buttons(omsg)
     if DATABASE_URL and file_name != 'config.env':
         DbManger().update_private_file(file_name)
