@@ -1054,9 +1054,9 @@ def update_private_file(update, context, omsg):
         if fn == 'accounts':
             if ospath.exists('accounts'):
                 srun(["rm", "-rf", "accounts"])
-            config_dict['USE_SERVICE_ACCOUNTS'] = True
+            config_dict['USE_SERVICE_ACCOUNTS'] = False
             if DATABASE_URL:
-                DbManger().update_config({'USE_SERVICE_ACCOUNTS': True})
+                DbManger().update_config({'USE_SERVICE_ACCOUNTS': False})
         elif file_name in ['.netrc', 'netrc']:
             srun(["touch", ".netrc"])
             srun(["cp", ".netrc", "/root/.netrc"])
