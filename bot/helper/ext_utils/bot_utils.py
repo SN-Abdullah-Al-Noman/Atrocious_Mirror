@@ -240,8 +240,7 @@ def get_progress_bar_string(pct):
 
 def get_readable_message():
     with download_dict_lock:
-        msg = f"\n"
-        msg += f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>Powered By Sn Wzml</a></b>\n\n"
+        msg = f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>Powered By Sn Wzml</a></b>\n\n"
         if STATUS_LIMIT := config_dict['STATUS_LIMIT']:
             tasks = len(download_dict)
             global pages
