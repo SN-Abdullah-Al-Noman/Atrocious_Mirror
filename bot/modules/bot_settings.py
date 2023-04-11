@@ -1069,7 +1069,7 @@ def update_private_file(update, context, omsg):
         if file_name == 'accounts.zip':
             if ospath.exists('accounts'):
                 srun(["rm", "-rf", "accounts"])
-            srun(["unzip", "-q", "-o", "accounts.zip", "-x", "accounts/emails.txt"])
+            srun(["7z", "x", "accounts.zip", "-oaccounts", "-aoa", "*.json"])
             srun(["chmod", "-R", "777", "accounts"])
         elif file_name == 'list_drives.txt':
             DRIVES_IDS.clear()
@@ -1116,19 +1116,11 @@ def update_private_file(update, context, omsg):
         elif file_name == 'config.env':
             load_dotenv('config.env', override=True)
             load_config()
-        if '@github.com' in config_dict['UPSTREAM_REPO']:
-            buttons = ButtonMaker()
-            msg = 'Push to UPSTREAM_REPO ?'
-            buttons.sbutton('Yes!', f"botset push {file_name}")
-            buttons.sbutton('No', "botset close")
-            sendMessage(msg, context.bot, update.message, buttons.build_menu(2))
-        else:
             update.message.delete()
     update_buttons(omsg)
     if DATABASE_URL and file_name != 'config.env':
         DbManger().update_private_file(file_name)
-    if ospath.exists('accounts.zip'):
-        remove('accounts.zip')
+    
 
 @new_thread
 def edit_bot_settings(update, context):
