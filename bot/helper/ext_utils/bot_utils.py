@@ -240,7 +240,7 @@ def get_progress_bar_string(pct):
 
 def get_readable_message():
     with download_dict_lock:
-        msg = f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>Powered By Sn Wzml</a></b>\n\n"
+        msg = f""
         if STATUS_LIMIT := config_dict['STATUS_LIMIT']:
             tasks = len(download_dict)
             global pages
@@ -361,12 +361,15 @@ def get_readable_message():
             bmsg += f"<b>🖥 CPU:</b> {cpu_percent()}% | <b>💿 FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
             bmsg += f"\n<b>🎮 RAM:</b> {virtual_memory().percent}% | <b>🟢 UPTIME:</b> {get_readable_time(time() - botStartTime)}"
             bmsg += f"\n<b>🔽 DL:</b> {get_readable_file_size(dl_speed)}/s | <b>🔼 UL:</b> {get_readable_file_size(up_speed)}/s"
+            bmsg += f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>Powered By Sn Wzml</a></b>\n\n"
+
         else:
             bmsg = f"{TASKS_COUNT}"
             bmsg += f"<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
             bmsg += f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UPTIME:</b> {get_readable_time(time() - botStartTime)}"
             bmsg += f"\n<b>DL:</b> {get_readable_file_size(dl_speed)}/s | <b>UL:</b> {get_readable_file_size(up_speed)}/s"
-        
+            bmsg += f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>Powered By Sn Wzml</a></b>\n\n"
+
         buttons = ButtonMaker()
         buttons.sbutton("Refresh", "status refresh")
         buttons.sbutton("Statistics", str(THREE))
