@@ -878,8 +878,7 @@ if ospath.exists('accounts.zip'):
     if ospath.exists('accounts'):
         srun(["rm", "-rf", "accounts"])
     srun(["7z", "x", "accounts.zip", "-oaccounts", "-aoa", "*.json"])
-            srun(["chmod", "-R", "777", "accounts"])
-    osremove('accounts.zip')
+        srun(["chmod", "-R", "777", "accounts"])
 if not ospath.exists('accounts'):
     config_dict['USE_SERVICE_ACCOUNTS'] = False
 sleep(0.5)
