@@ -535,9 +535,6 @@ SHORTENER = (SHORTENER.replace("'", '').replace('"', '').replace('[', '').replac
 SHORTENER_API = (SHORTENER_API.replace("'", '').replace('"', '').replace('[', '').replace(']', '').replace(",", "")).split()
 
 
-GDTOT_CRYPT = environ.get('GDTOT_CRYPT', '')
-if len(GDTOT_CRYPT) == 0:
-    GDTOT_CRYPT = ''
 
 HUBDRIVE_CRYPT = environ.get('HUBDRIVE_CRYPT', '')
 if len(HUBDRIVE_CRYPT) == 0:
@@ -652,6 +649,12 @@ if len(WALLCRAFT_CATEGORY) == 0:
 PICS = environ.get('PICS', '')
 PICS = (PICS.replace("'", '').replace('"', '').replace('[', '').replace(']', '').replace(",", "")).split()
 
+SERVER_PORT = environ.get('SERVER_PORT', '')
+if len(SERVER_PORT) == 0:
+    SERVER_PORT = 80
+else:
+    SERVER_PORT = int(SERVER_PORT)
+    
 YT_DLP_QUALITY = environ.get('YT_DLP_QUALITY', '')
 if len(YT_DLP_QUALITY) == 0:
     YT_DLP_QUALITY = ''
@@ -864,9 +867,9 @@ if ospath.exists('categories.txt'):
                 CATEGORY_INDEX.append('')
 
 
-PORT = environ.get('PORT')
-Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{PORT}", shell=True)
-alive = Popen(["python3", "alive.py"])
+if BASE_URL:
+    Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{SERVER_PORT}", shell=True)
+
 srun(["qbittorrent-nox", "-d", "--profile=."])
 if not ospath.exists('.netrc'):
     srun(["touch", ".netrc"])
