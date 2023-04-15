@@ -361,7 +361,9 @@ def load_config():
     if len(RSS_COMMAND) == 0:
         RSS_COMMAND = ''
 
-
+    SERVER_PORT = environ.get('SERVER_PORT', '')
+    SERVER_PORT = 80 if len(SERVER_PORT) == 0 else int(SERVER_PORT)
+    
     DRIVES_IDS.clear()
     DRIVES_NAMES.clear()
     INDEX_URLS.clear()
@@ -672,9 +674,10 @@ def load_config():
     BASE_URL = environ.get('BASE_URL', '').rstrip("/")
     if len(BASE_URL) == 0:
         BASE_URL = ''
-
-    PORT = environ.get('PORT')
-    Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{PORT}", shell=True)
+        srun(["pkill", "-9", "-f", "gunicorn"])
+    else:
+        srun(["pkill", "-9", "-f", "gunicorn"])
+        Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{SERVER_PORT}", shell=True)
 
     SAFE_MODE = environ.get('SAFE_MODE', '')
     if len(SAFE_MODE) == 0:
@@ -944,7 +947,7 @@ def edit_variable(update, context, omsg, key):
         aria2_options['bt-stop-timeout'] = f'{value}'
     elif key == 'TG_SPLIT_SIZE':
         value = min(int(value), tgBotMaxFileSize)
-    elif key == 'PORT':
+    elif key == 'SERVER_PORT':
         value = int(value)
         srun(["pkill", "-9", "-f", "gunicorn"])
         Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{value}", shell=True)
@@ -1174,7 +1177,7 @@ def edit_bot_settings(update, context):
                 DbManger().update_aria2('bt-stop-timeout', '0')
         elif data[2] == 'BASE_URL':
             srun(["pkill", "-9", "-f", "gunicorn"])
-        elif data[2] == 'PORT':
+        elif data[2] == 'SERVER_PORT':
             value = 80
             srun(["pkill", "-9", "-f", "gunicorn"])
             Popen("gunicorn web.wserver:app --bind 0.0.0.0:80", shell=True)
