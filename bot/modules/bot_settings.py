@@ -24,7 +24,7 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'FORCE_BOT_PM': False,
                   'UPDATE_PACKAGES': 'False',
                   'UPSTREAM_BRANCH': 'master',
-                  'UPSTREAM_REPO': 'https://github.com/SN-Abdullah-Al-Noman/SN_WZML',
+                  'UPSTREAM_REPO': 'https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror',
                   'STATUS_UPDATE_INTERVAL': 10,
                   'DOWNLOAD_DIR': '/usr/src/app/downloads/',
                   'TIME_GAP': -1,
@@ -412,7 +412,7 @@ def load_config():
 
     UPSTREAM_REPO = environ.get('UPSTREAM_REPO', '')
     if len(UPSTREAM_REPO) == 0: 
-        UPSTREAM_REPO = 'https://github.com/weebzone/WZML'
+        UPSTREAM_REPO = 'https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror'
 
     UPSTREAM_BRANCH = environ.get('UPSTREAM_BRANCH', '')
     if len(UPSTREAM_BRANCH) == 0:   
@@ -484,14 +484,14 @@ def load_config():
     START_BTN1_NAME = environ.get('START_BTN1_NAME', '')
     START_BTN1_URL = environ.get('START_BTN1_URL', '')
     if len(START_BTN1_NAME) == 0 or len(START_BTN1_URL) == 0:   
-        START_BTN1_NAME = 'Master'
-        START_BTN1_URL = 'https://t.me/krn_adhikari'
+        START_BTN1_NAME = 'Mirror Group'
+        START_BTN1_URL = 'https://t.me/+yw0A-x4cYBphZmJl'
 
     START_BTN2_NAME = environ.get('START_BTN2_NAME', '')
     START_BTN2_URL = environ.get('START_BTN2_URL', '')
     if len(START_BTN2_NAME) == 0 or len(START_BTN2_URL) == 0:   
-        START_BTN2_NAME = 'Support Group'
-        START_BTN2_URL = 'https://t.me/WeebZone_updates'
+        START_BTN2_NAME = 'Update Channel'
+        START_BTN2_URL = 'https://t.me/Atrocious_Bot_Update'
 
     BUTTON_FOUR_NAME = environ.get('BUTTON_FOUR_NAME', '')
     BUTTON_FOUR_URL = environ.get('BUTTON_FOUR_URL', '')
@@ -565,23 +565,23 @@ def load_config():
 
     AUTHOR_NAME = environ.get('AUTHOR_NAME', '')
     if len(AUTHOR_NAME) == 0:   
-        AUTHOR_NAME = 'WZML'
+        AUTHOR_NAME = 'Atrocious'
 
     AUTHOR_URL = environ.get('AUTHOR_URL', '')
     if len(AUTHOR_URL) == 0:    
-        AUTHOR_URL = 'https://t.me/WeebZone_updates'
+        AUTHOR_URL = 'https://t.me/Atrocious_Bot_Update'
 
     TITLE_NAME = environ.get('TITLE_NAME', '')
     if len(TITLE_NAME) == 0:    
-        TITLE_NAME = 'WeebZone'
+        TITLE_NAME = 'Atrocious'
 
     GD_INFO = environ.get('GD_INFO', '')
     if len(GD_INFO) == 0:   
-        GD_INFO = 'Uploaded by WeebZone Mirror Bot'
+        GD_INFO = 'Uploaded By Atrocious Mirror Bot'
 
     CREDIT_NAME = environ.get('CREDIT_NAME', '')
     if len(CREDIT_NAME) == 0:   
-        CREDIT_NAME = 'WeebZone'
+        CREDIT_NAME = 'Atrocious'
 
     NAME_FONT = environ.get('NAME_FONT', '')
     if len(NAME_FONT) == 0: 
@@ -727,6 +727,7 @@ def load_config():
                         'SEARCH_API_LINK': SEARCH_API_LINK,
                         'SEARCH_LIMIT': SEARCH_LIMIT,
                         'SEARCH_PLUGINS': SEARCH_PLUGINS,
+                        'SERVER_PORT': SERVER_PORT,
                         'STATUS_LIMIT': STATUS_LIMIT,
                         'STATUS_UPDATE_INTERVAL': STATUS_UPDATE_INTERVAL,
                         'STOP_DUPLICATE': STOP_DUPLICATE,
