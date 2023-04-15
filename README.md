@@ -1,7 +1,7 @@
 <p align="center">
     <a href="https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror">
         <kbd>
-            <img width="250" src="https://telegra.ph/file/496644cbabaeb916e3616.png" alt="SN-Abdullah-Al-Noman Logo">
+            <img width="250" src="https://telegra.ph/file/440254850680056bbeb3a.jpg" alt="SN-Abdullah-Al-Noman Logo">
         </kbd>
     </a>
 </p>
