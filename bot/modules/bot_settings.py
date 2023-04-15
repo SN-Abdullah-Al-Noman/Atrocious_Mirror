@@ -517,10 +517,6 @@ def load_config():
         SHORTENER = ''
         SHORTENER_API = ''
 
-    GDTOT_CRYPT = environ.get('GDTOT_CRYPT', '')
-    if len(GDTOT_CRYPT) == 0:
-        GDTOT_CRYPT = ''
-
     HUBDRIVE_CRYPT = environ.get('HUBDRIVE_CRYPT', '')
     if len(HUBDRIVE_CRYPT) == 0:
         HUBDRIVE_CRYPT = ''
@@ -773,7 +769,6 @@ def load_config():
                         'FSUB_IDS': FSUB_IDS,
                         'SHORTENER': SHORTENER,
                         'SHORTENER_API': SHORTENER_API,
-                        'GDTOT_CRYPT': GDTOT_CRYPT,
                         'HUBDRIVE_CRYPT': HUBDRIVE_CRYPT,
                         'KATDRIVE_CRYPT': KATDRIVE_CRYPT,
                         'KOLOP_CRYPT': KOLOP_CRYPT,
