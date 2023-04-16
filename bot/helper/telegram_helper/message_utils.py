@@ -6,6 +6,7 @@ from telegram.error import RetryAfter
 from pyrogram import enums
 from pyrogram.errors import FloodWait
 from os import remove
+from pyrogram import Client
 from bot import botStartTime
 from bot.helper.ext_utils.bot_utils import get_readable_time
 from bot.helper.telegram_helper.button_build import ButtonMaker
@@ -72,19 +73,6 @@ def sendRss(text, bot):
             LOGGER.error(str(e))
             return
 
-
-async def sendRss_pyro(text: str):
-    rss_session = Client(name='rss_session', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, session_string=USER_STRING_SESSION, parse_mode=enums.ParseMode.HTML)
-    await rss_session.start()
-    try:
-        return await rss_session.send_message(config_dict['RSS_CHAT_ID'], text, disable_web_page_preview=True)
-    except FloodWait as e:
-        LOGGER.warning(str(e))
-        await asleep(e.value * 1.5)
-        return await sendRss(text)
-    except Exception as e:
-        LOGGER.error(str(e))
-        return
 
 def sendPhoto(text, bot, message, photo, reply_markup=None):
     try:
