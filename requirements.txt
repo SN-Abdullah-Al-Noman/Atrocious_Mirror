@@ -18,7 +18,7 @@ google-auth-httplib2
 google-auth-oauthlib
 gunicorn
 lk21
-lxml
+lxml>=4.9.1
 markdown
 mediainfo
 pillow
