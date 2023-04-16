@@ -1,20 +1,20 @@
 from pymongo import MongoClient
 from telegram.ext import CommandHandler
 
-from bot import config_dict, OWNER_ID, DATABASE_URL, dispatcher
+from bot import config_dict, dispatcher, OWNER_ID
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.message_utils import sendMessage, sendPhoto
 from bot.helper.telegram_helper.bot_commands import BotCommands
 
 
 def dbusers(update, context):
-    if not DATABASE_URL:
+    if not config_dict['DATABASE_URL']:
         context.bot.send_message(chat_id=update.effective_chat.id, text=f"DATABASE_URL not provided")
     else:
-        client = MongoClient(DATABASE_URL)
-        db = client["mltb"]
-        count = db.users.count_documents({})
-        context.bot.send_message(chat_id=update.effective_chat.id, text=f"Total users in database: {count}")
+        conn = MongoClient(config_dict['DATABASE_URL'])
+        db = conn.mltb
+        users_count = db.users.count_documents({})
+        context.bot.send_message(chat_id=update.effective_chat.id, text=f"Total users in database: {users_count}")
 
 
 def get_id(update, context):
