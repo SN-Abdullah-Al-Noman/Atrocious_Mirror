@@ -709,5 +709,5 @@ SENT: {sent} | RECV: {recv}
 DLs: {num_active} | ULs: {num_upload} | SEEDING: {num_seeding}
 ZIP: {num_zip} | UNZIP: {num_unzip} | SPLIT: {num_split}
 """
-    return stats
+
 dispatcher.add_handler(CallbackQueryHandler(pop_up_stats, pattern="^" + str(THREE) + "$"))
