@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from random import choice as rchoice
 from telegram.ext import CommandHandler
 
 from bot import config_dict, dispatcher, OWNER_ID
