@@ -256,14 +256,14 @@ def get_readable_message():
                 msg += f"<code>{escape(str(download.name()))}</code>"
             if download.status() not in [MirrorStatus.STATUS_SEEDING, MirrorStatus.STATUS_SPLITTING, MirrorStatus.STATUS_CONVERTING, MirrorStatus.STATUS_QUEUEDL, MirrorStatus.STATUS_QUEUEUP]:
                 if config_dict['EMOJI_THEME']:
-                    msg += f"\n<b><a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>{get_progress_bar_string(download.progress())}</a></b> {download.progress()}"
+                    msg += f"\n<b><a href='https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror'>{get_progress_bar_string(download.progress())}</a></b> {download.progress()}"
                     msg += f"\n<b>🔄 Done:</b> {get_readable_file_size(download.processed_bytes())} of {download.size()}"
                     msg += f"\n<b>⚡ Speed:</b> {download.speed()}"
                     msg += f"\n<b>⏳ ETA:</b> {download.eta()}"
                     msg += f"<b> | Elapsed: </b>{get_readable_time(time() - download.message.date.timestamp())}"
                     msg += f"\n<b>⛓️ Engine:</b> {download.eng()}"
                 else:
-                    msg += f"\n<b><a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>{get_progress_bar_string(download.progress())}</a></b> {download.progress()}"
+                    msg += f"\n<b><a href='https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror'>{get_progress_bar_string(download.progress())}</a></b> {download.progress()}"
                     msg += f"\n<b>Done:</b> {get_readable_file_size(download.processed_bytes())} of {download.size()}"
                     msg += f"\n<b>Speed:</b> {download.speed()}"
                     msg += f"\n<b>ETA:</b> {download.eta()}"
@@ -361,7 +361,7 @@ def get_readable_message():
             bmsg += f"<b>🖥 CPU:</b> {cpu_percent()}% | <b>💿 FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
             bmsg += f"\n<b>🎮 RAM:</b> {virtual_memory().percent}% | <b>🟢 UPTIME:</b> {get_readable_time(time() - botStartTime)}"
             bmsg += f"\n<b>🔽 DL:</b> {get_readable_file_size(dl_speed)}/s | <b>🔼 UL:</b> {get_readable_file_size(up_speed)}/s\n\n"
-            bmsg += f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/SN_WZML'>Powered By Atrocious Mirror</a></b>\n"
+            bmsg += f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror'>Powered By Atrocious Mirror</a></b>\n"
 
         else:
             bmsg = f"{TASKS_COUNT}"
