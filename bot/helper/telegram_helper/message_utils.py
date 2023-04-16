@@ -6,7 +6,6 @@ from telegram.error import RetryAfter
 from pyrogram import enums
 from pyrogram.errors import FloodWait
 from os import remove
-from pyrogram import Client
 from bot import botStartTime
 from bot.helper.ext_utils.bot_utils import get_readable_time
 from bot.helper.telegram_helper.button_build import ButtonMaker
@@ -182,7 +181,7 @@ def auto_delete_upload_message(bot, cmd_message=None, bot_message=None):
         if bot_message is not None:
             deleteMessage(bot, bot_message)
 
-           
+
 def delete_all_messages():
     with status_reply_dict_lock:
         for data in list(status_reply_dict.values()):
