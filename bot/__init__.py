@@ -268,6 +268,9 @@ if len(TG_SPLIT_SIZE) == 0 or int(TG_SPLIT_SIZE) > tgBotMaxFileSize:
     TG_SPLIT_SIZE = tgBotMaxFileSize
 else:
     TG_SPLIT_SIZE = int(TG_SPLIT_SIZE)
+    
+RSS_CHAT_ID = environ.get('RSS_CHAT_ID', '')
+RSS_CHAT_ID = '' if len(RSS_CHAT_ID) == 0 else int(RSS_CHAT_ID)
 
 try:
     USER_SESSION_STRING = environ.get('USER_SESSION_STRING', '')
@@ -390,9 +393,6 @@ rss_session = Client(name='rss_session', api_id=(TELEGRAM_API), api_hash=TELEGRA
 RSS_COMMAND = environ.get('RSS_COMMAND', '')
 if len(RSS_COMMAND) == 0:
     RSS_COMMAND = ''
-
-RSS_CHAT_ID = environ.get('RSS_CHAT_ID', '')
-RSS_CHAT_ID = '' if len(RSS_CHAT_ID) == 0 else int(RSS_CHAT_ID)
 
 RSS_DELAY = environ.get('RSS_DELAY', '')
 RSS_DELAY = 900 if len(RSS_DELAY) == 0 else int(RSS_DELAY)
