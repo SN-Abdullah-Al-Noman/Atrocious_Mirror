@@ -1,4 +1,4 @@
-FROM noman12/snwzmlsync:latest
+FROM noman12/atrociousmirror:latest
 
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app
