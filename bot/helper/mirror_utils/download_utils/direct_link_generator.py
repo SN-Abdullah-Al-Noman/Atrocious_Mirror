@@ -39,8 +39,6 @@ def direct_link_generator(link: str):
     if 'youtube.com' in link or 'youtu.be' in link:
         raise DirectDownloadLinkException(
             f"ERROR: Use /{BotCommands.WatchCommand} to mirror Youtube link\nUse /{BotCommands.ZipWatchCommand} to make zip of Youtube playlist")
-    elif 'zippyshare.com' in link:
-        return zippy_share(link)
     elif 'yadi.sk' in link or 'disk.yandex.com' in link:
         return yandex_disk(link)
     elif 'mediafire.com' in link:
@@ -202,51 +200,6 @@ def ouo(url: str) -> str:
     return res.headers.get('Location')
 
 
-def zippy_share(url: str) -> str:
-    base_url = re_search('http.+.zippyshare.com', url).group()
-    response = rget(url)
-    pages = BeautifulSoup(response.text, "html.parser")
-    js_script = pages.find("div", style="margin-left: 24px; margin-top: 20px; text-align: center; width: 303px; height: 105px;")
-    if js_script is None:
-        js_script = pages.find("div", style="margin-left: -22px; margin-top: -5px; text-align: center;width: 303px;")
-    js_script = str(js_script)
-
-    try:
-        omg = re_findall(r"\.omg.=.(.*?);", js_script)[0]
-        mtk = (eval(omg) * (int(omg.split("%")[0])%3)) + 18
-        uri1 = "d/" + re_findall(r'.\"\/d\/(.*?)\/\"\+', js_script)[0]
-        uri2 = re_findall(r'\)\+\"\/(.*?)\"\;', js_script)[0]
-    except:
-        try:
-            var_a = re_findall(r"var.a.=.(\d+)", js_script)[0]
-            mtk = int(math.pow(int(var_a),3) + 3)
-            uri1 = re_findall(r"\.href.=.\"/(.*?)/\"", js_script)[0]
-            uri2 = re_findall(r"\+\"/(.*?)\"", js_script)[0]
-        except:
-            try:
-                a, b = re_findall(r"var.[ab].=.(\d+)", js_script)
-                mtk = eval(f"{math.floor(int(a)/3) + int(a) % int(b)}")
-                uri1 = re_findall(r"\.href.=.\"/(.*?)/\"", js_script)[0]
-                uri2 = re_findall(r"\)\+\"/(.*?)\"", js_script)[0]
-            except:
-                try:
-                    mtk = eval(re_findall(r"\+\((.*?).\+", js_script)[0] + "+ 11")
-                    uri1 = re_findall(r"\.href.=.\"/(.*?)/\"", js_script)[0]
-                    uri2 = re_findall(r"\)\+\"/(.*?)\"", js_script)[0]
-                except:
-                    try:
-                        mtk = eval(re.findall(r"\+.\((.*?)\).\+", js_script)[0])
-                        uri1 = re_findall(r"\.href.=.\"/(.*?)/\"", js_script)[0]
-                        uri2 = re_findall(r"\+.\"/(.*?)\"", js_script)[0]
-                    except Exception as err:
-                        LOGGER.error(err)
-                        raise DirectDownloadLinkException("ERROR: Unable to get direct link")
-
-
-    dl_url = f"{base_url}/{uri1}/{int(mtk)}/{uri2}"
-    return dl_url
-
-
 def yandex_disk(url: str) -> str:
     """ Yandex.Disk direct link generator
     Based on https://github.com/wldhx/yadisk-direct """
@@ -311,13 +264,13 @@ def mediafire(url: str) -> str:
     try:
         url = rget('get', url).url
         page = rget('get', url).text
-    except IndexError:
+    except IndexError as e:
         raise DirectDownloadLinkException(f"ERROR: {e.__class__.__name__}")
     if not (link := re_findall(r"\'(https?:\/\/download\d+\.mediafire\.com\/\S+\/\S+\/\S+)\'", page)):
         raise DirectDownloadLinkException("ERROR: No links found in this page")
     return link[0]
-
-
+  
+  
 def osdn(url: str) -> str:
     """ OSDN direct link generator """
     osdn_link = 'https://osdn.net'
