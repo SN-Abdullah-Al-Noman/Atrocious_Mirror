@@ -245,10 +245,10 @@ def get_readable_message():
             tasks = len(download_dict)
             global pages
             globals()['PAGES'] = ceil(tasks/STATUS_LIMIT)
-            if PAGE_NO > PAGES and PAGES != 0:
-                globals()['COUNT'] -= STATUS_LIMIT
+            if int(PAGE_NO) > int(PAGES) and PAGES != 0:
+                globals()['COUNT'] -= int(STATUS_LIMIT)
                 globals()['PAGE_NO'] -= 1
-        for index, download in enumerate(list(download_dict.values())[COUNT:], start=1):
+        for index, download in enumerate(list(download_dict.values())[int(COUNT):], start=1):
             if config_dict['SAFE_MODE']:
                 msg += f"<b>{download.status()}: Safe Mode Enabled</b>"
             else:
