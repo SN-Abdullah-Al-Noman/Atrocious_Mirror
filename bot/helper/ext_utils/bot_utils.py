@@ -363,18 +363,16 @@ def get_readable_message():
             bmsg += f"<b>🖥 CPU:</b> {cpu_percent()}% | <b>💿 FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
             bmsg += f"\n<b>🎮 RAM:</b> {virtual_memory().percent}% | <b>🟢 UPTIME:</b> {get_readable_time(time() - botStartTime)}"
             bmsg += f"\n<b>🔽 DL:</b> {get_readable_file_size(dl_speed)}/s | <b>🔼 UL:</b> {get_readable_file_size(up_speed)}/s\n\n"
-            bmsg += f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror'>Powered By Atrocious Mirror</a></b>\n"
-
         else:
             bmsg = f"{TASKS_COUNT}"
             bmsg += f"<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
             bmsg += f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UPTIME:</b> {get_readable_time(time() - botStartTime)}"
             bmsg += f"\n<b>DL:</b> {get_readable_file_size(dl_speed)}/s | <b>UL:</b> {get_readable_file_size(up_speed)}/s\n\n"
-            bmsg += f"<b>‎‎<a href='https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror'>Powered By Atrocious Mirror</a></b>\n\n"
 
         buttons = ButtonMaker()
         buttons.sbutton("Refresh", "status refresh")
         buttons.sbutton("Statistics", str(THREE))
+        buttons.buildbutton(f"Repo", f"https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror")
         buttons.sbutton("Close", "status close")
         sbutton = buttons.build_menu(3)
         
@@ -384,12 +382,14 @@ def get_readable_message():
             buttons.sbutton(f"{PAGE_NO}/{PAGES}", str(THREE))
             buttons.sbutton("Next⏩", "status nex")
             buttons.sbutton("Refresh", "status refresh")
+            buttons.buildbutton(f"Repo", f"https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror")
             buttons.sbutton("Close", "status close")
         else:
             buttons.sbutton("Previous", "status pre")
             buttons.sbutton(f"{PAGE_NO}/{PAGES}", str(THREE))
             buttons.sbutton("Next", "status nex")
             buttons.sbutton("Refresh", "status refresh")
+            buttons.buildbutton(f"Repo", f"https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror")
             buttons.sbutton("Close", "status close")
             button = buttons.build_menu(3)
             return msg + bmsg, button
