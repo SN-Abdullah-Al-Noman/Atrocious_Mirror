@@ -534,8 +534,6 @@ if len(SHORTENER) == 0 or len(SHORTENER_API) == 0:
 SHORTENER = (SHORTENER.replace("'", '').replace('"', '').replace('[', '').replace(']', '').replace(",", "")).split()
 SHORTENER_API = (SHORTENER_API.replace("'", '').replace('"', '').replace('[', '').replace(']', '').replace(",", "")).split()
 
-
-
 HUBDRIVE_CRYPT = environ.get('HUBDRIVE_CRYPT', '')
 if len(HUBDRIVE_CRYPT) == 0:
     HUBDRIVE_CRYPT = ''
@@ -869,6 +867,19 @@ if ospath.exists('categories.txt'):
 
 if BASE_URL:
     Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{SERVER_PORT}", shell=True)
+
+def keep_alive():
+    if BASE_URL:
+        while True:
+            try:
+                rget(BASE_URL).status_code
+                sleep(60)
+            except Exception as e:
+                sleep(2)
+                continue
+
+keep_alive_thread = Thread(target=keep_alive)
+keep_alive_thread.start()
 
 srun(["qbittorrent-nox", "-d", "--profile=."])
 if not ospath.exists('.netrc'):
