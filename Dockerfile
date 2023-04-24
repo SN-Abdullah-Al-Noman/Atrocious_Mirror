@@ -13,7 +13,5 @@ RUN apt-get -y autoremove
 
 COPY . .
 
-EXPOSE 80
-
 CMD ["bash", "start.sh"]
 
