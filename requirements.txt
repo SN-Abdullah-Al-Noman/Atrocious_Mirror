@@ -40,3 +40,4 @@ urllib3
 waybackpy
 xattr
 yt-dlp
+oauth2client==3.0.0
