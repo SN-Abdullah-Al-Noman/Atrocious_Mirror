@@ -345,6 +345,11 @@ def start_ml(extra, s_listener):
         else:
             Thread(target=add_gd_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}', listener, name, is_gdtot, is_udrive, is_sharer, is_sharedrive, is_filepress)).start()
     elif is_mega_link(link):
+        if not config_dict['MEGA_API_KEY']:
+            if not config_dict['MEGA_EMAIL_ID']:
+                if not config_dict['MEGA_PASSWORD']:
+                    sendMessage(f"<b>Mega Credentials Not Found</b>", bot, message)
+                    return
         Thread(target=add_mega_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener, name)).start()
     elif isQbit and (is_magnet(link) or ospath.exists(link)):
         Thread(target=add_qb_torrent, args=(link, f'{DOWNLOAD_DIR}{listener.uid}', listener,
