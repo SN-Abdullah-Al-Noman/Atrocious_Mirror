@@ -630,7 +630,7 @@ class GoogleDriveHelper:
                             msg += f' <b>| <a href="{url}">Index Link</a></b>'
                 elif mime_type == 'application/vnd.google-apps.shortcut':
                     furl = f"https://drive.google.com/drive/folders/{file.get('id')}"
-                    msg += f"⁍<a href='https://drive.google.com/drive/folders/{file.get('id')}'>{file.get('name')}" \
+                    msg += f"<a href='https://drive.google.com/drive/folders/{file.get('id')}'>{file.get('name')}" \
                            f"</a> (shortcut)"
                 else:
                     if config_dict['SHORTENER']:
