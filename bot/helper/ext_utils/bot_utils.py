@@ -374,7 +374,7 @@ def get_readable_message():
         buttons.sbutton("Statistics", str(THREE))
         buttons.buildbutton(f"Repo", f"https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror")
         buttons.sbutton("Close", "status close")
-        sbutton = buttons.build_menu(3)
+        sbutton = buttons.build_menu(2)
         
         buttons = ButtonMaker()
         if config_dict['EMOJI_THEME']:
