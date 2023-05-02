@@ -238,7 +238,7 @@ def add_aria2c_download(link: str, path, listener, filename, auth, ratio, seed_t
     if TORRENT_TIMEOUT := config_dict['TORRENT_TIMEOUT']:
         args['bt-stop-timeout'] = str(TORRENT_TIMEOUT)
     if is_magnet(link):
-        download = aria2.add_magnet(link, args)
+        return sendMessage("<b>⚠️ Use /qb command for mirror or leeching torrent and magnet.</b>", listener.bot, listener.message)
     elif match(r'https?://.+\/\d+\:\/', link) and link[-1] == '/':
         links, error = indexScrape({"page_token": "", "page_index": 0}, link, auth, folder_mode=True)
         if error:
