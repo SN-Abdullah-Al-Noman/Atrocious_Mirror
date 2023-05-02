@@ -373,7 +373,11 @@ def start_clone(listelem):
     AUTO_DELETE_UPLOAD_MESSAGE_DURATION = config_dict["AUTO_DELETE_UPLOAD_MESSAGE_DURATION"]
     if AUTO_DELETE_UPLOAD_MESSAGE_DURATION != -1:
         if reply_to is not None:
-            reply_to.delete()
+            try:
+                reply_to.delete()
+            except:
+                pass
+              
         auto_delete_message = int(AUTO_DELETE_UPLOAD_MESSAGE_DURATION / 60)
         if message.chat.type == 'private':
             warnmsg = ''
