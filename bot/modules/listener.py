@@ -267,18 +267,18 @@ class MirrorLeechListener:
         
         NAME_FONT = config_dict['NAME_FONT']
         if config_dict['EMOJI_THEME']:
-            slmsg = f"”9ö4„1‚5 Name: <{NAME_FONT}>{escape(name)}</{NAME_FONT}>\n\n"
-            slmsg += f"”9Þ2 Size: {size}\n"
-            slmsg += f"”9Ó5 Added by: {self.tag} | <code>{self.user_id}</code>\n\n"
+            slmsg = f"ðŸ—‚ï¸ Name: <{NAME_FONT}>{escape(name)}</{NAME_FONT}>\n\n"
+            slmsg += f"ðŸ“ Size: {size}\n"
+            slmsg += f"ðŸ‘¥ Added by: {self.tag} | <code>{self.user_id}</code>\n\n"
         else:
             slmsg = f"Name: <{NAME_FONT}>{escape(name)}</{NAME_FONT}>\n\n"
             slmsg += f"Size: {size}\n"
             slmsg += f"Added by: {self.tag} | <code>{self.user_id}</code>\n\n"
         if 'link_logs' in user_data:
             try:
-                upper = f"6¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥3\n"
+                upper = f"â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’\n"
                 source_link = f"<code>{message_args[1]}</code>\n"
-                lower = f"6¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥3\n"
+                lower = f"â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’\n"
                 for link_log in user_data['link_logs']:
                     bot.sendMessage(link_log, text=slmsg + upper + source_link + lower, parse_mode=ParseMode.HTML )
             except IndexError:
@@ -287,9 +287,9 @@ class MirrorLeechListener:
                 try:
                     reply_text = reply_to.text
                     if is_url(reply_text):
-                        upper = f"6¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥3\n"
+                        upper = f"â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’\n"
                         source_link = f"<code>{reply_text.strip()}</code>\n"
-                        lower = f"6¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥36¥3\n"
+                        lower = f"â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’â€’\n"
                         for link_log in user_data['link_logs']:
                             bot.sendMessage(chat_id=link_log, text=slmsg + upper + source_link + lower, parse_mode=ParseMode.HTML )
                 except TypeError:
@@ -307,14 +307,14 @@ class MirrorLeechListener:
                 warnmsg = ''
             else:
                 if config_dict['EMOJI_THEME']:
-                    warnmsg = f'<b>7Ä5 This message will be deleted in <i>{auto_delete_message} minutes</i> from this group.</b>\n'
+                    warnmsg = f'<b>â— This message will be deleted in <i>{auto_delete_message} minutes</i> from this group.</b>\n'
                 else:
                     warnmsg = f'<b>This message will be deleted in <i>{auto_delete_message} minutes</i> from this group.</b>\n'
         else:
             warnmsg = ''
         if BOT_PM_X and self.message.chat.type != 'private':
             if config_dict['EMOJI_THEME']:
-                pmwarn = f"<b>”9à7 I have sent files in PM.</b>\n"
+                pmwarn = f"<b>ðŸ“© I have sent files in PM.</b>\n"
             else:
                 pmwarn = f"<b>I have sent files in PM.</b>\n"
         elif self.message.chat.type == 'private':
@@ -323,7 +323,7 @@ class MirrorLeechListener:
             pmwarn = ''
         if 'mirror_logs' in user_data and self.message.chat.type != 'private':
             if config_dict['EMOJI_THEME']:
-                logwarn = f"<b>”9à7 I have sent files in Mirror Log Channel. Join <a href=\"{config_dict['MIRROR_LOG_URL']}\">Mirror Log channel</a> </b>\n"
+                logwarn = f"<b>ðŸ“© I have sent files in Mirror Log Channel. Join <a href=\"{config_dict['MIRROR_LOG_URL']}\">Mirror Log channel</a> </b>\n"
             else:
                 logwarn = f"<b>I have sent files in Mirror Log Channel. Join <a href=\"{config_dict['MIRROR_LOG_URL']}\">Mirror Log channel</a> </b>\n"
         elif self.message.chat.type == 'private':
@@ -332,7 +332,7 @@ class MirrorLeechListener:
             logwarn = ''
         if 'is_leech_log' in user_data and self.message.chat.type != 'private':
             if config_dict['EMOJI_THEME']:
-                logleechwarn = f"<b>”9à7 I have sent files in Leech Log Channel. Join <a href=\"{config_dict['LEECH_LOG_URL']}\">Leech Log channel</a> </b>\n"
+                logleechwarn = f"<b>ðŸ“© I have sent files in Leech Log Channel. Join <a href=\"{config_dict['LEECH_LOG_URL']}\">Leech Log channel</a> </b>\n"
             else:
                 logleechwarn = f"<b>I have sent files in Leech Log Channel. Join <a href=\"{config_dict['LEECH_LOG_URL']}\">Leech Log channel</a> </b>\n"
         elif self.message.chat.type == 'private':
@@ -346,7 +346,7 @@ class MirrorLeechListener:
 
 
         if config_dict['EMOJI_THEME']:
-            msg = f"<b>”9ö4„1‚5 Name: </b><{config_dict['NAME_FONT']}>{escape(name)}</{config_dict['NAME_FONT']}>\n<b>”9Þ2 Size: </b>{size}"
+            msg = f"<b>ðŸ—‚ï¸ Name: </b><{config_dict['NAME_FONT']}>{escape(name)}</{config_dict['NAME_FONT']}>\n<b>ðŸ“ Size: </b>{size}"
         else:
             msg = f"<b>Name: </b><{config_dict['NAME_FONT']}>{escape(name)}</{config_dict['NAME_FONT']}>\n<b>Size: </b>{size}"
 
@@ -359,13 +359,13 @@ class MirrorLeechListener:
                             title=f"{config_dict['TITLE_NAME']} Source Link",
                             content=mesg,
                         )["path"]
-                        buttons.buildbutton(f"”9å3 Source Link", f"https://telegra.ph/{link}")
+                        buttons.buildbutton(f"ðŸ”— Source Link", f"https://telegra.ph/{link}")
                     elif is_url(mesg):
                         source_link = mesg
                         if source_link.startswith(("|", "pswd: ", "c:")):
                             pass
                         else:
-                            buttons.buildbutton(f"”9å3 Source Link", source_link)
+                            buttons.buildbutton(f"ðŸ”— Source Link", source_link)
                     else:
                         pass
                 except Exception:
@@ -380,9 +380,9 @@ class MirrorLeechListener:
                                     title=f"{config_dict['TITLE_NAME']} Source Link",
                                     content=source_link,
                                 )["path"]
-                                buttons.buildbutton(f"”9å3 Source Link", f"https://telegra.ph/{link}")
+                                buttons.buildbutton(f"ðŸ”— Source Link", f"https://telegra.ph/{link}")
                             else:
-                                buttons.buildbutton(f"”9å3 Source Link", source_link)
+                                buttons.buildbutton(f"ðŸ”— Source Link", source_link)
                     except Exception:
                         pass
             else:
@@ -398,17 +398,17 @@ class MirrorLeechListener:
             #     botstart = ''
 
             if config_dict['EMOJI_THEME']:
-                msg += f'\n<b>”9ß2 Total Files: </b>{folders}'
+                msg += f'\n<b>ðŸ“š Total Files: </b>{folders}'
             else:
                 msg += f'\n<b>Total Files: </b>{folders}'
             if typ != 0:
                 if config_dict['EMOJI_THEME']:
-                    msg += f'\n<b>”9Ö2 Corrupted Files: </b>{typ}'
+                    msg += f'\n<b>ðŸ’€ Corrupted Files: </b>{typ}'
                 else:
                     msg += f'\n<b>Corrupted Files: </b>{typ}'
             if config_dict['EMOJI_THEME']:
-                msg += f'\n<b>6ê1 It Tooks:</b> {get_readable_time(time() - self.message.date.timestamp())}'
-                msg += f'\n<b>”9Ó4 Leech By: </b>{self.tag}\n\n'
+                msg += f'\n<b>âŒ› It Tooks:</b> {get_readable_time(time() - self.message.date.timestamp())}'
+                msg += f'\n<b>ðŸ‘¤ Leech By: </b>{self.tag}\n\n'
             else: 
                 msg += f'\n<b>It Tooks:</b> {get_readable_time(time() - self.message.date.timestamp())}'
                 msg += f'\n<b>Leech By: </b>{self.tag}\n\n'
@@ -468,19 +468,19 @@ class MirrorLeechListener:
 
         else:
             if config_dict['EMOJI_THEME']:
-                msg += f'\n<b>”9à4 Type: </b>{typ}'
+                msg += f'\n<b>ðŸ“¦ Type: </b>{typ}'
             else:
                 msg += f'\n<b>Type: </b>{typ}'
             if typ == "Folder":
                 if config_dict['EMOJI_THEME']:
-                    msg += f'\n<b>”9ö5„1‚5 SubFolders: </b>{folders}'
-                    msg += f'\n<b>”9ö4„1‚5 Files: </b>{files}'
+                    msg += f'\n<b>ðŸ—ƒï¸ SubFolders: </b>{folders}'
+                    msg += f'\n<b>ðŸ—‚ï¸ Files: </b>{files}'
                 else:
                     msg += f'\n<b>SubFolders: </b>{folders}'
                     msg += f'\n<b>Files: </b>{files}'
             if config_dict['EMOJI_THEME']:
-                msg += f'\n<b>6ê1 It Tooks:</b> {get_readable_time(time() - self.message.date.timestamp())}'
-                msg += f'\n<b>”9Ó4 Mirror By: </b>{self.tag}\n\n'
+                msg += f'\n<b>âŒ› It Tooks:</b> {get_readable_time(time() - self.message.date.timestamp())}'
+                msg += f'\n<b>ðŸ‘¤ Mirror By: </b>{self.tag}\n\n'
             else:
                 msg += f'\n<b>It Tooks:</b> {get_readable_time(time() - self.message.date.timestamp())}'
                 msg += f'\n<b>Mirror By: </b>{self.tag}\n\n' 
@@ -489,7 +489,7 @@ class MirrorLeechListener:
             if config_dict['DISABLE_DRIVE_LINK'] and self.message.chat.type != 'private':
                 pass
             else:
-                buttons.buildbutton("7¢8„1‚5 Drive Link", link)
+                buttons.buildbutton("â˜ï¸ Drive Link", link)
             LOGGER.info(f'Done Uploading {name}')
             _, INDEXURL = getGDriveUploadUtils(user_id_, self.u_index, self.c_index)
             if INDEX_URL:= INDEXURL:
@@ -498,14 +498,14 @@ class MirrorLeechListener:
                 if typ == "Folder":
                     share_url += '/'
                     share_url = short_url(share_url, user_id_)
-                    buttons.buildbutton("7²3 Index Link", share_url)
+                    buttons.buildbutton("âš¡ Index Link", share_url)
                 else:
                     share_url = short_url(share_url, user_id_)
-                    buttons.buildbutton("7²3 Index Link", share_url)
+                    buttons.buildbutton("âš¡ Index Link", share_url)
                     if config_dict['VIEW_LINK']:
                         share_urls = f'{INDEX_URL}/{url_path}?a=view'
                         share_urls = short_url(share_urls, user_id_)
-                        buttons.buildbutton("”9±4 View Link", share_urls)
+                        buttons.buildbutton("ðŸŒ View Link", share_urls)
                     if config_dict['SOURCE_LINK']:
                         try:
                             mesg = message_args[1]
@@ -514,13 +514,13 @@ class MirrorLeechListener:
                                     title=f"{config_dict['TITLE_NAME']} Source Link",
                                     content=mesg,
                                 )["path"]
-                                buttons.buildbutton(f"”9å3 Source Link", f"https://telegra.ph/{link}")
+                                buttons.buildbutton(f"ðŸ”— Source Link", f"https://telegra.ph/{link}")
                             elif is_url(mesg):
                                 source_link = mesg
                                 if source_link.startswith(("|", "pswd: ", "c:")):
                                     pass
                                 else:
-                                    buttons.buildbutton(f"”9å3 Source Link", source_link)
+                                    buttons.buildbutton(f"ðŸ”— Source Link", source_link)
                             else:
                                 pass
                         except Exception:
@@ -535,9 +535,9 @@ class MirrorLeechListener:
                                             title=f"{config_dict['TITLE_NAME']} Source Link",
                                             content=source_link,
                                         )["path"]
-                                        buttons.buildbutton(f"”9å3 Source Link", f"https://telegra.ph/{link}")
+                                        buttons.buildbutton(f"ðŸ”— Source Link", f"https://telegra.ph/{link}")
                                     else:
-                                        buttons.buildbutton(f"”9å3 Source Link", source_link)
+                                        buttons.buildbutton(f"ðŸ”— Source Link", source_link)
                             except Exception:
                                 pass
                     else:
@@ -604,7 +604,7 @@ class MirrorLeechListener:
             else:
                 name = name
             if config_dict['EMOJI_THEME']:
-                bmsg = f"<b>”9ö4„1‚5 Name: </b><{config_dict['NAME_FONT']}>{escape(name)}</{config_dict['NAME_FONT']}>\n"
+                bmsg = f"<b>ðŸ—‚ï¸ Name: </b><{config_dict['NAME_FONT']}>{escape(name)}</{config_dict['NAME_FONT']}>\n"
             else:
                 bmsg = f"<b>Name: </b><{config_dict['NAME_FONT']}>{escape(name)}</{config_dict['NAME_FONT']}>\n"
             botpm = f"<b>\nHey {self.tag}. I have sent your stuff in PM.</b>\n"
