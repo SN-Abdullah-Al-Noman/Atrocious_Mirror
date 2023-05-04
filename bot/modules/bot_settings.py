@@ -41,8 +41,8 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'CREDIT_NAME': 'Atrocious',
                   'NAME_FONT': 'code',
                   'CAPTION_FONT': 'code',
-                  'FINISHED_PROGRESS_STR': '°ˆ',
-                  'UN_FINISHED_PROGRESS_STR': '°ı',
+                  'FINISHED_PROGRESS_STR': '‚ñ†',
+                  'UN_FINISHED_PROGRESS_STR': '‚ñ°',
                   'IMAGE_URL': 'https://graph.org/file/6b22ef7b8a733c5131d3f.jpg',
                   'TIMEZONE': 'Asia/Kolkata',
                   'LIST_MODE': "Telegraph",
@@ -67,7 +67,7 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                                      <b>Description</b>: <i>{description}</i>''',
                   'IMDB_TEMPLATE': '''<b>Title: </b> {title} [{year}]
                                       <b>Also Known As:</b> {aka}
-                                      <b>Rating Å8¨2Ñ1Ç5:</b> <i>{rating}</i>
+                                      <b>Rating ‚≠êÔ∏è:</b> <i>{rating}</i>
                                       <b>Release Info: </b> <a href="{url_releaseinfo}">{release_date}</a>
                                       <b>Genre: </b>{genres}
                                       <b>IMDb URL:</b> {url}
@@ -590,7 +590,7 @@ def load_config():
     if len(DEF_IMDB_TEMP) == 0:
         DEF_IMDB_TEMP = '''<b>Title: </b> {title} [{year}]
     <b>Also Known As:</b> {aka}
-    <b>Rating Å8¨2Ñ1Ç5:</b> <i>{rating}</i>
+    <b>Rating ‚≠êÔ∏è:</b> <i>{rating}</i>
     <b>Release Info: </b> <a href="{url_releaseinfo}">{release_date}</a>
     <b>Genre: </b>{genres}
     <b>IMDb URL:</b> {url}
@@ -622,11 +622,11 @@ def load_config():
 
     FINISHED_PROGRESS_STR = environ.get('FINISHED_PROGRESS_STR', '')
     if len(FINISHED_PROGRESS_STR) == 0:
-        FINISHED_PROGRESS_STR = '°ˆ'
+        FINISHED_PROGRESS_STR = '‚ñ†'
 
     UN_FINISHED_PROGRESS_STR = environ.get('UN_FINISHED_PROGRESS_STR', '')
     if len(UN_FINISHED_PROGRESS_STR) == 0:
-        UN_FINISHED_PROGRESS_STR = '°ı'
+        UN_FINISHED_PROGRESS_STR = '‚ñ°'
 
     IMAGE_URL = environ.get('IMAGE_URL', '')
     if len(IMAGE_URL) == 0:
