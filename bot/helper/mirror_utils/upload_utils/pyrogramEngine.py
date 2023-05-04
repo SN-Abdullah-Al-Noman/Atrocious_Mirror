@@ -86,41 +86,7 @@ class TgUploader:
         LEECH_X = int(dumpid) if len(dumpid) != 0 else user_data.get('is_log_leech', [''])[0]
         
         BOT_PM_X = get_bot_pm(user_id_)
-        
-        if config_dict['REMOVE_FILE_TAG']:
-            cap_mono = cap_mono.replace("https", "")
-            cap_mono = cap_mono.replace(".com", "")
-            cap_mono = cap_mono.replace("@OngoingCosmos", "")
-            cap_mono = cap_mono.replace("@BuLMoviee", "")
-            cap_mono = cap_mono.replace("HUB_LinkZz", "")
-            cap_mono = cap_mono.replace("@TamilRockerz_FZN_", "")
-            cap_mono = cap_mono.replace("tnlink", "")
-            cap_mono = cap_mono.replace("@JohnWickFiles", "")
-            cap_mono = cap_mono.replace("@MROTTTamilOffls_", "")
-            cap_mono = cap_mono.replace("www.", "")
-            cap_mono = cap_mono.replace("TeleguFlix", "")
-            cap_mono = cap_mono.replace(".Site", "")
-            cap_mono = cap_mono.replace("@EHentaiFHD", "")
-            cap_mono = cap_mono.replace("EHentaiFHD", "")
-            cap_mono = cap_mono.replace("@Tamilblasterslinkz-", "")
-            cap_mono = cap_mono.replace("@", "")
-            file_ = file_.replace("@Tamilblasterslinkz-", "")
-            file_ = file_.replace("@EHentaiFHD", "")
-            file_ = file_.replace("https", "")
-            file_ = file_.replace("TeleguFlix", "")
-            file_ = file_.replace(".com", "")
-            file_ = file_.replace("OngoingCosmos", "")
-            file_ = file_.replace("BuLMoviee", "")
-            file_ = file_.replace("EHentaiFHD", "")
-            file_ = file_.replace("HUB_LinkZz", "")
-            file_ = file_.replace("@TamilRockerz_FZN_", "")
-            file_ = file_.replace("tnlink", "")
-            file_ = file_.replace("JohnWickFiles", "")
-            file_ = file_.replace("@MROTTTamilOffls_", "")
-            file_ = file_.replace("@", "")
-        else:
-            pass
-
+       
         if config_dict['LEECH_CAPTION']:
             cap_mono = f"<{config_dict['CAPTION_FONT']}>{config_dict['LEECH_CAPTION']}</b>\n\n<b>{file_}</{config_dict['CAPTION_FONT']}>"
             new_path = ospath.join(dirpath, file_)
