@@ -41,8 +41,8 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'CREDIT_NAME': 'Atrocious',
                   'NAME_FONT': 'code',
                   'CAPTION_FONT': 'code',
-                  'FINISHED_PROGRESS_STR': '‚ñ†',
-                  'UN_FINISHED_PROGRESS_STR': '‚ñ°',
+                  'FINISHED_PROGRESS_STR': '°ˆ',
+                  'UN_FINISHED_PROGRESS_STR': '°ı',
                   'IMAGE_URL': 'https://graph.org/file/6b22ef7b8a733c5131d3f.jpg',
                   'TIMEZONE': 'Asia/Kolkata',
                   'LIST_MODE': "Telegraph",
@@ -50,7 +50,6 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'SAME_ACC_COOKIES': True,
                   'ENABLE_USR_TD': False,
                   'RSS_DELAY': 900,
-                  'ZIP_LEVEL': 0,
                   'ANIME_TEMPLATE': '''<b>{ro_title}</b>({na_title})
                                      <b>Format</b>: <code>{format}</code>
                                      <b>Status</b>: <code>{status}</code>
@@ -68,7 +67,7 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                                      <b>Description</b>: <i>{description}</i>''',
                   'IMDB_TEMPLATE': '''<b>Title: </b> {title} [{year}]
                                       <b>Also Known As:</b> {aka}
-                                      <b>Rating ‚≠êÔ∏è:</b> <i>{rating}</i>
+                                      <b>Rating Å8¨2Ñ1Ç5:</b> <i>{rating}</i>
                                       <b>Release Info: </b> <a href="{url_releaseinfo}">{release_date}</a>
                                       <b>Genre: </b>{genres}
                                       <b>IMDb URL:</b> {url}
@@ -591,7 +590,7 @@ def load_config():
     if len(DEF_IMDB_TEMP) == 0:
         DEF_IMDB_TEMP = '''<b>Title: </b> {title} [{year}]
     <b>Also Known As:</b> {aka}
-    <b>Rating ‚≠êÔ∏è:</b> <i>{rating}</i>
+    <b>Rating Å8¨2Ñ1Ç5:</b> <i>{rating}</i>
     <b>Release Info: </b> <a href="{url_releaseinfo}">{release_date}</a>
     <b>Genre: </b>{genres}
     <b>IMDb URL:</b> {url}
@@ -623,11 +622,11 @@ def load_config():
 
     FINISHED_PROGRESS_STR = environ.get('FINISHED_PROGRESS_STR', '')
     if len(FINISHED_PROGRESS_STR) == 0:
-        FINISHED_PROGRESS_STR = '‚ñ†'
+        FINISHED_PROGRESS_STR = '°ˆ'
 
     UN_FINISHED_PROGRESS_STR = environ.get('UN_FINISHED_PROGRESS_STR', '')
     if len(UN_FINISHED_PROGRESS_STR) == 0:
-        UN_FINISHED_PROGRESS_STR = '‚ñ°'
+        UN_FINISHED_PROGRESS_STR = '°ı'
 
     IMAGE_URL = environ.get('IMAGE_URL', '')
     if len(IMAGE_URL) == 0:
@@ -679,12 +678,6 @@ def load_config():
     if len(SAFE_MODE) == 0:
         SAFE_MODE = ''
    
-    ZIP_LEVEL = environ.get('ZIP_LEVEL', '')
-    if len(ZIP_LEVEL) == 0:
-        ZIP_LEVEL = 0
-    else:
-        ZIP_LEVEL = int(ZIP_LEVEL)
-
     LEECH_CAPTION = environ.get('LEECH_CAPTION')
     if len(LEECH_CAPTION) == 0:
         LEECH_CAPTION = ''
@@ -821,7 +814,6 @@ def load_config():
                         'MAX_PLAYLIST': MAX_PLAYLIST,
                         'YT_DLP_QUALITY': YT_DLP_QUALITY,
                         'SAFE_MODE': SAFE_MODE,
-                        'ZIP_LEVEL': ZIP_LEVEL,
                         'LEECH_CAPTION':LEECH_CAPTION,
                         'REMOVE_FILE_TAG': REMOVE_FILE_TAG})
 
