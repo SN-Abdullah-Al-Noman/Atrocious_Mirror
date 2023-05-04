@@ -61,7 +61,7 @@ class EngineStatus:
         STATUS_YT = "YT-Dlp 🌟"
         STATUS_EXT = "pExtract ⚔️"
         STATUS_SPLIT_MERGE = "FFmpeg 🍿"
-        STATUS_ZIP = f"7z "
+        STATUS_ZIP = f"7z 🛠"
         STATUS_QUEUE = "Sleep 💤"
     else:
         STATUS_ARIA = "Aria2c"
