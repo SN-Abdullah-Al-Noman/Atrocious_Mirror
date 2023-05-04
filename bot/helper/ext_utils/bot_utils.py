@@ -61,7 +61,7 @@ class EngineStatus:
         STATUS_YT = "YT-Dlp 🌟"
         STATUS_EXT = "pExtract ⚔️"
         STATUS_SPLIT_MERGE = "FFmpeg 🍿"
-        STATUS_ZIP = f"p7zip 🛠 | <b>Level:</b> {config_dict['ZIP_LEVEL']}"
+        STATUS_ZIP = f"7z "
         STATUS_QUEUE = "Sleep 💤"
     else:
         STATUS_ARIA = "Aria2c"
@@ -72,7 +72,7 @@ class EngineStatus:
         STATUS_YT = "YT-Dlp"
         STATUS_EXT = "pExtract"
         STATUS_SPLIT_MERGE = "FFmpeg"
-        STATUS_ZIP = f"p7zip | <b>Level: </b> {config_dict['ZIP_LEVEL']}"
+        STATUS_ZIP = f"7z"
         STATUS_QUEUE = "Sleep"
 
     
