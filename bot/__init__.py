@@ -683,12 +683,6 @@ else:
     FORCE_BOT_PM = 'True'
     SAFE_MODE = 'True'
 
-ZIP_LEVEL = environ.get('ZIP_LEVEL', '')
-if len(ZIP_LEVEL) == 0:
-    ZIP_LEVEL = 0
-else:
-    ZIP_LEVEL = int(ZIP_LEVEL)
-
 LEECH_CAPTION = environ.get('LEECH_CAPTION')
 if len(LEECH_CAPTION) == 0:
     LEECH_CAPTION = ''
@@ -826,7 +820,6 @@ config_dict = {'ANILIST_ENABLED': ANILIST_ENABLED,
                'MAX_PLAYLIST': MAX_PLAYLIST,
                'YT_DLP_QUALITY': YT_DLP_QUALITY,
                'SAFE_MODE': SAFE_MODE,
-               'ZIP_LEVEL': ZIP_LEVEL,
                'LEECH_CAPTION': LEECH_CAPTION,
                'REMOVE_FILE_TAG': REMOVE_FILE_TAG}
 
