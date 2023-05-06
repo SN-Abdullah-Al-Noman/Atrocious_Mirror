@@ -312,33 +312,6 @@ help_string_telegraph_admin = f'''
 • <b>/{BotCommands.LogCommand}</b>: Get a log file of the bot. Handy for getting crash reports
 '''
 
-help_string_telegraph_admin = f'''
-<b><u>🛡️ Admin Commands</u></b>
-<br><br>
-• <b>/{BotCommands.PingCommand}</b>: Check how long it takes to Ping the Bot
-<br><br>
-• <b>/{BotCommands.AuthorizeCommand}</b>: Authorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
-<br><br>
-• <b>/{BotCommands.UnAuthorizeCommand}</b>: Unauthorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
-<br><br>
-• <b>/{BotCommands.UsersCommand}</b>: show users settings (Only Owner & Sudo).
-<br><br>
-• <b>/{BotCommands.AddSudoCommand}</b>: Add sudo user (Only Owner)
-<br><br>
-• <b>/{BotCommands.RmSudoCommand}</b>: Remove sudo users (Only Owner)
-<br><br>
-• <b>/{BotCommands.PaidUsersCommand}</b>: Show Paid users (Only Owner & Sudo)
-<br><br>
-• <b>/{BotCommands.AddPaidCommand}</b>: Authorize Paid users (Only Owner)
-<br><br>
-• <b>/{BotCommands.RmPaidCommand}</b>: Unauthorize Paid users (Only Owner)
-<br><br>
-• <b>/{BotCommands.RestartCommand}</b>: Restart and update the bot (Only Owner & Sudo)
-<br><br>
-• <b>/{BotCommands.LogCommand}</b>: Get a log file of the bot. Handy for getting crash reports
-'''
-
-
 help_admin = telegraph.create_page(
     title=f"{config_dict['TITLE_NAME']} Help",
     content=help_string_telegraph_admin)["path"]
