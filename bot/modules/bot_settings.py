@@ -50,6 +50,7 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'SAME_ACC_COOKIES': True,
                   'ENABLE_USR_TD': False,
                   'RSS_DELAY': 900,
+                  'ZIP_LEVEL': 0,
                   'ANIME_TEMPLATE': '''<b>{ro_title}</b>({na_title})
                                      <b>Format</b>: <code>{format}</code>
                                      <b>Status</b>: <code>{status}</code>
@@ -449,6 +450,9 @@ def load_config():
     if len(LIST_MODE) == 0:
         LIST_MODE = "Telegraph"
 
+    EMOJI_THEME = environ.get('EMOJI_THEME', '')
+    EMOJI_THEME = EMOJI_THEME.lower() == 'true'
+
     DISABLE_DRIVE_LINK = environ.get('DISABLE_DRIVE_LINK', '')
     DISABLE_DRIVE_LINK = DISABLE_DRIVE_LINK.lower() == 'true'
 
@@ -675,6 +679,12 @@ def load_config():
     if len(SAFE_MODE) == 0:
         SAFE_MODE = ''
    
+    ZIP_LEVEL = environ.get('ZIP_LEVEL', '')
+    if len(ZIP_LEVEL) == 0:
+        ZIP_LEVEL = 0
+    else:
+        ZIP_LEVEL = int(ZIP_LEVEL)
+
     LEECH_CAPTION = environ.get('LEECH_CAPTION')
     if len(LEECH_CAPTION) == 0:
         LEECH_CAPTION = ''
@@ -780,6 +790,7 @@ def load_config():
                         'TIME_GAP': TIME_GAP,
                         'FINISHED_PROGRESS_STR': FINISHED_PROGRESS_STR,
                         'UN_FINISHED_PROGRESS_STR': UN_FINISHED_PROGRESS_STR,
+                        'EMOJI_THEME': EMOJI_THEME,
                         'SHOW_LIMITS_IN_STATS': SHOW_LIMITS_IN_STATS,
                         'LIST_MODE': LIST_MODE,
                         'CREDIT_NAME': CREDIT_NAME,
@@ -810,6 +821,7 @@ def load_config():
                         'MAX_PLAYLIST': MAX_PLAYLIST,
                         'YT_DLP_QUALITY': YT_DLP_QUALITY,
                         'SAFE_MODE': SAFE_MODE,
+                        'ZIP_LEVEL': ZIP_LEVEL,
                         'LEECH_CAPTION':LEECH_CAPTION,
                         'REMOVE_FILE_TAG': REMOVE_FILE_TAG})
 
