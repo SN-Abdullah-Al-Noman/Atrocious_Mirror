@@ -47,12 +47,8 @@ now=datetime.now(timezone(f'{timez}'))
 
 def stats(update, context):
     if ospath.exists('.git'):
-        if config_dict['EMOJI_THEME']:
-            last_commit = check_output(["git log -1 --date=short --pretty=format:'%cd \n🛠 From: %cr'"], shell=True).decode()
-            botVersion = check_output(["git log -1 --date=format:v%y.%m%d.%H%M --pretty=format:%cd"], shell=True).decode()
-        else:
-            last_commit = check_output(["git log -1 --date=short --pretty=format:'%cd \nFrom: %cr'"], shell=True).decode()
-            botVersion = check_output(["git log -1 --date=format:v%y.%m%d.%H%M --pretty=format:%cd"], shell=True).decode()
+        last_commit = check_output(["git log -1 --date=short --pretty=format:'%cd \nFrom: %cr'"], shell=True).decode()
+        botVersion = check_output(["git log -1 --date=format:v%y.%m%d.%H%M --pretty=format:%cd"], shell=True).decode()
     else:
         botVersion = 'No UPSTREAM_REPO'
         last_commit = 'No UPSTREAM_REPO'
@@ -77,33 +73,18 @@ def stats(update, context):
     mem_t = get_readable_file_size(memory.total)
     mem_a = get_readable_file_size(memory.available)
     mem_u = get_readable_file_size(memory.used)
-    if config_dict['EMOJI_THEME']:
-            stats = f'<b>       📊 Bot Statistics </b>\n' \
-                    f'🛠 Updated On: {last_commit}\n'\
-                    f'⏰️ Uptime: {currentTime}\n'\
-                    f'🤖 Version: {version}\n'\
-                    f'🟢 OS Uptime: {osUptime}\n'\
-                    f'🖥︄ CPU: [{progress_bar(cpuUsage)}] {cpuUsage}%\n'\
-                    f'🎮 RAM: [{progress_bar(mem_p)}] {mem_p}%\n'\
-                    f'💾 Disk: [{progress_bar(disk)}] {disk}%\n'\
-                    f'💿 Disk Free: {free}\n'\
-                    f'🔺 Upload Data: {sent}\n'\
-                    f'🔻 Download Data: {recv}\n\n'
-
-    else:
-            stats = f'<b>    📊 Bot Statistics </b>\n' \
-                    f'Updated On: {last_commit}\n'\
-                    f'Uptime: {currentTime}\n'\
-                    f'Version: {version}\n'\
-                    f'OS Uptime: {osUptime}\n'\
-                    f'CPU: [{progress_bar(cpuUsage)}] {cpuUsage}%\n'\
-                    f'RAM: [{progress_bar(mem_p)}] {mem_p}%\n'\
-                    f'Disk: [{progress_bar(disk)}] {disk}%\n'\
-                    f'Disk Free: {free}\n'\
-                    f'Upload Data: {sent}\n'\
-                    f'Download Data: {recv}\n\n'
-
-
+    stats = f'<b>    📊 Bot Statistics </b>\n' \
+            f'Updated On: {last_commit}\n'\
+            f'Uptime: {currentTime}\n'\
+            f'Version: {version}\n'\
+            f'OS Uptime: {osUptime}\n'\
+            f'CPU: [{progress_bar(cpuUsage)}] {cpuUsage}%\n'\
+            f'RAM: [{progress_bar(mem_p)}] {mem_p}%\n'\
+            f'Disk: [{progress_bar(disk)}] {disk}%\n'\
+            f'Disk Free: {free}\n'\
+            f'Upload Data: {sent}\n'\
+            f'Download Data: {recv}\n\n'
+            
 
     if config_dict['SHOW_LIMITS_IN_STATS']:
 
@@ -123,24 +104,15 @@ def stats(update, context):
         total_task = 'No Limit Set' if TOTAL_TASKS_LIMIT == '' else f'{TOTAL_TASKS_LIMIT} Total Tasks/Time'
         user_task = 'No Limit Set' if USER_TASKS_LIMIT == '' else f'{USER_TASKS_LIMIT} Tasks/user'
 
-        if config_dict['EMOJI_THEME']: 
-            stats += f'<b>🔢 Bot Limitations </b>\n'\
-                     f'🧲 Torrent/Direct: {torrent_direct}\n'\
-                     f'🔐 Zip/Unzip: {zip_unzip}\n'\
-                     f'🔷 Leech: {leech_limit}\n'\
-                     f'♻️ Clone: {clone_limit}\n'\
-                     f'🔰 Mega: {mega_limit}\n'\
-                     f'💣 Total Tasks: {total_task}\n'\
-                     f'🔫 User Tasks: {user_task}\n\n'
-        else: 
-            stats += f'<b>🔢 Bot Limitations </b>\n'\
-                     f'Torrent/Direct: {torrent_direct}\n'\
-                     f'Zip/Unzip: {zip_unzip}\n'\
-                     f'Leech: {leech_limit}\n'\
-                     f'Clone: {clone_limit}\n'\
-                     f'Mega: {mega_limit}\n'\
-                     f'Total Tasks: {total_task}\n'\
-                     f'User Tasks: {user_task}\n\n'
+        stats += f'<b>🔢 Bot Limitations </b>\n'\
+                 f'Torrent/Direct: {torrent_direct}\n'\
+                 f'Zip/Unzip: {zip_unzip}\n'\
+                 f'Leech: {leech_limit}\n'\
+                 f'Clone: {clone_limit}\n'\
+                 f'Mega: {mega_limit}\n'\
+                 f'Total Tasks: {total_task}\n'\
+                 f'User Tasks: {user_task}\n\n'
+            
 
     if config_dict['PICS']:
         sendPhoto(stats, context.bot, update.message, rchoice(config_dict['PICS']))
@@ -149,12 +121,8 @@ def stats(update, context):
 
 def start(update, context):
     buttons = ButtonMaker()
-    if config_dict['EMOJI_THEME']:
-        buttons.buildbutton(f"{config_dict['START_BTN1_NAME']}", f"{config_dict['START_BTN1_URL']}")
-        buttons.buildbutton(f"{config_dict['START_BTN2_NAME']}", f"{config_dict['START_BTN2_URL']}")
-    else:
-        buttons.buildbutton(f"{config_dict['START_BTN1_NAME']}", f"{config_dict['START_BTN1_URL']}")
-        buttons.buildbutton(f"{config_dict['START_BTN2_NAME']}", f"{config_dict['START_BTN2_URL']}")
+    buttons.buildbutton(f"{config_dict['START_BTN1_NAME']}", f"{config_dict['START_BTN1_URL']}")
+    buttons.buildbutton(f"{config_dict['START_BTN2_NAME']}", f"{config_dict['START_BTN2_URL']}")
     reply_markup = buttons.build_menu(2)
     if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
         start_string = f'''This bot can mirror all your links to Google Drive!
@@ -190,16 +158,11 @@ def restart(update, context):
 
 
 def ping(update, context):
-    if config_dict['EMOJI_THEME']:
-        start_time = int(round(time() * 1000))
-        reply = sendMessage("Starting_Ping", context.bot, update.message)
-        end_time = int(round(time() * 1000))
-        editMessage(f'{end_time - start_time} ms 🔥', reply)
-    else:
-        start_time = int(round(time() * 1000))
-        reply = sendMessage("Starting_Ping ", context.bot, update.message)
-        end_time = int(round(time() * 1000))
-        editMessage(f'{end_time - start_time} ms ', reply)
+    start_time = int(round(time() * 1000))
+    reply = sendMessage("Starting_Ping ", context.bot, update.message)
+    end_time = int(round(time() * 1000))
+    editMessage(f'{end_time - start_time} ms ', reply)
+        
 
 def log(update, context):
     sendLogFile(context.bot, update.message)
@@ -319,12 +282,8 @@ help_admin = telegraph.create_page(
 
 def bot_help(update, context):
     button = ButtonMaker()
-    if config_dict['EMOJI_THEME']:
-        button.buildbutton("👤 User", f"https://telegra.ph/{help_user}")
-        button.buildbutton("🔰 Admin", f"https://telegra.ph/{help_admin}")
-    else:
-        button.buildbutton("User", f"https://telegra.ph/{help_user}")
-        button.buildbutton("Admin", f"https://telegra.ph/{help_admin}")
+    button.buildbutton("User", f"https://telegra.ph/{help_user}")
+    button.buildbutton("Admin", f"https://telegra.ph/{help_admin}")
     sendMessage(help_string, context.bot, update.message, button.build_menu(2))
 
 
