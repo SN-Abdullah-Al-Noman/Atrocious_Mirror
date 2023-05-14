@@ -396,7 +396,7 @@ def main():
                 msg += f"Time: {time}\n"
                 msg += f"Time Zone: {timez}\n"
                 msg += f"Repo Version: {version}\n\n"
-                msg += f" Incomplete Tasks ⬇️ \n\n"
+                msg += f"Incomplete Tasks ⬇️ \n"
                 
                 for tag, links in data.items():
                     msg += f"\n{tag}: "
