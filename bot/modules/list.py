@@ -99,10 +99,10 @@ def clist(update, context):
             buttons.sbutton(f"Pᴀɢᴇs\n{no} / {len(udata)}", f"cari {user_id} pagnav {ind}")
         buttons.sbutton("Close", f"cari {user_id} clo", 'footer')
         exdata = formList[0]
-        extras = f'''╭ <b>Query :</b> <i>{exdata[0]}</i>
-├ <b>Total Results :</b> <i>{exdata[1]}</i>
-├ <b>Type :</b> <i>{exdata[2].capitalize()}</i>
-╰ <b>CC :</b> <a href='tg://user?id={user_id}'>{bot.get_chat(user_id).first_name}</a>\n'''
+        extras = f'''<b>Query :</b> <i>{exdata[0]}</i>
+<b>Total Results :</b> <i>{exdata[1]}</i>
+<b>Type :</b> <i>{exdata[2].capitalize()}</i>
+<b>CC :</b> <a href='tg://user?id={user_id}'>{bot.get_chat(user_id).first_name}</a>\n'''
         editMessage(extras+udata[ind], query.message, buttons.build_menu(3))
     elif data[2] == "pagnav":
         query.answer()
