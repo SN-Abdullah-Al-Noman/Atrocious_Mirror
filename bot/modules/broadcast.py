@@ -35,6 +35,5 @@ def broadcast(update, context):
         msg += f"<b>Failed: </b>{users_count - success} users"
         return sendMessage(msg, context.bot, update.message) 
 
-
-CommandHandler("broadcast", broadcast, filters=CustomFilters.owner_filter)
-dispatcher.add_handler(CommandHandler('broadcast', broadcast))
+broadcast_handler = CommandHandler("broadcast", broadcast, filters=CustomFilters.owner_filter)
+dispatcher.add_handler(broadcast_handler)
