@@ -28,6 +28,8 @@ from .modules import authorize, list, cancel_mirror, mirror_status, mirror_leech
                      scraper, pictures, save_msg, sel_cat, users, drive_clean, broadcast
 
 version = "Master Branch 5.0.3"
+timez = config_dict['TIMEZONE']
+now=datetime.now(timezone(f'{timez}'))
 
 def progress_bar(percentage):
     p_used = config_dict['FINISHED_PROGRESS_STR']
@@ -38,13 +40,7 @@ def progress_bar(percentage):
         percentage=int(percentage)
     except:
         percentage = 0
-    return ''.join(
-        p_used if i <= percentage // 10 else p_total for i in range(1, 11)
-    )
-
-
-timez = config_dict['TIMEZONE']
-now=datetime.now(timezone(f'{timez}'))
+    return ''.join(p_used if i <= percentage // 10 else p_total for i in range(1, 11))
 
 def stats(update, context):
     if ospath.exists('.git'):
@@ -86,9 +82,7 @@ def stats(update, context):
             f'Upload Data: {sent}\n'\
             f'Download Data: {recv}\n\n'
             
-
     if config_dict['SHOW_LIMITS_IN_STATS']:
-
         TORRENT_DIRECT_LIMIT = config_dict['TORRENT_DIRECT_LIMIT']
         CLONE_LIMIT = config_dict['CLONE_LIMIT']
         MEGA_LIMIT = config_dict['MEGA_LIMIT']
@@ -113,13 +107,11 @@ def stats(update, context):
                  f'Mega: {mega_limit}\n'\
                  f'Total Tasks: {total_task}\n'\
                  f'User Tasks: {user_task}\n\n'
-            
 
     if config_dict['PICS']:
         sendPhoto(stats, context.bot, update.message, rchoice(config_dict['PICS']))
     else:
         sendMessage(stats, context.bot, update.message)
-
 
 def start(update, context):
     token_timeout = config_dict['TOKEN_TIMEOUT']
@@ -137,8 +129,7 @@ def start(update, context):
         data['time'] = time()
         user_data[userid].update(data)
         time_str = format_validity_time(token_timeout)
-        return update.message.reply_text(f'Congratulations! Ads token refreshed successfully!\n\n<b>It will expire after</b> {time_str}')
-    
+        return update.message.reply_text(f'Congratulations! Ads token refreshed successfully!\n\n<b>It will expire after</b> {time_str}')  
     else:
         buttons = ButtonMaker()
     if config_dict['EMOJI_THEME']:
@@ -163,8 +154,6 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
         else:
             sendMessage(text, context.bot, update.message, reply_markup)
 
-
-
 def restart(update, context):
     restart_message = sendMessage("Bot Restarting...", context.bot, update.message)
     if Interval:
@@ -181,17 +170,14 @@ def restart(update, context):
         f.write(f"{restart_message.chat.id}\n{restart_message.message_id}\n")
     osexecl(executable, executable, "-m", "bot")
 
-
 def ping(update, context):
     start_time = int(round(time() * 1000))
     reply = sendMessage("Starting_Ping ", context.bot, update.message)
     end_time = int(round(time() * 1000))
     editMessage(f'{end_time - start_time} ms ', reply)
         
-
 def log(update, context):
     sendLogFile(context.bot, update.message)
-
 
 help_string = '''
 <b><a href='https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror'>Atrocious-Mirror</a></b> - The Ultimate Telegram MIrror-Leech Bot to Upload Your File & Link in Google Drive & Telegram
@@ -304,13 +290,11 @@ help_admin = telegraph.create_page(
     title=f"{config_dict['TITLE_NAME']} Help",
     content=help_string_telegraph_admin)["path"]
 
-
 def bot_help(update, context):
     button = ButtonMaker()
     button.buildbutton("User", f"https://telegra.ph/{help_user}")
     button.buildbutton("Admin", f"https://telegra.ph/{help_admin}")
     sendMessage(help_string, context.bot, update.message, button.build_menu(2))
-
 
 if config_dict['SET_BOT_COMMANDS']:
     botcmds = [
@@ -351,7 +335,6 @@ if config_dict['SET_BOT_COMMANDS']:
         (f'{BotCommands.HelpCommand}','Get detailed help'),
         (f'{BotCommands.LimitCommand}','Get Bot Limitation')
     ]
-
 
 def main():
     try:
@@ -466,8 +449,6 @@ def main():
             LOGGER.info(e)
         osremove(".restartmsg")
 
-     
-
     start_handler = CommandHandler(BotCommands.StartCommand, start)
     log_handler = CommandHandler(BotCommands.LogCommand, log,
                                filters=CustomFilters.owner_filter | CustomFilters.sudo_user)
@@ -479,7 +460,6 @@ def main():
                                filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
     stats_handler = CommandHandler(BotCommands.StatsCommand, stats,
                                filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
-
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(ping_handler)
@@ -493,5 +473,4 @@ def main():
 
 app.start()
 main()
-
 main_loop.run_forever()
