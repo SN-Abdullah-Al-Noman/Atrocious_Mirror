@@ -25,7 +25,7 @@ from bot import config_dict, botStartTime, Interval, QbInterval, LOGGER, DATABAS
                 app, main_loop, user_data
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror_leech, clone, ytdlp, shell, eval, bot_settings, \
                      delete, count, users_settings, search, rss, wayback, speedtest, anilist, imdb, bt_select, mediainfo, hash, \
-                     scraper, pictures, save_msg, sel_cat, users, drive_clean, broadcast
+                     scraper, pictures, save_msg, sel_cat, users, drive_clean, broadcast, autodelete, no_username_members
 
 version = "Master Branch 5.0.3"
 
@@ -138,12 +138,30 @@ def start(update, context):
         user_data[userid].update(data)
         time_str = format_validity_time(token_timeout)
         return update.message.reply_text(f'Congratulations! Ads token refreshed successfully!\n\n<b>It will expire after</b> {time_str}')
-    elif config_dict['BOT_PM']:
-        start_string = f'<b>Welcome!</b>\n\nFrom now I will send your files and links here.\n'
+    
     else:
-        start_string = f'<b>Welcome!</b>\n\nThis bot can mirror all your links to Google Drive!\n'
-
-    return update.message.reply_text(start_string)
+        buttons = ButtonMaker()
+    if config_dict['EMOJI_THEME']:
+        buttons.buildbutton(f"{config_dict['START_BTN1_NAME']}", f"{config_dict['START_BTN1_URL']}")
+        buttons.buildbutton(f"{config_dict['START_BTN2_NAME']}", f"{config_dict['START_BTN2_URL']}")
+    else:
+        buttons.buildbutton(f"{config_dict['START_BTN1_NAME']}", f"{config_dict['START_BTN1_URL']}")
+        buttons.buildbutton(f"{config_dict['START_BTN2_NAME']}", f"{config_dict['START_BTN2_URL']}")
+    reply_markup = buttons.build_menu(2)
+    if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
+        start_string = f'''This bot can mirror all your links to Google Drive!
+Type /{BotCommands.HelpCommand} to get a list of available commands
+'''
+        if config_dict['PICS']:
+            sendPhoto(start_string, context.bot, update.message, rchoice(config_dict['PICS']), reply_markup)
+        else:
+            sendMessage(start_string, context.bot, update.message, reply_markup)
+    else:
+        text = f"Not Authorized user, deploy your own mirror bot"
+        if config_dict['PICS']:
+            sendPhoto(text, context.bot, update.message, rchoice(config_dict['PICS']), reply_markup)
+        else:
+            sendMessage(text, context.bot, update.message, reply_markup)
 
 
 
