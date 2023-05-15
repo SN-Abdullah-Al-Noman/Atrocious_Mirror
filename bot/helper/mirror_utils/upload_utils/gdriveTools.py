@@ -270,7 +270,7 @@ class GoogleDriveHelper:
         # File body description
         file_metadata = {
             "name": directory_name,
-            "description": f"Uploaded By Atrocious Mirror",
+            "description": f"{config_dict['GD_INFO']}",
             "mimeType": self.__G_DRIVE_DIR_MIME_TYPE
         }
         if dest_id is not None:
@@ -290,7 +290,7 @@ class GoogleDriveHelper:
         # File body description
         file_metadata = {
             'name': file_name,
-            'description': f"Uploaded By Atrocious Mirror",
+            'description': f"{config_dict['GD_INFO']}",
             'mimeType': mime_type,
         }
         if dest_id is not None:
@@ -388,19 +388,16 @@ class GoogleDriveHelper:
                 msg += f'\n<b>SubFolders: </b>{self.__total_folders}'
                 msg += f'\n<b>Files: </b>{self.__total_files}'
                 buttons = ButtonMaker()
-                durl = (durl, self.user_id)
                 buttons.buildbutton("☁️ Drive Link", durl)
                 if INDEX_URL := INDEXURL:
                     url_path = rquote(f'{f_name}', safe='')
                     url = f'{INDEX_URL}/{url_path}/'
-                    url = (url, self.user_id)
                     buttons.buildbutton("⚡ Index Link", url)
             else:
                 file = self.__copyFile(meta.get('id'), GDRIVEID, meta.get('name'))
                 msg += f'<b>Name: </b><code>{file.get("name")}</code>'
                 durl = self.__G_DRIVE_BASE_DOWNLOAD_URL.format(file.get("id"))
                 buttons = ButtonMaker()
-                durl = (durl, self.user_id)
                 buttons.buildbutton("☁️ Drive Link", durl)
                 if mime_type is None:
                     mime_type = 'File'
@@ -409,11 +406,9 @@ class GoogleDriveHelper:
                 if INDEX_URL := INDEXURL:
                     url_path = rquote(f'{file.get("name")}', safe='')
                     url = f'{INDEX_URL}/{url_path}'
-                    url = (url, self.user_id)
                     buttons.buildbutton("⚡ Index Link", url)
                     if config_dict['VIEW_LINK']:
                         urls = f'{INDEX_URL}/{url_path}?a=view'
-                        urls = (urls, self.user_id)
                         buttons.buildbutton("🌐 View Link", urls)
             if config_dict['BUTTON_FOUR_NAME'] != '' and config_dict['BUTTON_FOUR_URL'] != '':
                 buttons.buildbutton(f"{config_dict['BUTTON_FOUR_NAME']}", f"{config_dict['BUTTON_FOUR_URL']}")
@@ -627,10 +622,11 @@ class GoogleDriveHelper:
                             url_path = "/".join(rquote(n, safe='') for n in self.__get_recursive_list(file, dir_id))
                         else:
                             url_path = rquote(f'{file.get("name")}')
-                            url = f'{index_url}/{url_path}'
-                            msg += f' <b>| <a href="{url}">Index Link</a></b>'
-                            urlv = f'{index_url}/{url_path}?a=view'
+                        url = f'{index_url}/{url_path}'
+                        msg += f' <b>| <a href="{url}">Index Link</a></b>'
+                        urlv = f'{index_url}/{url_path}?a=view'
                         if config_dict['VIEW_LINK']:
+                            urlv = urlv
                             msg += f' <b>| <a href="{urlv}">View Link</a></b>'
                             
                 if tegr:
