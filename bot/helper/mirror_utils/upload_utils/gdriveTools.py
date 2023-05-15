@@ -19,7 +19,6 @@ from bot import bot, config_dict, ulist_listener, user_data, DRIVES_NAMES, DRIVE
 from bot.helper.ext_utils.telegraph_helper import telegraph
 from bot.helper.ext_utils.bot_utils import get_readable_file_size, setInterval, change_filename, getGDriveUploadUtils, userlistype
 from bot.helper.ext_utils.fs_utils import get_mime_type
-from bot.helper.ext_utils.shortenurl import short_url
 
 LOGGER = getLogger(__name__)
 getLogger('googleapiclient.discovery').setLevel(ERROR)
@@ -271,7 +270,7 @@ class GoogleDriveHelper:
         # File body description
         file_metadata = {
             "name": directory_name,
-            "description": f"{config_dict['GD_INFO']}",
+            "description": f"Uploaded By Atrocious Mirror",
             "mimeType": self.__G_DRIVE_DIR_MIME_TYPE
         }
         if dest_id is not None:
@@ -291,7 +290,7 @@ class GoogleDriveHelper:
         # File body description
         file_metadata = {
             'name': file_name,
-            'description': f"{config_dict['GD_INFO']}",
+            'description': f"Uploaded By Atrocious Mirror",
             'mimeType': mime_type,
         }
         if dest_id is not None:
@@ -389,19 +388,19 @@ class GoogleDriveHelper:
                 msg += f'\n<b>SubFolders: </b>{self.__total_folders}'
                 msg += f'\n<b>Files: </b>{self.__total_files}'
                 buttons = ButtonMaker()
-                durl = short_url(durl, self.user_id)
+                durl = (durl, self.user_id)
                 buttons.buildbutton("☁️ Drive Link", durl)
                 if INDEX_URL := INDEXURL:
                     url_path = rquote(f'{f_name}', safe='')
                     url = f'{INDEX_URL}/{url_path}/'
-                    url = short_url(url, self.user_id)
+                    url = (url, self.user_id)
                     buttons.buildbutton("⚡ Index Link", url)
             else:
                 file = self.__copyFile(meta.get('id'), GDRIVEID, meta.get('name'))
                 msg += f'<b>Name: </b><code>{file.get("name")}</code>'
                 durl = self.__G_DRIVE_BASE_DOWNLOAD_URL.format(file.get("id"))
                 buttons = ButtonMaker()
-                durl = short_url(durl, self.user_id)
+                durl = (durl, self.user_id)
                 buttons.buildbutton("☁️ Drive Link", durl)
                 if mime_type is None:
                     mime_type = 'File'
@@ -410,11 +409,11 @@ class GoogleDriveHelper:
                 if INDEX_URL := INDEXURL:
                     url_path = rquote(f'{file.get("name")}', safe='')
                     url = f'{INDEX_URL}/{url_path}'
-                    url = short_url(url, self.user_id)
+                    url = (url, self.user_id)
                     buttons.buildbutton("⚡ Index Link", url)
                     if config_dict['VIEW_LINK']:
                         urls = f'{INDEX_URL}/{url_path}?a=view'
-                        urls = short_url(urls, self.user_id)
+                        urls = (urls, self.user_id)
                         buttons.buildbutton("🌐 View Link", urls)
             if config_dict['BUTTON_FOUR_NAME'] != '' and config_dict['BUTTON_FOUR_URL'] != '':
                 buttons.buildbutton(f"{config_dict['BUTTON_FOUR_NAME']}", f"{config_dict['BUTTON_FOUR_URL']}")
@@ -596,10 +595,7 @@ class GoogleDriveHelper:
             for file in response.get('files', []):
                 mime_type = file.get('mimeType')
                 if mime_type == "application/vnd.google-apps.folder":
-                    if config_dict['SHORTENER']:
-                        furl = short_url(f"https://drive.google.com/drive/folders/{file.get('id')}", self.user_id)
-                    else:
-                        furl = f"https://drive.google.com/drive/folders/{file.get('id')}"
+                    furl = f"https://drive.google.com/drive/folders/{file.get('id')}"
                     if tegr:
                         msg += f"📁 <code>{file.get('name')}<br>(folder)</code><br>"
                         msg += f"<b><a href='{furl}'>Drive Link</a></b>"
@@ -619,10 +615,7 @@ class GoogleDriveHelper:
                     msg += f"<a href='https://drive.google.com/drive/folders/{file.get('id')}'>{file.get('name')}" \
                            f"</a> (shortcut)"
                 else:
-                    if config_dict['SHORTENER']:
-                        furl = short_url("https://drive.google.com/uc?id={file.get('id')}&export=download", self.user_id)
-                    else:
-                        furl = f"https://drive.google.com/uc?id={file.get('id')}&export=download"
+                    furl = f"https://drive.google.com/uc?id={file.get('id')}&export=download"
                     if tegr:
                         msg += f"📄 <code>{file.get('name')}<br>({get_readable_file_size(int(file.get('size', 0)))})</code><br>"
                         msg += f"<b><a href='{furl}'>Drive Link</a></b>"
@@ -634,18 +627,10 @@ class GoogleDriveHelper:
                             url_path = "/".join(rquote(n, safe='') for n in self.__get_recursive_list(file, dir_id))
                         else:
                             url_path = rquote(f'{file.get("name")}')
-                        if config_dict['SHORTENER']:
-                            url = short_url(f'{index_url}/{url_path}', self.user_id)
-                            msg += f' <b>| <a href="{url}">Index Link</a></b>'
-                        else:
                             url = f'{index_url}/{url_path}'
                             msg += f' <b>| <a href="{url}">Index Link</a></b>'
-                        if config_dict['SHORTENER']:
-                            urlv = short_url(f'{index_url}/{url_path}?a=view', self.user_id)
-                        else:
                             urlv = f'{index_url}/{url_path}?a=view'
                         if config_dict['VIEW_LINK']:
-                            urlv = urlv
                             msg += f' <b>| <a href="{urlv}">View Link</a></b>'
                             
                 if tegr:

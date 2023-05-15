@@ -86,25 +86,6 @@ class TgUploader:
         LEECH_X = int(dumpid) if len(dumpid) != 0 else user_data.get('is_log_leech', [''])[0]
         
         BOT_PM_X = get_bot_pm(user_id_)
-       
-        if config_dict['LEECH_CAPTION']:
-            cap_mono = f"<{config_dict['CAPTION_FONT']}>{config_dict['LEECH_CAPTION']}</b>\n\n<b>{file_}</{config_dict['CAPTION_FONT']}>"
-            new_path = ospath.join(dirpath, file_)
-            osrename(up_path, new_path)
-            up_path = new_path
-        if len(file_) > 50:
-            extension = ospath.splitext(file_)[1]
-            file_ = file_[:50] + '' + extension
-            new_path = ospath.join(dirpath, file_)
-            osrename(up_path, new_path)
-            up_path = new_path
-        else:
-            cap_mono = f"<config_dict['CAPTION_FONT']>{file_}</config_dict['CAPTION_FONT']>"
-        
-        if config_dict['AS_DOCUMENT']:
-            cap_mono = f""
-        else:
-            cap_mono = cap_mono
         
         notMedia = False
         thumb = self.__thumb
