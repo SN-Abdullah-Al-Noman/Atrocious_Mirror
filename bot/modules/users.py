@@ -7,7 +7,6 @@ from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.message_utils import sendMessage, sendPhoto
 from bot.helper.telegram_helper.bot_commands import BotCommands
 
-
 def dbusers(update, context):
     if not config_dict['DATABASE_URL']:
         context.bot.send_message(chat_id=update.effective_chat.id, text=f"DATABASE_URL not provided")
@@ -16,7 +15,6 @@ def dbusers(update, context):
         db = conn.mltb
         users_count = db.users.count_documents({})
         context.bot.send_message(chat_id=update.effective_chat.id, text=f"Total users in database: {users_count}")
-
 
 def get_id(update, context):
     chat_id = update.effective_chat.id
@@ -57,12 +55,10 @@ def bot_limit(update, context):
     else:
         sendMessage(limit, context.bot, update.message)
 
-
 dbusers_handler = CommandHandler("dbusers", dbusers, filters=CustomFilters.owner_filter | CustomFilters.sudo_user)
 id_handler = CommandHandler("id", get_id)
 limit_handler = CommandHandler(BotCommands.LimitCommand, bot_limit,
                                filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
-
 
 dispatcher.add_handler(dbusers_handler)
 dispatcher.add_handler(id_handler)
