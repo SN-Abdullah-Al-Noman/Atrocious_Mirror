@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, CallbackQueryHandler
 
 from bot.helper.ext_utils.bot_utils import get_bot_pm, is_paid, is_sudo, getdailytasks, get_user_task, getUserTDs, is_url, \
         is_magnet, get_category_buttons, is_mega_link, is_gdrive_link, get_content_type, is_gdtot_link, \
-        is_udrive_link, is_sharer_link, is_sharedrive_link, is_filepress_link, new_thread
+        is_udrive_link, is_sharer_link, is_sharedrive_link, is_filepress_link, new_thread, check_ads_token_status
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
 from bot.helper.ext_utils.timegap import timegap_check
 from bot.helper.mirror_utils.download_utils.aria2_download import add_aria2c_download
@@ -414,39 +414,63 @@ def mir_confirm(update, context):
     editMessage(text, message, btns)
 
 def mirror(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message)
 
 def unzip_mirror(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, extract=True)
 
 def zip_mirror(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, True)
 
 def qb_mirror(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, isQbit=True)
 
 def qb_unzip_mirror(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, extract=True, isQbit=True)
 
 def qb_zip_mirror(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, True, isQbit=True)
 
 def leech(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, isLeech=True)
 
 def unzip_leech(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, extract=True, isLeech=True)
 
 def zip_leech(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, True, isLeech=True)
 
 def qb_leech(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, isQbit=True, isLeech=True)
 
 def qb_unzip_leech(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, extract=True, isQbit=True, isLeech=True)
 
 def qb_zip_leech(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _mirror_leech(context.bot, update.message, True, isQbit=True, isLeech=True)
 
 authfilter = CustomFilters.authorized_chat if config_dict['MIRROR_ENABLED'] is True else CustomFilters.owner_filter

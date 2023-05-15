@@ -6,7 +6,7 @@ from time import sleep, time
 
 from bot.helper.ext_utils.bot_utils import is_sudo, is_paid, get_user_task, get_category_buttons, get_readable_file_size, getUserTDs, \
                     new_thread, get_bot_pm, is_url, is_gdrive_link, is_gdtot_link, is_udrive_link, is_sharer_link, is_unified_link, \
-                    is_sharedrive_link, is_filepress_link, userlistype
+                    is_sharedrive_link, is_filepress_link, userlistype, check_ads_token_status
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
 from bot.helper.ext_utils.timegap import timegap_check
 from bot.helper.mirror_utils.download_utils.direct_link_generator import gdtot, udrive, sharer_pw_dl, shareDrive, filepress, unified
@@ -450,6 +450,8 @@ def confirm_clone(update, context):
 
 @new_thread
 def cloneNode(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _clone(update.message, context.bot)
 
 

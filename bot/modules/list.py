@@ -3,7 +3,7 @@ from telegram.ext import CommandHandler, CallbackQueryHandler
 
 from bot import bot, ulist_listener, LOGGER, dispatcher, config_dict, user_data
 from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
-from bot.helper.ext_utils.bot_utils import handleIndex
+from bot.helper.ext_utils.bot_utils import handleIndex, check_ads_token_status
 from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, sendMessage, sendFile, deleteMessage
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
@@ -21,6 +21,8 @@ def common_btn(isRecur, msg_id):
     return buttons.build_menu(3)
 
 def list_buttons(update, context):
+    if not check_ads_token_status(update, context):
+        return
     message = update.message
     user_id = message.from_user.id
     msg_id = message.message_id

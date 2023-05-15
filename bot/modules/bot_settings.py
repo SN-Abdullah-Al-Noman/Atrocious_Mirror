@@ -22,7 +22,6 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'AUTO_DELETE_UPLOAD_MESSAGE_DURATION': -1,
                   'BOT_PM': False,
                   'FORCE_BOT_PM': False,
-                  'UPDATE_PACKAGES': 'False',
                   'UPSTREAM_BRANCH': 'master',
                   'UPSTREAM_REPO': 'https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror',
                   'STATUS_UPDATE_INTERVAL': 10,
@@ -37,8 +36,6 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'AUTHOR_NAME': 'Atrocious',
                   'AUTHOR_URL': 'https://t.me/AtrociousBotSupport',
                   'TITLE_NAME': 'Atrocious',
-                  'GD_INFO': 'Uploaded by Atrocious Mirror Bot',
-                  'CREDIT_NAME': 'Atrocious',
                   'NAME_FONT': 'code',
                   'CAPTION_FONT': 'code',
                   'FINISHED_PROGRESS_STR': '■',
@@ -50,7 +47,6 @@ default_values = {'AUTO_DELETE_MESSAGE_DURATION': 30,
                   'SAME_ACC_COOKIES': True,
                   'ENABLE_USR_TD': False,
                   'RSS_DELAY': 900,
-                  'ZIP_LEVEL': 0,
                   'ANIME_TEMPLATE': '''<b>{ro_title}</b>({na_title})
                                      <b>Format</b>: <code>{format}</code>
                                      <b>Status</b>: <code>{status}</code>
@@ -418,10 +414,6 @@ def load_config():
     if len(UPSTREAM_BRANCH) == 0:   
         UPSTREAM_BRANCH = 'master'
 
-    UPDATE_PACKAGES = environ.get('UPDATE_PACKAGES', '')
-    if len(UPDATE_PACKAGES) == 0:
-        UPDATE_PACKAGES = 'False'
-
     MIRROR_ENABLED = environ.get('MIRROR_ENABLED', '')
     MIRROR_ENABLED = MIRROR_ENABLED.lower() == 'true'
 
@@ -511,12 +503,6 @@ def load_config():
         BUTTON_SIX_NAME = ''
         BUTTON_SIX_URL = ''
 
-    SHORTENER = environ.get('SHORTENER', '')
-    SHORTENER_API = environ.get('SHORTENER_API', '')
-    if len(SHORTENER) == 0 or len(SHORTENER_API) == 0:  
-        SHORTENER = ''
-        SHORTENER_API = ''
-
     HUBDRIVE_CRYPT = environ.get('HUBDRIVE_CRYPT', '')
     if len(HUBDRIVE_CRYPT) == 0:
         HUBDRIVE_CRYPT = ''
@@ -570,14 +556,6 @@ def load_config():
     TITLE_NAME = environ.get('TITLE_NAME', '')
     if len(TITLE_NAME) == 0:    
         TITLE_NAME = 'Atrocious'
-
-    GD_INFO = environ.get('GD_INFO', '')
-    if len(GD_INFO) == 0:   
-        GD_INFO = 'Uploaded By Atrocious Mirror Bot'
-
-    CREDIT_NAME = environ.get('CREDIT_NAME', '')
-    if len(CREDIT_NAME) == 0:   
-        CREDIT_NAME = 'Atrocious'
 
     NAME_FONT = environ.get('NAME_FONT', '')
     if len(NAME_FONT) == 0: 
@@ -678,20 +656,12 @@ def load_config():
     SAFE_MODE = environ.get('SAFE_MODE', '')
     if len(SAFE_MODE) == 0:
         SAFE_MODE = ''
-   
-    ZIP_LEVEL = environ.get('ZIP_LEVEL', '')
-    if len(ZIP_LEVEL) == 0:
-        ZIP_LEVEL = 0
+
+    TOKEN_TIMEOUT = environ.get('TOKEN_TIMEOUT', '')
+    if TOKEN_TIMEOUT.isdigit():
+        TOKEN_TIMEOUT = int(TOKEN_TIMEOUT)
     else:
-        ZIP_LEVEL = int(ZIP_LEVEL)
-
-    LEECH_CAPTION = environ.get('LEECH_CAPTION')
-    if len(LEECH_CAPTION) == 0:
-        LEECH_CAPTION = ''
-
-    REMOVE_FILE_TAG = environ.get('REMOVE_FILE_TAG')
-    if len(REMOVE_FILE_TAG) == 0:
-        REMOVE_FILE_TAG = ''
+        TOKEN_TIMEOUT = ''
 
     config_dict.update({'AS_DOCUMENT': AS_DOCUMENT,
                         'AUTHORIZED_CHATS': AUTHORIZED_CHATS,
@@ -736,7 +706,6 @@ def load_config():
                         'TORRENT_TIMEOUT': TORRENT_TIMEOUT,
                         'UPSTREAM_REPO': UPSTREAM_REPO,
                         'UPSTREAM_BRANCH': UPSTREAM_BRANCH,
-                        'UPDATE_PACKAGES': UPDATE_PACKAGES,
                         'UPTOBOX_TOKEN': UPTOBOX_TOKEN,
                         'USE_SERVICE_ACCOUNTS': USE_SERVICE_ACCOUNTS,
                         'VIEW_LINK': VIEW_LINK,
@@ -765,10 +734,7 @@ def load_config():
                         'TITLE_NAME': TITLE_NAME,
                         'AUTHOR_NAME': AUTHOR_NAME,
                         'AUTHOR_URL': AUTHOR_URL,
-                        'GD_INFO': GD_INFO,
                         'FSUB_IDS': FSUB_IDS,
-                        'SHORTENER': SHORTENER,
-                        'SHORTENER_API': SHORTENER_API,
                         'HUBDRIVE_CRYPT': HUBDRIVE_CRYPT,
                         'KATDRIVE_CRYPT': KATDRIVE_CRYPT,
                         'KOLOP_CRYPT': KOLOP_CRYPT,
@@ -793,7 +759,6 @@ def load_config():
                         'EMOJI_THEME': EMOJI_THEME,
                         'SHOW_LIMITS_IN_STATS': SHOW_LIMITS_IN_STATS,
                         'LIST_MODE': LIST_MODE,
-                        'CREDIT_NAME': CREDIT_NAME,
                         'WALLFLARE_SEARCH': WALLFLARE_SEARCH,
                         'WALLTIP_SEARCH': WALLTIP_SEARCH,
                         'WALLCRAFT_CATEGORY': WALLCRAFT_CATEGORY,
@@ -821,11 +786,9 @@ def load_config():
                         'MAX_PLAYLIST': MAX_PLAYLIST,
                         'YT_DLP_QUALITY': YT_DLP_QUALITY,
                         'SAFE_MODE': SAFE_MODE,
-                        'ZIP_LEVEL': ZIP_LEVEL,
-                        'LEECH_CAPTION':LEECH_CAPTION,
-                        'REMOVE_FILE_TAG': REMOVE_FILE_TAG})
+                        'TOKEN_TIMEOUT': TOKEN_TIMEOUT})
 
-
+    
     if DATABASE_URL:
         DbManger().update_config(config_dict)
     initiate_search_tools()

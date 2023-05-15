@@ -5,7 +5,7 @@ from re import split as re_split
 from telegram.ext import CommandHandler, CallbackQueryHandler
 
 from bot.helper.ext_utils.bot_utils import get_bot_pm, is_sudo, is_paid, get_user_task, is_url, getUserTDs, new_thread, \
-                                            get_category_buttons, get_readable_file_size
+                                            get_category_buttons, get_readable_file_size, check_ads_token_status
 from bot.helper.ext_utils.timegap import timegap_check
 from bot.helper.mirror_utils.download_utils.yt_dlp_download_helper import YoutubeDLHelper
 from bot.helper.telegram_helper.bot_commands import BotCommands
@@ -454,15 +454,23 @@ def _auto_cancel(msg, task_id):
         pass
 
 def ytdl(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _ytdl(context.bot, update.message)
 
 def ytdlZip(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _ytdl(context.bot, update.message, True)
 
 def ytdlleech(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _ytdl(context.bot, update.message, isLeech=True)
 
 def ytdlZipleech(update, context):
+    if not check_ads_token_status(update, context):
+        return
     _ytdl(context.bot, update.message, True, True)
 
 
