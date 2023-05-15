@@ -25,7 +25,7 @@ from bot import config_dict, botStartTime, Interval, QbInterval, LOGGER, DATABAS
                 app, main_loop, user_data
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror_leech, clone, ytdlp, shell, eval, bot_settings, \
                      delete, count, users_settings, search, rss, wayback, speedtest, anilist, imdb, bt_select, mediainfo, hash, \
-                     scraper, pictures, save_msg, sel_cat, users, drive_clean, broadcast, autodelete, no_username_members
+                     scraper, pictures, save_msg, sel_cat, users, drive_clean, broadcast
 
 version = "Master Branch 5.0.3"
 
