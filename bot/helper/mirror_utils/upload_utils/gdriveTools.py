@@ -270,7 +270,7 @@ class GoogleDriveHelper:
         # File body description
         file_metadata = {
             "name": directory_name,
-            "description": f"{config_dict['GD_INFO']}",
+            "description": f"Uploaded By Atrocious Mirror",
             "mimeType": self.__G_DRIVE_DIR_MIME_TYPE
         }
         if dest_id is not None:
@@ -290,7 +290,7 @@ class GoogleDriveHelper:
         # File body description
         file_metadata = {
             'name': file_name,
-            'description': f"{config_dict['GD_INFO']}",
+            'description': f"Uploaded By Atrocious Mirror",
             'mimeType': mime_type,
         }
         if dest_id is not None:
