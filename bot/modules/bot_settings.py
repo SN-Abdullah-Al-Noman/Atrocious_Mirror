@@ -442,9 +442,6 @@ def load_config():
     if len(LIST_MODE) == 0:
         LIST_MODE = "Telegraph"
 
-    EMOJI_THEME = environ.get('EMOJI_THEME', '')
-    EMOJI_THEME = EMOJI_THEME.lower() == 'true'
-
     DISABLE_DRIVE_LINK = environ.get('DISABLE_DRIVE_LINK', '')
     DISABLE_DRIVE_LINK = DISABLE_DRIVE_LINK.lower() == 'true'
 
@@ -756,7 +753,6 @@ def load_config():
                         'TIME_GAP': TIME_GAP,
                         'FINISHED_PROGRESS_STR': FINISHED_PROGRESS_STR,
                         'UN_FINISHED_PROGRESS_STR': UN_FINISHED_PROGRESS_STR,
-                        'EMOJI_THEME': EMOJI_THEME,
                         'SHOW_LIMITS_IN_STATS': SHOW_LIMITS_IN_STATS,
                         'LIST_MODE': LIST_MODE,
                         'WALLFLARE_SEARCH': WALLFLARE_SEARCH,
