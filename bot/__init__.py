@@ -34,6 +34,7 @@ load_dotenv('config.env', override=True)
 
 Interval = []
 QbInterval = []
+shorteneres_list = []
 DRIVES_NAMES = []
 DRIVES_IDS = []
 INDEX_URLS = []
@@ -523,14 +524,6 @@ if len(BUTTON_SIX_NAME) == 0 or len(BUTTON_SIX_URL) == 0:
     BUTTON_SIX_NAME = ''
     BUTTON_SIX_URL = ''
 
-SHORTENER = environ.get('SHORTENER', '')
-SHORTENER_API = environ.get('SHORTENER_API', '')
-if len(SHORTENER) == 0 or len(SHORTENER_API) == 0:
-    SHORTENER = ''
-    SHORTENER_API = ''
-SHORTENER = (SHORTENER.replace("'", '').replace('"', '').replace('[', '').replace(']', '').replace(",", "")).split()
-SHORTENER_API = (SHORTENER_API.replace("'", '').replace('"', '').replace('[', '').replace(']', '').replace(",", "")).split()
-
 HUBDRIVE_CRYPT = environ.get('HUBDRIVE_CRYPT', '')
 if len(HUBDRIVE_CRYPT) == 0:
     HUBDRIVE_CRYPT = ''
@@ -584,14 +577,6 @@ if len(AUTHOR_URL) == 0:
 TITLE_NAME = environ.get('TITLE_NAME', '')
 if len(TITLE_NAME) == 0:
     TITLE_NAME = 'Atrocious'
-
-GD_INFO = environ.get('GD_INFO', '')
-if len(GD_INFO) == 0:
-    GD_INFO = 'Uploaded By Atrocious Mirror Bot'
-
-CREDIT_NAME = environ.get('CREDIT_NAME', '')
-if len(CREDIT_NAME) == 0:
-    CREDIT_NAME = 'Atrocious'
 
 NAME_FONT = environ.get('NAME_FONT', '')
 if len(NAME_FONT) == 0:
@@ -667,10 +652,6 @@ UPSTREAM_BRANCH = environ.get('UPSTREAM_BRANCH', '')
 if len(UPSTREAM_BRANCH) == 0:
     UPSTREAM_BRANCH = 'master'
 
-UPDATE_PACKAGES = environ.get('UPDATE_PACKAGES', '')
-if len(UPDATE_PACKAGES) == 0:
-    UPDATE_PACKAGES = ''
-
 SAFE_MODE = environ.get('SAFE_MODE', '')
 if len(SAFE_MODE) == 0:
     log_warning('SAFE_MODE Is Not Enabled')
@@ -680,13 +661,11 @@ else:
     FORCE_BOT_PM = 'True'
     SAFE_MODE = 'True'
 
-LEECH_CAPTION = environ.get('LEECH_CAPTION')
-if len(LEECH_CAPTION) == 0:
-    LEECH_CAPTION = ''
-
-REMOVE_FILE_TAG = environ.get('REMOVE_FILE_TAG')
-if len(REMOVE_FILE_TAG) == 0:
-    REMOVE_FILE_TAG = ''
+TOKEN_TIMEOUT = environ.get('TOKEN_TIMEOUT', '')
+if TOKEN_TIMEOUT.isdigit():
+    TOKEN_TIMEOUT = int(TOKEN_TIMEOUT)
+else:
+    TOKEN_TIMEOUT = ''
 
 config_dict = {'ANILIST_ENABLED': ANILIST_ENABLED,
                'AS_DOCUMENT': AS_DOCUMENT,
@@ -705,7 +684,6 @@ config_dict = {'ANILIST_ENABLED': ANILIST_ENABLED,
                'BUTTON_SIX_NAME': BUTTON_SIX_NAME,
                'BUTTON_SIX_URL': BUTTON_SIX_URL,
                'CAPTION_FONT': CAPTION_FONT,
-               'CREDIT_NAME': CREDIT_NAME,
                'CLONE_ENABLED': CLONE_ENABLED,
                'CLONE_LIMIT': CLONE_LIMIT,
                'CMD_SUFFIX': CMD_SUFFIX,
@@ -753,11 +731,8 @@ config_dict = {'ANILIST_ENABLED': ANILIST_ENABLED,
                'TIMEZONE': TIMEZONE,
                'TGH_THUMB': TGH_THUMB,
                'TITLE_NAME': TITLE_NAME,
-               'GD_INFO': GD_INFO,
                'FSUB_IDS': FSUB_IDS,
                'SA_MAIL': SA_MAIL,
-               'SHORTENER': SHORTENER,
-               'SHORTENER_API': SHORTENER_API,
                'SEARCH_API_LINK': SEARCH_API_LINK,
                'SERVER_PORT': SERVER_PORT,
                'SEARCH_LIMIT': SEARCH_LIMIT,
@@ -805,7 +780,6 @@ config_dict = {'ANILIST_ENABLED': ANILIST_ENABLED,
                'PIXABAY_SEARCH': PIXABAY_SEARCH,
                'PICS': PICS,
                'NAME_FONT': NAME_FONT,
-               'UPDATE_PACKAGES': UPDATE_PACKAGES,
                'SOURCE_LINK': SOURCE_LINK,
                'START_BTN1_NAME': START_BTN1_NAME,
                'START_BTN1_URL': START_BTN1_URL,
@@ -816,8 +790,7 @@ config_dict = {'ANILIST_ENABLED': ANILIST_ENABLED,
                'MAX_PLAYLIST': MAX_PLAYLIST,
                'YT_DLP_QUALITY': YT_DLP_QUALITY,
                'SAFE_MODE': SAFE_MODE,
-               'LEECH_CAPTION': LEECH_CAPTION,
-               'REMOVE_FILE_TAG': REMOVE_FILE_TAG}
+               'TOKEN_TIMEOUT': TOKEN_TIMEOUT}
 
 if GDRIVE_ID:
     DRIVES_NAMES.append("Main")
@@ -840,6 +813,14 @@ if GDRIVE_ID:
     CATEGORY_NAMES.append("Root")
     CATEGORY_IDS.append(GDRIVE_ID)
     CATEGORY_INDEX.append(INDEX_URL)
+
+if ospath.exists('shorteners.txt'):
+    with open('shorteners.txt', 'r+') as f:
+        lines = f.readlines()
+        for line in lines:
+            temp = line.strip().split()
+            if len(temp) == 2:
+                shorteneres_list.append({'domain': temp[0],'api_key': temp[1]})
 
 if ospath.exists('categories.txt'):
     with open('categories.txt', 'r+') as f:
@@ -937,5 +918,6 @@ else:
 tgDefaults = Defaults(parse_mode='HTML', disable_web_page_preview=True, allow_sending_without_reply=True, run_async=True)
 updater = tgUpdater(token=BOT_TOKEN, defaults=tgDefaults, request_kwargs={'read_timeout': 20, 'connect_timeout': 15})
 bot = updater.bot
+bot_name = bot.username.lstrip('@')
 dispatcher = updater.dispatcher
 job_queue = updater.job_queue

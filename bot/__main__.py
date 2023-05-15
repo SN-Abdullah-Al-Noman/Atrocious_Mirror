@@ -1,3 +1,4 @@
+from uuid import uuid4
 from bs4 import BeautifulSoup
 from signal import signal, SIGINT
 from requests import get as rget
@@ -12,7 +13,7 @@ from sys import executable
 from pytz import timezone
 from telegram.ext import CommandHandler
 
-from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
+from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time, format_validity_time
 from .helper.ext_utils.db_handler import DbManger
 from .helper.ext_utils.fs_utils import start_cleanup, clean_all, exit_clean_up
 from .helper.ext_utils.telegraph_helper import telegraph
@@ -21,10 +22,10 @@ from .helper.telegram_helper.message_utils import sendMessage, editMessage, send
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 from bot import config_dict, botStartTime, Interval, QbInterval, LOGGER, DATABASE_URL, bot, dispatcher, updater, IGNORE_PENDING_REQUESTS, \
-                app, main_loop
+                app, main_loop, user_data
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror_leech, clone, ytdlp, shell, eval, bot_settings, \
                      delete, count, users_settings, search, rss, wayback, speedtest, anilist, imdb, bt_select, mediainfo, hash, \
-                     scraper, pictures, save_msg, sel_cat, users, drive_clean, broadcast
+                     scraper, pictures, save_msg, sel_cat, users, drive_clean, broadcast, autodelete, no_username_members
 
 version = "Master Branch 5.0.3"
 
@@ -119,25 +120,31 @@ def stats(update, context):
     else:
         sendMessage(stats, context.bot, update.message)
 
+
 def start(update, context):
-    buttons = ButtonMaker()
-    buttons.buildbutton(f"{config_dict['START_BTN1_NAME']}", f"{config_dict['START_BTN1_URL']}")
-    buttons.buildbutton(f"{config_dict['START_BTN2_NAME']}", f"{config_dict['START_BTN2_URL']}")
-    reply_markup = buttons.build_menu(2)
-    if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
-        start_string = f'''This bot can mirror all your links to Google Drive!
-Type /{BotCommands.HelpCommand} to get a list of available commands
-'''
-        if config_dict['PICS']:
-            sendPhoto(start_string, context.bot, update.message, rchoice(config_dict['PICS']), reply_markup)
-        else:
-            sendMessage(start_string, context.bot, update.message, reply_markup)
+    token_timeout = config_dict['TOKEN_TIMEOUT']
+    message = update.message
+
+    if len(message.text.split()) > 1:
+        userid = message.from_user.id
+        input_token = message.text.split()[1]
+        if userid not in user_data:
+            return update.message.reply_text('Who are you? Do not try to be over smart')
+        data = user_data[userid]
+        if 'token' not in data or data['token'] != input_token:
+            return update.message.reply_text('This ads token is already expired')
+        data['token'] = str(uuid4())
+        data['time'] = time()
+        user_data[userid].update(data)
+        time_str = format_validity_time(token_timeout)
+        return update.message.reply_text(f'Congratulations! Ads token refreshed successfully!\n\n<b>It will expire after</b> {time_str}')
+    elif config_dict['BOT_PM']:
+        start_string = f'<b>Welcome!</b>\n\nFrom now I will send your files and links here.\n'
     else:
-        text = f"Not Authorized user, deploy your own mirror bot"
-        if config_dict['PICS']:
-            sendPhoto(text, context.bot, update.message, rchoice(config_dict['PICS']), reply_markup)
-        else:
-            sendMessage(text, context.bot, update.message, reply_markup)
+        start_string = f'<b>Welcome!</b>\n\nThis bot can mirror all your links to Google Drive!\n'
+
+    return update.message.reply_text(start_string)
+
 
 
 def restart(update, context):
