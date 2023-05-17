@@ -2,12 +2,10 @@ from base64 import b64encode
 from random import choice, random, randrange
 from time import sleep
 from urllib.parse import quote
-
 from cloudscraper import create_scraper
 from urllib3 import disable_warnings
 
 from bot import LOGGER, shorteneres_list
-
 
 def short_url(longurl, attempt=0):
     if not shorteneres_list:
