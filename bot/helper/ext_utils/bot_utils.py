@@ -553,7 +553,6 @@ def is_sudo(user_id):
         return user_data[user_id].get('is_sudo')
     return False
 
-
 def getdailytasks(user_id, increase_task=False, upleech=0, upmirror=0, check_mirror=False, check_leech=False):
     task, lsize, msize = 0, 0, 0
     if user_id in user_data and user_data[user_id].get('dly_tasks'):
@@ -593,6 +592,19 @@ def getdailytasks(user_id, increase_task=False, upleech=0, upmirror=0, check_mir
         if check_leech: return lsize
         elif check_mirror: return msize
         return task
+
+def is_paid(user_id):
+    if config_dict['PAID_SERVICE'] is True:
+        if user_id in user_data and user_data[user_id].get('is_paid'):
+            ex_date = user_data[user_id].get('expiry_date')
+            if ex_date:
+                odate = datetime.strptime(ex_date, '%d-%m-%Y')
+                ndate = datetime.today()
+                if odate.year <= ndate.year and odate.month <= ndate.month and odate.day < ndate.day:
+                    return False
+            return True
+        else: return False
+    else: return False
 
 def format_validity_time(validity_time):
     days = validity_time // (24 * 3600)
@@ -653,19 +665,6 @@ def check_ads_token_status(update, context):
             return False
     return True
     
-def is_paid(user_id):
-    if config_dict['PAID_SERVICE'] is True:
-        if user_id in user_data and user_data[user_id].get('is_paid'):
-            ex_date = user_data[user_id].get('expiry_date')
-            if ex_date:
-                odate = datetime.strptime(ex_date, '%d-%m-%Y')
-                ndate = datetime.today()
-                if odate.year <= ndate.year and odate.month <= ndate.month and odate.day < ndate.day:
-                    return False
-            return True
-        else: return False
-    else: return False
-
 ONE, TWO, THREE = range(3)
 
 def pop_up_stats(update, context):
