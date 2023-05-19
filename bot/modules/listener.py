@@ -13,7 +13,6 @@ from bot.helper.ext_utils.db_handler import DbManger
 from bot.helper.ext_utils.exceptions import NotSupportedExtractionArchive
 from bot.helper.ext_utils.fs_utils import get_base_name, get_path_size, split_file, clean_download, clean_target
 from bot.helper.ext_utils.queued_starter import start_from_queued
-from bot.helper.ext_utils.shortenurl import short_url
 from bot.helper.ext_utils.telegraph_helper import telegraph
 from bot.helper.mirror_utils.status_utils.extract_status import ExtractStatus
 from bot.helper.mirror_utils.status_utils.zip_status import ZipStatus
@@ -26,7 +25,7 @@ from bot.helper.mirror_utils.upload_utils.pyrogramEngine import TgUploader
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.telegram_helper.message_utils import sendMessage, delete_all_messages, update_all_messages, auto_delete_upload_message, sendPhoto
 from bot import aria2, bot, DOWNLOAD_DIR, LOGGER, Interval, config_dict, user_data, DATABASE_URL, download_dict_lock, download_dict, \
-                queue_dict_lock, non_queued_dl, non_queued_up, queued_up, queued_dl, tgBotMaxFileSize, status_reply_dict_lock
+                queue_dict_lock, non_queued_dl, non_queued_up, queued_up, queued_dl, tgBotMaxFileSize, status_reply_dict_lock, OWNER_ID
 
 class MirrorLeechListener:
     def __init__(self, bot, message, isZip=False, extract=False, isQbit=False, isLeech=False, pswd=None, tag=None, select=False, seed=False, c_index=0, u_index=None):
@@ -444,9 +443,11 @@ class MirrorLeechListener:
             msg += f'\n<b>It Tooks:</b> {get_readable_time(time() - self.message.date.timestamp())}'
             msg += f'\n<b>Mirror By: </b>{self.tag}\n\n'
             buttons = ButtonMaker()
-            link = short_url(link, user_id_)
-            if config_dict['DISABLE_DRIVE_LINK'] and self.message.chat.type != 'private':
-                pass
+            if config_dict['DISABLE_DRIVE_LINK']:
+                if self.user_id == OWNER_ID:
+                    buttons.buildbutton("☁️ Drive Link", link)
+                else:
+                    pass
             else:
                 buttons.buildbutton("☁️ Drive Link", link)
             LOGGER.info(f'Done Uploading {name}')
@@ -456,14 +457,11 @@ class MirrorLeechListener:
                 share_url = f'{INDEX_URL}/{url_path}'
                 if typ == "Folder":
                     share_url += '/'
-                    share_url = short_url(share_url, user_id_)
                     buttons.buildbutton("⚡ Index Link", share_url)
                 else:
-                    share_url = short_url(share_url, user_id_)
                     buttons.buildbutton("⚡ Index Link", share_url)
                     if config_dict['VIEW_LINK']:
                         share_urls = f'{INDEX_URL}/{url_path}?a=view'
-                        share_urls = short_url(share_urls, user_id_)
                         buttons.buildbutton("🌐 View Link", share_urls)
                     if config_dict['SOURCE_LINK']:
                         try:
