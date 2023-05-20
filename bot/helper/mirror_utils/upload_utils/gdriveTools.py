@@ -605,10 +605,22 @@ class GoogleDriveHelper:
                     furl = f"https://drive.google.com/drive/folders/{file.get('id')}"
                     if tegr:
                         msg += f"📁 <code>{file.get('name')}<br>(folder)</code><br>"
-                        msg += f"<b><a href='{furl}'>Drive Link</a></b>"
-                    else: 
+                        if config_dict['DISABLE_DRIVE_LINK']:
+                            if self.user_id == OWNER_ID:
+                                msg += f"<b><a href='{furl}'>Drive Link</a></b>"
+                            else:
+                                pass
+                        else:
+                            msg += f"<b><a href='{furl}'>Drive Link</a></b>"
+                    else:
                         msg += f"📁 <code>{file.get('name')}\n(folder)</code>\n"
-                        msg += f"<b><a href='{furl}'>Drive Link</a></b>"
+                        if config_dict['DISABLE_DRIVE_LINK']:
+                            if self.user_id == OWNER_ID:
+                                msg += f"<b><a href='{furl}'>Drive Link</a></b>"
+                            else:
+                                pass
+                        else:
+                            msg += f"<b><a href='{furl}'>Drive Link</a></b>"
                     if index_url:
                         if isRecur:
                             url_path = "/".join([rquote(n, safe='') for n in self.__get_recursive_list(file, dir_id)])
@@ -625,10 +637,22 @@ class GoogleDriveHelper:
                     furl = f"https://drive.google.com/uc?id={file.get('id')}&export=download"
                     if tegr:
                         msg += f"📄 <code>{file.get('name')}<br>({get_readable_file_size(int(file.get('size', 0)))})</code><br>"
-                        msg += f"<b><a href='{furl}'>Drive Link</a></b>"
+                        if config_dict['DISABLE_DRIVE_LINK']:
+                            if self.user_id == OWNER_ID:
+                                msg += f"<b><a href='{furl}'>Drive Link</a></b>"
+                            else:
+                                pass
+                        else:
+                             msg += f"<b><a href='{furl}'>Drive Link</a></b>"
                     else:
                         msg += f"📄 <code>{file.get('name')}\n({get_readable_file_size(int(file.get('size', 0)))})</code>\n"
-                        msg += f"<b><a href='{furl}'>Drive Link</a></b>"
+                        if config_dict['DISABLE_DRIVE_LINK']:
+                            if self.user_id == OWNER_ID:
+                                msg += f"<b><a href='{furl}'>Drive Link</a></b>"
+                            else:
+                                pass
+                        else:
+                            msg += f"<b><a href='{furl}'>Drive Link</a></b>"
                     if index_url:
                         if isRecur:
                             url_path = "/".join(rquote(n, safe='') for n in self.__get_recursive_list(file, dir_id))
