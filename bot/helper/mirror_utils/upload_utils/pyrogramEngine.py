@@ -87,6 +87,11 @@ class TgUploader:
         
         BOT_PM_X = get_bot_pm(user_id_)
         
+        cap_mono = f"Leecher ID: <code>{user_id_}</code>\n\n{file_}"
+        new_path = ospath.join(dirpath, file_)
+        osrename(up_path, new_path)
+        up_path = new_path
+        
         notMedia = False
         thumb = self.__thumb
         self.__is_corrupted = False
