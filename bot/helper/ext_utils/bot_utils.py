@@ -661,7 +661,7 @@ def check_ads_token_status(update, context):
             keyboard = [[InlineKeyboardButton("Refresh Token", url=short_url(f'https://telegram.me/{bot_name}?start={token}'))]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             time_str = format_validity_time(token_timeout)
-            update.message.reply_text(f'<b>Hey {tag}.</b>\n\nYour Ads token is expired, refresh your token and try again.\n\n<b>Token Timeout:</b> {time_str}\n\n<b>What is token?</b>\nThis is an ads token. If you pass 1 ad, you can use the bot for {time_str} after passing the ad.\n\nToken Refresh Video Tutorial ⬇️\nhttps://t.me/AtrociousMirrorBackup/116', reply_markup=reply_markup)
+            update.message.reply_text(f'<b>Hey {tag}.</b>\n\nYour Ads token is expired, refresh your token and try again.\n\n<b>Token Timeout:</b> {time_str}\n\n<b>What is token?</b>\nThis is an ads token. If you pass 1 ad, you can use the bot for {time_str} after passing the ad.\n\n<b>Token Refresh Video Tutorial</b> ⬇️\nhttps://t.me/AtrociousMirrorBackup/116', reply_markup=reply_markup)
             return False
     return True
     
