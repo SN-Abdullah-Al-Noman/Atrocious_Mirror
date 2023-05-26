@@ -258,7 +258,7 @@ def get_readable_message():
                     msg += f"\n<b>Cancel: </b><code>/{BotCommands.CancelMirror} {download.gid()}</code>"
             elif download.status() == MirrorStatus.STATUS_SEEDING:
                 msg += f"\n<b>Size: </b>{download.size()}"
-                msg += f"\n<b>Engine:</b> <code>qBittorrent v4.4.2</code>"
+                msg += f"\n<b>Engine:</b> <code>qBittorrent</code>"
                 msg += f"\n<b>Speed: </b>{download.upload_speed()}"
                 msg += f"\n<b>Uploaded: </b>{download.uploaded_bytes()}"
                 msg += f"\n<b>Ratio: </b>{download.ratio()}"
