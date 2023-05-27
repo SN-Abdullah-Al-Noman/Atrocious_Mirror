@@ -32,6 +32,5 @@ telegraph
 tenacity
 tgCrypto
 urllib3==1.26.15
-waybackpy
 yt-dlp
 oauth2client==3.0.0
