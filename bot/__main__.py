@@ -126,7 +126,7 @@ def start(update, context):
         buttons.buildbutton(f"{config_dict['START_BTN2_NAME']}", f"{config_dict['START_BTN2_URL']}")
         reply_markup = buttons.build_menu(2)
       
-        if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update) or config_dict['IS_PUBLIC_BOT']:
+        if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
             start_string = f"This bot can mirror all your links to Google Drive! Type /{BotCommands.HelpCommand} to get a list of available commands"
         else:
             start_string = f"Not Authorized user, deploy your own mirror bot"
