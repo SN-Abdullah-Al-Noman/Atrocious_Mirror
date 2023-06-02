@@ -4,7 +4,7 @@ from time import time, sleep
 from pyrogram.errors import FloodWait, RPCError
 from PIL import Image
 from threading import RLock
-from bot import user_data, GLOBAL_EXTENSION_FILTER, app, tgBotMaxFileSize, premium_session, config_dict
+from bot import user_data, GLOBAL_EXTENSION_FILTER, app, tgBotMaxFileSize, premium_session, config_dict, OWNER_ID
 from bot.helper.ext_utils.fs_utils import take_ss, get_media_info, get_media_streams, clean_unwanted
 from bot.helper.ext_utils.bot_utils import get_readable_file_size, change_filename, get_bot_pm
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -87,7 +87,11 @@ class TgUploader:
         
         BOT_PM_X = get_bot_pm(user_id_)
         
-        cap_mono = f"Leecher ID: <code>{user_id_}</code>\n\n{file_}"
+        if user_id_ != OWNER_ID:
+            cap_mono = f"Leecher ID: <code>{user_id_}</code>\n\n{file_}"
+        else:
+            pass
+        
         new_path = ospath.join(dirpath, file_)
         osrename(up_path, new_path)
         up_path = new_path
