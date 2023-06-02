@@ -262,7 +262,10 @@ def set_addons(update, context, data, omsg, key):
         if out in sdic:
             value = int(value[:-2].strip().lower()) * 1024**sdic.index(out)
     update_user_ldata(user_id, data, value)
-    update.message.delete()
+    try:
+        update.message.delete()
+    except:
+        pass
     update_user_settings(omsg, message.from_user, key)
     if DATABASE_URL:
         DbManger().update_user_data(user_id)
@@ -574,8 +577,14 @@ def edit_user_settings(update, context):
     else:
         query.answer()
         handler_dict[user_id] = False
-        query.message.delete()
-        query.message.reply_to_message.delete()
+        try:
+            query.message.delete()
+        except:
+            pass
+        try:
+            query.message.reply_to_message.delete()
+        except:
+            pass
 
 def send_users_settings(update, context):
     msg, auth_chat, sudos, leechlogs, linklogs, mirrorlogs = '', '', '', '', '', ''
