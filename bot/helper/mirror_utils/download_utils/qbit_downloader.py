@@ -23,17 +23,20 @@ RECHECKED = set()
 UPLOADED = set()
 SEEDING = set()
 
+
 def __get_hash_magnet(mgt: str):
     hash_ = re_search(r'(?<=xt=urn:btih:)[a-zA-Z0-9]+', mgt).group(0)
     if len(hash_) == 32:
         hash_ = b16encode(b32decode(hash_.upper())).decode()
     return str(hash_)
 
+
 def __get_hash_file(path):
     with open(path, "rb") as f:
         decodedDict = bdecode(f.read())
         hash_ = sha1(bencode(decodedDict[b'info'])).hexdigest()
     return str(hash_)
+
 
 def add_qb_torrent(link, path, listener, ratio, seed_time):
     client = get_client()
@@ -112,6 +115,7 @@ def add_qb_torrent(link, path, listener, ratio, seed_time):
             remove(link)
         client.auth_log_out()
 
+
 def __remove_torrent(client, hash_):
     client.torrents_delete(torrent_hashes=hash_, delete_files=True)
     with qb_download_lock:
@@ -126,6 +130,7 @@ def __remove_torrent(client, hash_):
         if hash_ in SEEDING:
             SEEDING.remove(hash_)
 
+
 def __onDownloadError(err, client, tor):
     LOGGER.info(f"Cancelling Download: {tor.name}")
     client.torrents_pause(torrent_hashes=tor.hash)
@@ -138,6 +143,7 @@ def __onDownloadError(err, client, tor):
         pass
     __remove_torrent(client, tor.hash)
 
+
 @new_thread
 def __onSeedFinish(client, tor):
     LOGGER.info(f"Cancelling Seed: {tor.name}")
@@ -148,6 +154,7 @@ def __onSeedFinish(client, tor):
     except:
         pass
     __remove_torrent(client, tor.hash)
+
 
 @new_thread
 def __stop_duplicate(client, tor):
@@ -181,6 +188,7 @@ def __stop_duplicate(client, tor):
                     return
     except:
         pass
+
 
 @new_thread
 def __check_limits(client, tor):
@@ -236,6 +244,7 @@ def __check_limits(client, tor):
         __onDownloadError(mssg, client, tor)
     elif listener.isLeech: lsize = getdailytasks(user_id, upleech=size, check_leech=True); LOGGER.info(f"User : {user_id} | Daily Leech Size : {get_readable_file_size(lsize)}")
 
+
 @new_thread
 def __onDownloadComplete(client, tor):
     download = getDownloadByGid(tor.hash[:12])
@@ -264,6 +273,7 @@ def __onDownloadComplete(client, tor):
         LOGGER.info(f"Seeding started: {tor.name} - Hash: {tor.hash}")
     else:
         __remove_torrent(client, tor.hash)
+
 
 def __qb_listener():
     client = get_client()
