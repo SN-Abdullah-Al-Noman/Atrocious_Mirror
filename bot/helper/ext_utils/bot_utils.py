@@ -186,11 +186,10 @@ def get_readable_message():
     buttons.ubutton(f"Group", f"https://t.me/+yw0A-x4cYBphZmJl")
     button = buttons.build_menu(3)
     if tasks > STATUS_LIMIT:
-        msg += f"<b>Page:</b> {PAGE_NO}/{PAGES} | <b>Tasks:</b> {tasks}\n"
         buttons = ButtonMaker()
-        buttons.ibutton("<<", "status pre")
-        buttons.ibutton(">>", "status nex")
-        buttons.ibutton("♻️", "status ref")
+        buttons.ibutton("Previous", "status pre")
+        buttons.ibutton("Refresh", "status ref")
+        buttons.ibutton("Next", "status nex")
         button = buttons.build_menu(3)
     if config_dict['BOT_MAX_TASKS']:
         TASKS_COUNT = f"<b>Task Limit: </b>{config_dict['BOT_MAX_TASKS']} | <b>Run:</b> {len(download_dict)} | <b>Free:</b> {config_dict['BOT_MAX_TASKS'] - len(download_dict)}\n"
