@@ -1,232 +1,277 @@
-from random import choice
-from html import escape
-from time import sleep, time
-from telegram import InputMediaPhoto
-from telegram.error import RetryAfter
-from pyrogram import enums
-from pyrogram.errors import FloodWait
-from os import remove
-from bot import botStartTime
-from bot.helper.ext_utils.bot_utils import get_readable_time
+#!/usr/bin/env python3
+from asyncio import sleep
+from time import time
+from re import match as re_match
+from traceback import format_exc
+from random import choice as rchoice
+from aiofiles.os import remove as aioremove
+from pyrogram.errors import ReplyMarkupInvalid, FloodWait, PeerIdInvalid, RPCError, UserNotParticipant, PhotoInvalidDimensions, WebpageCurlFailed, MediaEmpty
+
+from bot import config_dict, LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, user, download_dict_lock, OWNER_ID
+from bot.helper.ext_utils.bot_utils import get_readable_message, setInterval, sync_to_async
+from bot.helper.ext_utils.exceptions import TgLinkException
 from bot.helper.telegram_helper.button_build import ButtonMaker
 
-from bot import LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, rss_session, app, config_dict
-from bot.helper.ext_utils.bot_utils import get_readable_message, setInterval
 
-
-def sendMessage(text, bot, message, reply_markup=None):
+async def sendMessage(message, text, buttons=None, photo=None):
     try:
-        return bot.sendMessage(message.chat_id, reply_to_message_id=message.message_id,
-                               text=text, reply_markup=reply_markup)
-    except RetryAfter as r:
-        LOGGER.warning(str(r))
-        sleep(r.retry_after * 1.5)
-        return sendMessage(text, bot, message, reply_markup)
-    except Exception as e:
-        LOGGER.error(str(e))
-        return
-
-def editMessage(text, message, reply_markup=None):
-    try:
-        bot.editMessageText(text=text, message_id=message.message_id, chat_id=message.chat.id, reply_markup=reply_markup)
-    except RetryAfter as r:
-        LOGGER.warning(str(r))
-        sleep(r.retry_after * 1.5)
-        return editMessage(text, message, reply_markup)
-    except Exception as e:
-        LOGGER.error(str(e))
-        return str(e)
-
-def editCaption(text, message, reply_markup=None):
-    try:
-        bot.edit_message_caption(chat_id=message.chat.id, message_id=message.message_id, caption=text, 
-                              reply_markup=reply_markup, parse_mode='HTML')
-    except RetryAfter as r:
-        LOGGER.warning(str(r))
-        sleep(r.retry_after * 1.5)
-        return editMessage(text, message, reply_markup)
-    except Exception as e:
-        LOGGER.error(str(e))
-        return str(e)
-
-def sendRss(text, bot):
-    if not rss_session:
-        try:
-            return bot.sendMessage(config_dict['RSS_CHAT_ID'], text)
-        except RetryAfter as r:
-            LOGGER.warning(str(r))
-            sleep(r.retry_after * 1.5)
-            return sendRss(text, bot)
-        except Exception as e:
-            LOGGER.error(str(e))
-            return
-    else:
-        try:
-            with rss_session:
-                return rss_session.send_message(config_dict['RSS_CHAT_ID'], text, disable_web_page_preview=True)
-        except FloodWait as e:
-            LOGGER.warning(str(e))
-            sleep(e.value * 1.5)
-            return sendRss(text, bot)
-        except Exception as e:
-            LOGGER.error(str(e))
-            return
-
-
-def sendPhoto(text, bot, message, photo, reply_markup=None):
-    try:
-        return bot.send_photo(chat_id=message.chat_id, photo=photo, reply_to_message_id=message.message_id,
-            caption=text, reply_markup=reply_markup, parse_mode='html')
-    except RetryAfter as r:
-        LOGGER.warning(str(r))
-        sleep(r.retry_after * 1.5)
-        return sendPhoto(text, bot, message, photo, reply_markup)
-    except Exception as e:
-        LOGGER.error(str(e))
-        return
-
-def editPhoto(text, message, photo, reply_markup=None):
-    try:
-        return bot.edit_message_media(media=InputMediaPhoto(media=photo, caption=text, parse_mode='html'), chat_id=message.chat.id, message_id=message.message_id,
-                                      reply_markup=reply_markup)
-    except RetryAfter as r:
-        LOGGER.warning(str(r))
-        sleep(r.retry_after * 1.5)
-        return editPhoto(text, message, photo, reply_markup)
-    except Exception as e:
-        LOGGER.error(str(e))
-        return
-
-def deleteMessage(bot, message):
-    try:
-        bot.deleteMessage(chat_id=message.chat.id,
-                           message_id=message.message_id)
-    except Exception as e:
-        pass
-
-def sendLogFile(bot, message):
-    logFileRead = open('log.txt', 'r')
-    logFileLines = logFileRead.read().splitlines()
-    ind = 1
-    Loglines = ''
-    try:
-        while len(Loglines) <= 2500:
-            Loglines = logFileLines[-ind]+'\n'+Loglines
-            if ind == len(logFileLines): break
-            ind += 1
-        startLine = f"Generated Last {ind} Lines from log.txt: \n\n---------------- START LOG -----------------\n\n"
-        endLine = "\n---------------- END LOG -----------------"
-        sendMessage(escape(startLine+Loglines+endLine), bot, message)
-    except Exception as err:
-        LOGGER.error(f"Log Display : {err}")
-    app.send_document(document='log.txt', thumb='Thumbnails/weeb.jpg',
-                          reply_to_message_id=message.message_id,
-                          chat_id=message.chat_id, caption=f'log.txt\n\n⏰️ UpTime: {get_readable_time(time() - botStartTime)}')
-
-def sendFile(bot, message, name, caption=""):
-    try:
-        app.send_document(document=name, reply_to_message_id=message.message_id,
-                             caption=caption, parse_mode=enums.ParseMode.HTML, chat_id=message.chat_id,
-                             thumb='Thumbnails/weeb.jpg')
-        remove(name)
-        return
-    except FloodWait as r:
-        LOGGER.warning(str(r))
-        sleep(r.value * 1.5)
-        return sendFile(bot, message, name, caption)
-    except Exception as e:
-        LOGGER.error(str(e))
-        return
-
-def forcesub(bot, message, tag):
-    if not (FSUB_IDS := config_dict['FSUB_IDS']):
-        return
-    join_button = {}
-    for channel_id in FSUB_IDS.split():
-        if not str(channel_id).startswith('-100'):
-            continue
-        chat = bot.get_chat(channel_id)
-        member = chat.get_member(message.from_user.id)
-        if member.status in [member.LEFT, member.KICKED] :
-            join_button[chat.title] = chat.link or chat.invite_link
-    if join_button:
-        btn = ButtonMaker()
-        for key, value in join_button.items():
-            btn.buildbutton(key, value)
-        msg = f'Hey{tag}. You have to join our channel(s) In Order To Use Bots. Join And Try Again'
-        reply_message = sendMessage(msg, bot, message, btn.build_menu(1))
-        return reply_message
-
-
-def isAdmin(message, user_id=None):
-    if message.chat.type != message.chat.PRIVATE:
-        if user_id:
-            member = message.chat.get_member(user_id)
-        else:
-            member = message.chat.get_member(message.from_user.id)
-        return member.status in [member.ADMINISTRATOR, member.CREATOR] or member.is_anonymous
-
-def auto_delete_message(bot, cmd_message=None, bot_message=None):
-    if config_dict['AUTO_DELETE_MESSAGE_DURATION'] != -1:
-        sleep(config_dict['AUTO_DELETE_MESSAGE_DURATION'])
-        if cmd_message is not None:
-            deleteMessage(bot, cmd_message)
-
-
-def auto_delete_upload_message(bot, cmd_message=None, bot_message=None):
-    if cmd_message.chat.type == 'private':
-        pass
-    elif config_dict['AUTO_DELETE_UPLOAD_MESSAGE_DURATION'] != -1:
-        sleep(config_dict['AUTO_DELETE_UPLOAD_MESSAGE_DURATION'])
-        if bot_message is not None:
-            deleteMessage(bot, bot_message)
-
-
-def delete_all_messages():
-    with status_reply_dict_lock:
-        for data in list(status_reply_dict.values()):
+        if photo:
             try:
-                deleteMessage(bot, data[0])
-                del status_reply_dict[data[0].chat.id]
+                if photo == 'IMAGES':
+                    photo = rchoice(config_dict['IMAGES'])
+                return await message.reply_photo(photo=photo, reply_to_message_id=message.id,
+                                                 caption=text, reply_markup=buttons, disable_notification=True)
+            except IndexError:
+                pass
+            except (PhotoInvalidDimensions, WebpageCurlFailed, MediaEmpty):
+                des_dir = await download_image_url(photo)
+                await sendMessage(message, text, buttons, des_dir)
+                await aioremove(des_dir)
+                return
+            except Exception as e:
+                LOGGER.error(format_exc())
+        return await message.reply(text=text, quote=True, disable_web_page_preview=True,
+                                   disable_notification=True, reply_markup=buttons)
+    except FloodWait as f:
+        LOGGER.warning(str(f))
+        await sleep(f.value * 1.2)
+        return await sendMessage(message, text, buttons, photo)
+    except ReplyMarkupInvalid:
+        return await sendMessage(message, text, None, photo)
+    except Exception as e:
+        LOGGER.error(format_exc())
+        return str(e)
+
+
+async def editMessage(message, text, buttons=None):
+    try:
+        await message.edit(text=text, disable_web_page_preview=True, reply_markup=buttons)
+    except FloodWait as f:
+        LOGGER.warning(str(f))
+        await sleep(f.value * 1.2)
+        return await editMessage(message, text, buttons)
+    except Exception as e:
+        LOGGER.error(str(e))
+        return str(e)
+
+
+async def sendFile(message, file, caption=None):
+    try:
+        return await message.reply_document(document=file, quote=True, caption=caption, disable_notification=True)
+    except FloodWait as f:
+        LOGGER.warning(str(f))
+        await sleep(f.value * 1.2)
+        return await sendFile(message, file, caption)
+    except Exception as e:
+        LOGGER.error(str(e))
+        return str(e)
+
+
+async def sendRss(text):
+    try:
+        if user:
+            return await user.send_message(chat_id=config_dict['RSS_CHAT'], text=text, disable_web_page_preview=True,
+                                           disable_notification=True)
+        else:
+            return await bot.send_message(chat_id=config_dict['RSS_CHAT'], text=text, disable_web_page_preview=True,
+                                          disable_notification=True)
+    except FloodWait as f:
+        LOGGER.warning(str(f))
+        await sleep(f.value * 1.2)
+        return await sendRss(text)
+    except Exception as e:
+        LOGGER.error(str(e))
+        return str(e)
+
+
+async def deleteMessage(message):
+    try:
+        await message.delete()
+    except Exception as e:
+        LOGGER.error(str(e))
+
+
+async def auto_delete_message(cmd_message=None, bot_message=None):
+    if config_dict['AUTO_DELETE_MESSAGE_DURATION'] != -1:
+        await sleep(config_dict['AUTO_DELETE_MESSAGE_DURATION'])
+        if cmd_message is not None:
+            await deleteMessage(cmd_message)
+        if bot_message is not None:
+            await deleteMessage(bot_message)
+
+
+async def delete_all_messages():
+    async with status_reply_dict_lock:
+        for key, data in list(status_reply_dict.items()):
+            try:
+                del status_reply_dict[key]
+                await deleteMessage(data[0])
             except Exception as e:
                 LOGGER.error(str(e))
 
-def update_all_messages(force=False):
-    with status_reply_dict_lock:
+
+async def delete_links(message):
+    if config_dict['DELETE_LINKS']:
+        if reply_to := message.reply_to_message:
+            await deleteMessage(reply_to)
+        await deleteMessage(message)
+
+
+async def get_tg_link_content(link):
+    message = None
+    if link.startswith('https://t.me/'):
+        private = False
+        msg = re_match(r"https:\/\/t\.me\/(?:c\/)?([^\/]+)(?:\/[^\/]+)?\/([0-9]+)", link)
+    else:
+        private = True
+        msg = re_match(
+            r"tg:\/\/openmessage\?user_id=([0-9]+)&message_id=([0-9]+)", link)
+        if not user:
+            raise TgLinkException(
+                'USER_SESSION_STRING required for this private link!')
+
+    chat = msg.group(1)
+    msg_id = int(msg.group(2))
+    if chat.isdigit():
+        chat = int(chat) if private else int(f'-100{chat}')
+
+    if not private:
+        try:
+            message = await bot.get_messages(chat_id=chat, message_ids=msg_id)
+            if message.empty:
+                private = True
+        except Exception as e:
+            private = True
+            if not user:
+                raise e
+
+    if private and user:
+        try:
+            user_message = await user.get_messages(chat_id=chat, message_ids=msg_id)
+        except Exception as e:
+            raise TgLinkException(
+                f"You don't have access to this chat!. ERROR: {e}") from e
+        if not user_message.empty:
+            return user_message, 'user'
+        else:
+            raise TgLinkException("Private: Please report!")
+    elif not private:
+        return message, 'bot'
+    else:
+        raise TgLinkException(
+            "Bot can't download from GROUPS without joining!")
+
+
+async def update_all_messages(force=False):
+    async with status_reply_dict_lock:
         if not status_reply_dict or not Interval or (not force and time() - list(status_reply_dict.values())[0][1] < 3):
             return
-        for chat_id in status_reply_dict:
+        for chat_id in list(status_reply_dict.keys()):
             status_reply_dict[chat_id][1] = time()
-
-    msg, buttons = get_readable_message()
+    async with download_dict_lock:
+        msg, buttons = await sync_to_async(get_readable_message)
     if msg is None:
         return
-    with status_reply_dict_lock:
-        for chat_id in status_reply_dict:
+    async with status_reply_dict_lock:
+        for chat_id in list(status_reply_dict.keys()):
             if status_reply_dict[chat_id] and msg != status_reply_dict[chat_id][0].text:
-                if config_dict['PICS']:
-                    rmsg = editPhoto(msg, status_reply_dict[chat_id][0], choice(config_dict['PICS']), buttons)
-                else:
-                    rmsg = editMessage(msg, status_reply_dict[chat_id][0], buttons)
-                if rmsg == "Message to edit not found":
+                rmsg = await editMessage(status_reply_dict[chat_id][0], msg, buttons)
+                if isinstance(rmsg, str) and rmsg.startswith('Telegram says: [400'):
                     del status_reply_dict[chat_id]
-                    return
+                    continue
                 status_reply_dict[chat_id][0].text = msg
                 status_reply_dict[chat_id][1] = time()
 
-def sendStatusMessage(msg, bot):
-    progress, buttons = get_readable_message()
+
+async def sendStatusMessage(msg):
+    async with download_dict_lock:
+        progress, buttons = await sync_to_async(get_readable_message)
     if progress is None:
         return
-    with status_reply_dict_lock:
-        if msg.chat.id in status_reply_dict:
-            message = status_reply_dict[msg.chat.id][0]
-            deleteMessage(bot, message)
-            del status_reply_dict[msg.chat.id]
-        if config_dict['PICS']:
-            message = sendPhoto(progress, bot, msg, choice(config_dict['PICS']), buttons)
-        else:
-            message = sendMessage(progress, bot, msg, buttons)
-        status_reply_dict[msg.chat.id] = [message, time()]
+    async with status_reply_dict_lock:
+        chat_id = msg.chat.id
+        if chat_id in list(status_reply_dict.keys()):
+            message = status_reply_dict[chat_id][0]
+            await deleteMessage(message)
+            del status_reply_dict[chat_id]
+        message = await sendMessage(msg, progress, buttons, photo='IMAGES')
+        message.text = progress
+        status_reply_dict[chat_id] = [message, time()]
         if not Interval:
-            Interval.append(setInterval(config_dict['STATUS_UPDATE_INTERVAL'], update_all_messages))
+            Interval.append(setInterval(
+                config_dict['STATUS_UPDATE_INTERVAL'], update_all_messages))
+
+
+async def chat_info(channel_id):
+    if channel_id.startswith('-100'):
+        channel_id = int(channel_id)
+    elif channel_id.startswith('@'):
+        channel_id = channel_id.replace('@', '')
+    else:
+        return None
+    try:
+        chat = await bot.get_chat(channel_id)
+        return chat
+    except PeerIdInvalid as e:
+        LOGGER.error(f"{e.NAME}: {e.MESSAGE} for {channel_id}")
+        return None
+
+
+async def forcesub(message, ids, button=None):
+    join_button = {}
+    _msg = ''
+    for channel_id in ids.split():
+        chat = await chat_info(channel_id)
+        try:
+            await chat.get_member(message.from_user.id)
+        except UserNotParticipant:
+            if username := chat.username:
+                invite_link = f"https://t.me/{username}"
+            else:
+                invite_link = chat.invite_link
+            join_button[chat.title] = invite_link
+        except RPCError as e:
+            LOGGER.error(f"{e.NAME}: {e.MESSAGE} for {channel_id}")
+        except Exception as e:
+            LOGGER.error(f'{e} for {channel_id}')
+    if join_button:
+        if button is None:
+            button = ButtonMaker()
+        _msg = "You haven't joined our channel yet!"
+        for key, value in join_button.items():
+            button.ubutton(f'Join {key}', value, 'footer')
+    return _msg, button
+
+
+async def user_info(client, userId):
+    return await client.get_users(userId)
+
+
+async def BotPm_check(message, button=None):
+    try:
+        temp_msg = await message._client.send_message(chat_id=message.from_user.id, text='<b>Checking Access...</b>')
+        await temp_msg.delete()
+        return None, button
+    except Exception as e:
+        if button is None:
+            button = ButtonMaker()
+        _msg = "<i>You didn't START the bot in PM (Private)</i>"
+        button.ubutton("Start Bot Now", f"https://t.me/{bot_name}?start=start", 'header')
+        return _msg, button
+
+
+async def send_to_pm(message, text, buttons=None):
+    user_id = message.from_user.id
+    try:
+        return await message._client.send_message(chat_id=user_id, text=text, disable_web_page_preview=True, reply_markup=buttons)
+    except:
+        pass
+
+
+async def send_to_log_chat(message, text, buttons=None):
+    if message.from_user.id == OWNER_ID or not config_dict['LOG_CHAT_ID']:
+        return
+    try:
+        return await message._client.send_message(chat_id=config_dict['LOG_CHAT_ID'], text=text, disable_web_page_preview=True, reply_markup=buttons)
+    except:
+        pass
