@@ -1,637 +1,427 @@
-from os import remove as osremove, path as ospath, mkdir
-from sys import prefix
+#!/usr/bin/env python3
+from pyrogram.handlers import MessageHandler, CallbackQueryHandler
+from pyrogram.filters import command, regex, create
+from aiofiles import open as aiopen
+from aiofiles.os import remove as aioremove, path as aiopath, mkdir
+from os import path as ospath, getcwd
 from PIL import Image
-from telegram.ext import CommandHandler, CallbackQueryHandler, MessageHandler, Filters
-from time import sleep, time
+from time import time
 from functools import partial
-from datetime import datetime
 from html import escape
-from telegram import ParseMode
-from threading import Thread
+from io import BytesIO
+from asyncio import sleep
 
-from bot import bot, user_data, dispatcher, LOGGER, config_dict, DATABASE_URL, OWNER_ID
-from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, sendPhoto
+from bot import bot, user_data, config_dict, DATABASE_URL, IS_PREMIUM_USER, MAX_SPLIT_SIZE
+from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, sendFile
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.db_handler import DbManger
-from bot.helper.ext_utils.bot_utils import update_user_ldata, is_paid, is_sudo, get_readable_file_size, getUserTDs, getdailytasks
+from bot.helper.ext_utils.bot_utils import update_user_ldata, sync_to_async, new_thread, is_blacklist
 
 handler_dict = {}
-example_dict = {'prefix':'1. <code>@your_channel_username or Anything</code>', 
-                'mprefix':'1. <code>@your_channel_username or Anything</code>', 
-                'suffix':'1. <code>~ WZML</code>\n2. <code>~ @channelname</code>', 
-                'msuffix':'1. <code>~ WZML</code>\n2. <code>~ @channelname</code>', 
-                'caption': '1.'+escape("<b>{filename}</b>\nJoin Now : @WeebZone_updates")+'\nCheck all available fillings options <a href="">HERE</a> and Make Custom Caption.', 
-                'userlog':'1. <code>-100xxxxxx or Channel ID</code>', 
-                'usertd':'1. <code>UserTD_Name 1TSYgS-88SkhkSuoS-KHSi7%^&s9HKj https://1.xyz.workers.dev/0:/Leecher</code>\n<b> Do not forget to add '+config_dict['SA_MAIL']+' to your TD as Content Manager</b>',
-                'remname':'<b>Syntax:</b> previousname:newname:times|previousname:newname:times\n\n1. Fork:Star|Here:Now:1|WZML\n\n<b>Output :</b> Star Now : Click Here.txt', 
-                'mremname':'<b>Syntax:</b> previousname:newname:times|previousname:newname:times\n\n1. Fork:Star|Here:Now:1|WZML\n\n<b>Output :</b> Star Now : Click Here.txt', 
-                'imdb_temp':'Check all available fillings options <a href="">HERE</a> and Make Custom Template.', 
-                'ani_temp':'Check all available fillings options <a href="">HERE</a> and Make Custom AniList Template.',
-                'split_size':'In Normal Data Values like 2GB, 1GB, 500mB, 1.5 Gb\nNote: When Specific Data Type Given given like kb, gb, Only Mention in 2 Letters',
-                'yt_ql': f'''1. <code>{escape('bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080]')}</code> this will give 1080p-mp4.\n2. <code>{escape('bv*[height<=720][ext=webm]+ba/b[height<=720]')}</code> this will give 720p-webm.\nCheck all available qualities options <a href="https://github.com/yt-dlp/yt-dlp#filtering-formats">HERE</a>.'''
-               }
-fname_dict = {'prefix': 'Leech Prefix', 
-            'mprefix':'Mirror Prefix', 
-            'suffix':'Leech Suffix', 
-            'msuffix':'Mirror Suffix', 
-            'caption': 'Caption', 
-            'userlog':'UserLog', 
-            'usertd':'UserTD', 
-            'remname':'Leech Remname', 
-            'mremname':'Mirror Remname', 
-            'imdb_temp':'IMDB Template', 
-            'ani_temp':'Anime Template',
-            'split_size':'TG Split Size',
-            'yt_ql': 'YT-DLP Quality'
-            }
 
-def get_user_settings(from_user, key=None):
+
+async def get_user_settings(from_user):
     user_id = from_user.id
-    name = from_user.full_name
+    name = from_user.mention
     buttons = ButtonMaker()
     thumbpath = f"Thumbnails/{user_id}.jpg"
-    user_dict = user_data.get(user_id, False)
-    if not user_dict:
-        update_user_ldata(user_id, 'ubot_pm', config_dict['BOT_PM'])
-    uplan = "Paid User" if is_paid(user_id) else "Normal User"
-    if key is None:
-        buttons.sbutton("Universal Settings", f"userset {user_id} universal")
-        buttons.sbutton("Mirror Settings", f"userset {user_id} mirror")
-        buttons.sbutton("Leech Settings", f"userset {user_id} leech")
-        buttons.sbutton("Close", f"userset {user_id} close")
-        text = "User Settings:"
-        button = buttons.build_menu(1)
-    elif key == 'universal':
-        imdb = user_dict['imdb_temp'] if user_dict and user_dict.get('imdb_temp') else "Not Exists"
-        anilist = user_dict['ani_temp'] if user_dict and user_dict.get('ani_temp') else "Not Exists"
-        ytq = user_dict['yt_ql'] if user_dict and user_dict.get('yt_ql') else config_dict['YT_DLP_QUALITY'] if config_dict['YT_DLP_QUALITY'] else "Not Exists"
-        ulist = user_dict['ulist_typ'] if user_dict and user_dict.get('ulist_typ') else f'{config_dict["LIST_MODE"].lower().capitalize()} (Default)'
-        dailytl = config_dict['DAILY_TASK_LIMIT'] if config_dict['DAILY_TASK_LIMIT'] else "Unlimited"
-        dailytas = user_dict.get('dly_tasks')[1] if user_dict and user_dict.get('dly_tasks') and user_id != OWNER_ID and not is_sudo(user_id) and not is_paid(user_id) and config_dict['DAILY_TASK_LIMIT'] else config_dict.get('DAILY_TASK_LIMIT', "Unlimited") if user_id != OWNER_ID and not is_sudo(user_id) and not is_paid(user_id) else "Unlimited"        
-        
-        if user_dict and user_dict.get('dly_tasks'):
-            t = str(datetime.now() - user_dict['dly_tasks'][0]).split(':')
-            lastused = f"{t[0]}h {t[1]}m {t[2].split('.')[0]}s ago"
-        else: lastused = "Bot Not Used"
+    rclone_path = f'rclone/{user_id}.conf'
+    user_dict = user_data.get(user_id, {})
+    if user_dict.get('as_doc', False) or 'as_doc' not in user_dict and config_dict['AS_DOCUMENT']:
+        ltype = "DOCUMENT"
+        buttons.ibutton("Send As Media", f"userset {user_id} doc")
+    else:
+        ltype = "MEDIA"
+        buttons.ibutton("Send As Document", f"userset {user_id} doc")
 
-        buttxt = "Change/Delete YT-DLP Quality" if ytq != "Not Exists" else "Set YT-DLP Quality"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal yt_ql universal")
-        buttxt = "Change/Delete List Type" if ulist != f'{config_dict["LIST_MODE"].lower().capitalize()} (Default)' else "Set List Type"
-        buttons.sbutton(buttxt, f"userset {user_id} setulist universal")
+    buttons.ibutton("Thumbnail", f"userset {user_id} sthumb")
+    thumbmsg = "Exists" if await aiopath.exists(thumbpath) else "Not Exists"
 
-        if not config_dict['FORCE_BOT_PM']:
-            if user_dict and user_dict.get('ubot_pm'):
-                ubotpm = "Enabled"
-                buttons.sbutton("Disable User PM", f"userset {user_id} ubotoff")
-            else:
-                ubotpm = "Disabled"
-                buttons.sbutton("Enable User PM", f"userset {user_id} uboton")
-        else:
-            ubotpm = "Force Enabled By Owner"
-            buttons.sbutton("Disable User PM", f"userset {user_id} ubotdisable")
+    buttons.ibutton("Leech Splits", f"userset {user_id} lss")
+    if user_dict.get('split_size', False):
+        split_size = user_dict['split_size']
+    else:
+        split_size = config_dict['LEECH_SPLIT_SIZE']
 
-        imdbval, anival = '', ''
-        if imdb != "Not Exists":
-            imdbval = "Exists"
-            buttons.sbutton("Change/Delete IMDB", f"userset {user_id} suniversal imdb_temp universal")
-            buttons.sbutton("Show IMDB Template", f"userset {user_id} showimdb")
-        else: buttons.sbutton("Set IMDB", f"userset {user_id} suniversal imdb_temp universal")
-        if anilist != "Not Exists":
-            anival = "Exists"
-            buttons.sbutton("Change/Delete AniList", f"userset {user_id} suniversal ani_temp universal")
-            buttons.sbutton("Show AniList Template", f"userset {user_id} showanilist")
-        else:
-            buttons.sbutton("Set AniList", f"userset {user_id} suniversal ani_temp universal")
-        buttons.sbutton("Back", f"userset {user_id} mback", 'footer')
-        buttons.sbutton("Close", f"userset {user_id} close", 'footer')
-        button = buttons.build_menu(2)
-        text = f'''<u>Universal Settings for <a href='tg://user?id={user_id}'>{name}</a></u>
+    if user_dict.get('equal_splits', False) or 'equal_splits' not in user_dict and config_dict['EQUAL_SPLITS']:
+        equal_splits = 'Enabled'
+    else:
+        equal_splits = 'Disabled'
 
-YT-DLP Quality : <b>{escape(ytq)}</b>
-Daily Tasks : <b>{dailytas} / {dailytl} per day</b>
-Last Bot Used : <b>{lastused}</b>
-User Bot PM : <b>{ubotpm}</b>
-List Type : <b>{ulist}</b>
-IMDB : <b>{imdbval if imdbval else imdb}</b>
-AniList : <b>{anival if anival else anilist}</b>
-'''
-    elif key == 'mirror':
-        prefix = user_dict['mprefix'] if user_dict and user_dict.get('mprefix') else "Not Exists"
-        suffix = user_dict['msuffix'] if user_dict and user_dict.get('msuffix') else "Not Exists"
-        remname = user_dict['mremname'] if user_dict and user_dict.get('mremname') else "Not Exists"
-        if user_dict and user_dict.get('usertd'):
-            usertd = user_dict['usertd']
-            GDrive, _, _ = getUserTDs(user_id, force=True)
-        else: usertd = "Not Exists"
-        dailytlup = get_readable_file_size(config_dict['DAILY_MIRROR_LIMIT'] * 1024**3) if config_dict['DAILY_MIRROR_LIMIT'] else "Unlimited"
-        dailyup = get_readable_file_size(getdailytasks(user_id, check_mirror=True)) if config_dict['DAILY_MIRROR_LIMIT'] and user_id != OWNER_ID and not is_sudo(user_id) and not is_paid(user_id) else "Unlimited"
+    if user_dict.get('media_group', False) or 'media_group' not in user_dict and config_dict['MEDIA_GROUP']:
+        media_group = 'Enabled'
+    else:
+        media_group = 'Disabled'
 
-        buttxt = "Change/Delete Prefix" if prefix != "Not Exists" else "Set Prefix"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal mprefix mirror")
-        buttxt = "Change/Delete Suffix" if suffix != "Not Exists" else "Set Suffix"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal msuffix mirror")
-        buttxt = "Change/Delete Remname" if remname != "Not Exists" else "Set Remname"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal mremname mirror")
-        
-        if config_dict['ENABLE_USR_TD']:
-            if user_dict and user_dict.get('usertd'):
-                if user_dict.get('is_usertd'):
-                    usertdstatus = "Enabled"
-                    buttons.sbutton("Disable User TD", f"userset {user_id} usertdxoff")
-                else:
-                    usertdstatus = "Disabled"
-                    buttons.sbutton("Enable User TD", f"userset {user_id} usertdxon")
-            else:
-                usertdstatus = "Disabled"
-                buttons.sbutton("Enable User TD", f"userset {user_id} usertdxnotset")
-        else:
-            usertdstatus = "User TD Feature Disabled By Owner!"
-            buttons.sbutton("Enable User TD", f"userset {user_id} usertdxdisable")
-        usertds = ''
-        if usertd != "Not Exists":
-            usertds = f"Exists ( Total : {len(GDrive)} )"
-            if config_dict['ENABLE_USR_TD']:
-              buttons.sbutton("Change/Delete User TD(s)", f"userset {user_id} suniversal usertd mirror")
-            else:
-              buttons.sbutton("Change/Delete User TD(s)", f"userset {user_id} usertdxdisable")  
-            buttons.sbutton("Show User TD(s)", f"userset {user_id} showusertds")
-        else:
-            if config_dict['ENABLE_USR_TD']:
-              buttons.sbutton("Set User TD(s)", f"userset {user_id} suniversal usertd mirror")
-            else:
-              buttons.sbutton("Set User TD(s)", f"userset {user_id} usertdxdisable")
+    buttons.ibutton("Leech Prefix", f"userset {user_id} lprefix")
+    if user_dict.get('lprefix', False):
+        lprefix = user_dict['lprefix']
+    elif 'lprefix' not in user_dict and (LP := config_dict['LEECH_FILENAME_PREFIX']):
+        lprefix = LP
+    else:
+        lprefix = 'None'
 
-        buttons.sbutton("Back", f"userset {user_id} mback", 'footer')
-        buttons.sbutton("Close", f"userset {user_id} close", 'footer')
-        button = buttons.build_menu(2)
-        text = f'''<u>Mirror/Clone Settings for <a href='tg://user?id={user_id}'>{name}</a></u>
+    buttons.ibutton("Leech Destination", f"userset {user_id} ldest")
+    if user_dict.get('leech_dest', False):
+        leech_dest = user_dict['leech_dest']
+    elif 'leech_dest' not in user_dict and (LD := config_dict['LOG_CHAT_ID']):
+        leech_dest = LD
+    else:
+        leech_dest = 'None'
 
-Prefix : <b>{escape(prefix)}</b>
-Suffix : <b>{suffix}</b>
-User TD Mode : <b>{usertdstatus}</b>
-User TeamDrive(s) : <b>{usertds if usertds else usertd}</b>
-Daily Upload : <b>{dailyup} / {dailytlup} per day</b>
-Remname : <code>{escape(remname)}</code>
-'''
-    elif key == 'leech':
-        prefix = user_dict['prefix'] if user_dict and user_dict.get('prefix') else "Not Exists"
-        suffix = user_dict['suffix'] if user_dict and user_dict.get('suffix') else "Not Exists"
-        caption = user_dict['caption'] if user_dict and user_dict.get('caption') else "Not Exists"
-        remname = user_dict['remname'] if user_dict and user_dict.get('remname') else "Not Exists"
-        cfont = user_dict['cfont'][0] if user_dict and user_dict.get('cfont') else "<b>Not Exists</b>"
-        userlog = user_dict['userlog'] if user_dict and user_dict.get('userlog') else "Not Exists"
-        dailytlle = get_readable_file_size(config_dict['DAILY_LEECH_LIMIT'] * 1024**3) if config_dict['DAILY_LEECH_LIMIT'] else "Unlimited"
-        dailyll = get_readable_file_size(getdailytasks(user_id, check_leech=True)) if config_dict['DAILY_LEECH_LIMIT'] and user_id != OWNER_ID and not is_sudo(user_id) and not is_paid(user_id) else "Unlimited"
-        lsplit = get_readable_file_size(user_dict['split_size']) if user_dict and user_dict.get('split_size') else get_readable_file_size(config_dict['TG_SPLIT_SIZE']) + "(Default)"
+    buttons.ibutton("Rclone", f"userset {user_id} rcc")
+    rccmsg = "Exists" if await aiopath.exists(rclone_path) else "Not Exists"
 
-        if not user_dict and config_dict['AS_DOCUMENT'] or user_dict and user_dict.get('as_doc'):
-            ltype = "DOCUMENT"
-            buttons.sbutton("Send As Media", f"userset {user_id} med")
-        else:
-            ltype = "MEDIA"
-            buttons.sbutton("Send As Document", f"userset {user_id} doc")
+    buttons.ibutton("YT-DLP Options", f"userset {user_id} yto")
+    if user_dict.get('yt_opt', False):
+        ytopt = user_dict['yt_opt']
+    elif 'yt_opt' not in user_dict and (YTO := config_dict['YT_DLP_OPTIONS']):
+        ytopt = YTO
+    else:
+        ytopt = 'None'
 
-        if ospath.exists(thumbpath):
-            thumbmsg = "Exists"
-            buttons.sbutton("Change/Delete Thumbnail", f"userset {user_id} sthumb leech")
-            buttons.sbutton("Show Thumbnail", f"userset {user_id} showthumb")
-        else:
-            thumbmsg = "Not Exists"
-            buttons.sbutton("Set Thumbnail", f"userset {user_id} sthumb leech")
+    buttons.ibutton("Close", f"userset {user_id} close")
 
-        esplits = 'Enabled' if not user_dict and config_dict['EQUAL_SPLITS'] or user_dict and user_dict.get('equal_splits') else 'Disabled'
+    text = f"""<u>Settings for {name}</u>
+Leech Type is <b>{ltype}</b>
+Custom Thumbnail <b>{thumbmsg}</b>
+Leech Split Size is <b>{split_size}</b>
+Equal Splits is <b>{equal_splits}</b>
+Media Group is <b>{media_group}</b>
+Leech Prefix is <code>{escape(lprefix)}</code>
+Leech Destination is <code>{leech_dest}</code>
+Rclone Config <b>{rccmsg}</b>
+YT-DLP Options is <b><code>{escape(ytopt)}</code></b>"""
 
-        buttxt = "Change/Delete UserLog" if userlog != "Not Exists" else "Set UserLog"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal userlog leech")
-        buttxt = "Change/Delete Prefix" if prefix != "Not Exists" else "Set Prefix"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal prefix leech")
-        buttxt = "Change/Delete Suffix" if suffix != "Not Exists" else "Set Suffix"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal suffix leech")
-        buttxt = "Change/Delete Caption" if caption != "Not Exists" else "Set Caption"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal caption leech")
-        buttxt = "Change/Delete Remname" if remname != "Not Exists" else "Set Remname"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal remname leech")
-        buttxt = "Change/Delete Leech Split" if lsplit != get_readable_file_size(config_dict['TG_SPLIT_SIZE']) + "(Default)" else "Set Leech Split"
-        buttons.sbutton(buttxt, f"userset {user_id} suniversal split_size leech")
-        if cfont != "<b>Not Exists</b>": buttons.sbutton("Remove CapFont", f"userset {user_id} cfont")
+    return text, buttons.build_menu(1)
 
-        buttons.sbutton("Back", f"userset {user_id} mback", 'footer')
-        buttons.sbutton("Close", f"userset {user_id} close", 'footer')
-        button = buttons.build_menu(2)
-        text = f'''<u>Leech Settings for <a href='tg://user?id={user_id}'>{name}</a></u>
 
-Leech Type : <b>{ltype}</b>
-Custom Thumbnail : <b>{thumbmsg}</b>
-UserLog : <b>{userlog}</b>
-Prefix : <b>{escape(prefix)}</b>
-Suffix : <b>{suffix}</b>
-Caption : <b>{escape(caption)}</b>
-CapFont : {cfont}
-Leech Split Size : <b>{lsplit}</b>
-Equal Split : <b>{esplits}</b>
-Daily Leech : <b>{dailyll} / {dailytlle} per day</b>
-Remname : <code>{escape(remname)}</code>
-'''
-    if uplan == "Paid User" and key:
-        ex_date = user_dict.get('expiry_date', False)
-        if not ex_date: ex_date = 'Not Specified'
-        text += f"User Plan : <b>{uplan}</b>\n"
-        text += f"Expiry Date : <b>{ex_date}</b>"
-    elif key: text += f"User Plan : <b>{uplan}</b>"
-    return text, button
+async def update_user_settings(query):
+    msg, button = await get_user_settings(query.from_user)
+    await editMessage(query.message, msg, button)
 
-def update_user_settings(message, from_user, key):
-    msg, button = get_user_settings(from_user, key)
-    editMessage(msg, message, button)
 
-def user_settings(update, context):
-    msg, button = get_user_settings(update.message.from_user)
-    buttons_msg  = sendMessage(msg, context.bot, update.message, button)
+async def user_settings(_, message):
+    if await is_blacklist(message):
+        return
+    from_user = message.from_user
+    handler_dict[from_user.id] = False
+    msg, button = await get_user_settings(from_user)
+    await sendMessage(message, msg, button)
 
-def set_addons(update, context, data, omsg, key):
-    message = update.message
+
+async def set_yt_options(_, message, pre_event):
     user_id = message.from_user.id
     handler_dict[user_id] = False
     value = message.text
-    if data == 'split_size':
-        sdic = ['b', 'kb', 'mb', 'gb', 'tb']
-        value = value.strip()
-        out = value[-2:].strip().lower()
-        if out in sdic:
-            value = int(value[:-2].strip().lower()) * 1024**sdic.index(out)
-    update_user_ldata(user_id, data, value)
-    try:
-        update.message.delete()
-    except:
-        pass
-    update_user_settings(omsg, message.from_user, key)
+    update_user_ldata(user_id, 'yt_opt', value)
+    await message.delete()
+    await update_user_settings(pre_event)
     if DATABASE_URL:
-        DbManger().update_user_data(user_id)
+        await DbManger().update_user_data(user_id)
 
-def set_thumb(update, context, omsg):
-    message = update.message
+
+async def set_prefix(_, message, pre_event):
+    user_id = message.from_user.id
+    handler_dict[user_id] = False
+    value = message.text
+    update_user_ldata(user_id, 'lprefix', value)
+    await message.delete()
+    await update_user_settings(pre_event)
+    if DATABASE_URL:
+        await DbManger().update_user_data(user_id)
+
+
+async def set_thumb(_, message, pre_event):
     user_id = message.from_user.id
     handler_dict[user_id] = False
     path = "Thumbnails/"
-    if not ospath.isdir(path):
-        mkdir(path)
-    photo_dir = message.photo[-1].get_file().download()
-    user_id = message.from_user.id
+    if not await aiopath.isdir(path):
+        await mkdir(path)
+    photo_dir = await message.download()
     des_dir = ospath.join(path, f'{user_id}.jpg')
-    Image.open(photo_dir).convert("RGB").save(des_dir, "JPEG")
-    osremove(photo_dir)
+    await sync_to_async(Image.open(photo_dir).convert("RGB").save, des_dir, "JPEG")
+    await aioremove(photo_dir)
     update_user_ldata(user_id, 'thumb', des_dir)
-    try:
-        update.message.delete()
-    except:
-        pass
-    update_user_settings(omsg, message.from_user, 'leech')
+    await message.delete()
+    await update_user_settings(pre_event)
     if DATABASE_URL:
-        DbManger().update_thumb(user_id, des_dir)
+        await DbManger().update_user_doc(user_id, 'thumb', des_dir)
 
-def edit_user_settings(update, context):
-    query = update.callback_query
-    message = query.message
+
+async def add_rclone(_, message, pre_event):
+    user_id = message.from_user.id
+    handler_dict[user_id] = False
+    path = f'{getcwd()}/rclone/'
+    if not await aiopath.isdir(path):
+        await mkdir(path)
+    des_dir = ospath.join(path, f'{user_id}.conf')
+    await message.download(file_name=des_dir)
+    update_user_ldata(user_id, 'rclone', f'rclone/{user_id}.conf')
+    await message.delete()
+    await update_user_settings(pre_event)
+    if DATABASE_URL:
+        await DbManger().update_user_doc(user_id, 'rclone', des_dir)
+
+
+async def leech_split_size(_, message, pre_event):
+    user_id = message.from_user.id
+    handler_dict[user_id] = False
+    value = min(int(message.text), MAX_SPLIT_SIZE)
+    update_user_ldata(user_id, 'split_size', value)
+    await message.delete()
+    await update_user_settings(pre_event)
+    if DATABASE_URL:
+        await DbManger().update_user_data(user_id)
+
+
+async def set_leech_destination(_, message, pre_event):
+    user_id = message.from_user.id
+    handler_dict[user_id] = False
+    value = message.text
+    if value.isdigit() or value.startswith('-'):
+        value = int(value)
+    update_user_ldata(user_id, 'leech_dest', value)
+    await message.delete()
+    await update_user_settings(pre_event)
+    if DATABASE_URL:
+        await DbManger().update_user_data(user_id)
+
+
+async def event_handler(client, query, pfunc, photo=False, document=False):
     user_id = query.from_user.id
-    data = query.data
-    data = data.split()
-    user_dict = user_data.get(user_id, False)
+    handler_dict[user_id] = True
+    start_time = time()
+
+    async def event_filter(_, __, event):
+        if photo:
+            mtype = event.photo
+        elif document:
+            mtype = event.document
+        else:
+            mtype = event.text
+        user = event.from_user or event.sender_chat
+        return bool(user.id == user_id and event.chat.id == query.message.chat.id and mtype)
+
+    handler = client.add_handler(MessageHandler(
+        pfunc, filters=create(event_filter)), group=-1)
+
+    while handler_dict[user_id]:
+        await sleep(0.5)
+        if time() - start_time > 60:
+            handler_dict[user_id] = False
+            await update_user_settings(query)
+    client.remove_handler(*handler)
+
+
+@new_thread
+async def edit_user_settings(client, query):
+    from_user = query.from_user
+    user_id = from_user.id
+    message = query.message
+    data = query.data.split()
+    thumb_path = f'Thumbnails/{user_id}.jpg'
+    rclone_path = f'rclone/{user_id}.conf'
+    user_dict = user_data.get(user_id, {})
     if user_id != int(data[1]):
-        query.answer(text="Not Yours!", show_alert=True)
-    elif data[2] in ['universal', 'leech', 'mirror']:
-        query.answer()
-        update_user_settings(message, query.from_user, data[2])
-    elif data[2] == 'mback':
-        query.answer()
-        update_user_settings(message, query.from_user, None)
+        await query.answer("Not Yours!", show_alert=True)
     elif data[2] == "doc":
-        update_user_ldata(user_id, 'as_doc', True)
-        query.answer(text="Your File Will Deliver As Document!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
+        update_user_ldata(user_id, 'as_doc',
+                          not user_dict.get('as_doc', False))
+        await query.answer()
+        await update_user_settings(query)
         if DATABASE_URL:
-            DbManger().update_user_data(user_id)
-    elif data[2] == "med":
-        update_user_ldata(user_id, 'as_doc', False)
-        query.answer(text="Your File Will Deliver As Media!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-        if DATABASE_URL:
-            DbManger().update_user_data(user_id)
-    elif data[2] == 'esplits':
-        query.answer()
+            await DbManger().update_user_data(user_id)
+    elif data[2] == 'vthumb':
         handler_dict[user_id] = False
-        update_user_ldata(user_id, 'equal_splits', not bool(user_dict and user_dict.get('equal_splits')))
-        update_user_settings(message, query.from_user, 'leech')
-        if DATABASE_URL:
-            DbManger().update_user_data(user_id)
-    elif data[2] == "usertdxon":
-        update_user_ldata(user_id, 'is_usertd', True)
-        query.answer(text="Now, Your Files Will Be Mirrored/Cloned ON Your Personal TD!", show_alert=True)
-        update_user_settings(message, query.from_user, 'mirror')
-        if DATABASE_URL:
-            DbManger().update_user_data(user_id)
-    elif data[2] == "usertdxoff":
-        update_user_ldata(user_id, 'is_usertd', False)
-        query.answer(text="Now, Your Files Will Be Mirrorred/Cloned ON Global TD!", show_alert=True)
-        update_user_settings(message, query.from_user, 'mirror')
-        if DATABASE_URL:
-            DbManger().update_user_data(user_id)
-    elif data[2] == "usertdxnotset":
-        query.answer(text="Set User TD First!", show_alert=True)
-    elif data[2] == "usertdxdisable":
-        query.answer(text="User TD Feature Disabled By Owner!", show_alert=True)
-    elif data[2] == "uboton":
-        update_user_ldata(user_id, 'ubot_pm', True)
-        query.answer(text="Now, Your Files will be send to your PM!", show_alert=True)
-        update_user_settings(message, query.from_user, 'universal')
-        if DATABASE_URL:
-            DbManger().update_user_data(user_id)
-    elif data[2] == "ubotoff":
-        update_user_ldata(user_id, 'ubot_pm', False)
-        query.answer(text="Now, Your Files will not be send to your PM anymore!", show_alert=True)
-        update_user_settings(message, query.from_user, 'universal')
-        if DATABASE_URL:
-            DbManger().update_user_data(user_id)
-    elif data[2] == "ubotdisable":
-        query.answer(text="Always BOT PM Mode is ON By Bot Owner!", show_alert=True)
+        await query.answer()
+        await sendFile(message, thumb_path, from_user.mention)
+        await update_user_settings(query)
     elif data[2] == "dthumb":
         handler_dict[user_id] = False
-        path = f"Thumbnails/{user_id}.jpg"
-        if ospath.lexists(path):
-            query.answer(text="Thumbnail Removed!", show_alert=True)
-            osremove(path)
+        if await aiopath.exists(thumb_path):
+            await query.answer()
+            await aioremove(thumb_path)
             update_user_ldata(user_id, 'thumb', '')
-            update_user_settings(message, query.from_user, 'leech')
+            await update_user_settings(query)
             if DATABASE_URL:
-                DbManger().update_thumb(user_id)
+                await DbManger().update_user_doc(user_id, 'thumb')
         else:
-            query.answer(text="Old Settings", show_alert=True)
-            update_user_settings(message, query.from_user, 'leech')
+            await query.answer("Old Settings", show_alert=True)
+            await update_user_settings(query)
     elif data[2] == "sthumb":
-        query.answer()
-        if handler_dict.get(user_id):
-            handler_dict[user_id] = False
-            sleep(0.5)
-        start_time = time()
-        handler_dict[user_id] = True
+        await query.answer()
         buttons = ButtonMaker()
-        thumbpath = f"Thumbnails/{user_id}.jpg"
-        if ospath.exists(thumbpath):
-            buttons.sbutton("Delete", f"userset {user_id} dthumb")
-        buttons.sbutton("Back", f"userset {user_id} back {data[3]}")
-        buttons.sbutton("Close", f"userset {user_id} close", 'footer')
-        editMessage('Send a photo to save it as custom Thumbnail.', message, buttons.build_menu(2))
-        partial_fnc = partial(set_thumb, omsg=message)
-        photo_handler = MessageHandler(filters=Filters.photo & Filters.chat(message.chat.id) & Filters.user(user_id),
-                                       callback=partial_fnc)
-        dispatcher.add_handler(photo_handler)
-        while handler_dict[user_id]:
-            if time() - start_time > 60:
-                handler_dict[user_id] = False
-                update_user_settings(message, query.from_user, 'leech')
-        dispatcher.remove_handler(photo_handler)
-    elif data[2] == 'back':
-        query.answer()
-        handler_dict[user_id] = False
-        update_user_settings(message, query.from_user, data[3])
-    elif data[2] == "showthumb":
-        path = f"Thumbnails/{user_id}.jpg"
-        if ospath.lexists(path):
-            msg = f"Thumbnail for: {query.from_user.mention_html()} (<code>{str(user_id)}</code>)"
-            delo = sendPhoto(text=msg, bot=context.bot, message=message, photo=open(path, 'rb'))
-            Thread(args=(context.bot, update.message, delo)).start()
-        else: query.answer(text="Send new settings command.")
-    elif data[2] == "suniversal":
-        if config_dict['PAID_SERVICE'] and user_id != OWNER_ID and not is_sudo(user_id) and not is_paid(user_id):
-            query.answer("You not Not Paid User to Use this Feature. \n#Buy Paid Service", show_alert=True)
-            return
-        query.answer()
-        if handler_dict.get(user_id):
-            handler_dict[user_id] = False
-            sleep(0.5)
-        start_time = time()
-        handler_dict[user_id] = True
+        if await aiopath.exists(thumb_path):
+            buttons.ibutton("View Thumbnail", f"userset {user_id} vthumb")
+            buttons.ibutton("Delete Thumbnail", f"userset {user_id} dthumb")
+        buttons.ibutton("Back", f"userset {user_id} back")
+        buttons.ibutton("Close", f"userset {user_id} close")
+        await editMessage(message, 'Send a photo to save it as custom thumbnail. Timeout: 60 sec', buttons.build_menu(1))
+        pfunc = partial(set_thumb, pre_event=query)
+        await event_handler(client, query, pfunc, True)
+    elif data[2] == 'yto':
+        await query.answer()
         buttons = ButtonMaker()
-        if data[3] == 'split_size':
-            if not user_dict and config_dict['EQUAL_SPLITS'] or user_dict and user_dict.get('equal_splits'):
-                buttons.sbutton("Disable Equal Splits", f"userset {user_id} esplits", 'header')
-            else:
-                buttons.sbutton("Enable Equal Splits", f"userset {user_id} esplits", 'header')
-        elif data[3] == 'caption':
-            buttons.sbutton("Set Custom Font Style", f"userset {user_id} font leech", 'header')
-        if user_dict and user_dict.get(data[3]):
-            buttons.sbutton("Remove", f"userset {user_id} sremove {data[3]} {data[4]}")
-        buttons.sbutton("Back", f"userset {user_id} back {data[4]}")
-        buttons.sbutton("Close", f"userset {user_id} close", 'footer')
-        editMessage(f"<u>Send {fname_dict[data[3]]}'s Valid Value. Timeout: 60sec</u>\n\nExamples:\n{example_dict[data[3]]}", message, buttons.build_menu(2))
-        partial_fnc = partial(set_addons, data=data[3], omsg=message, key=data[4])
-        UNI_HANDLER = f"{data[3]}_handler"
-        UNI_HANDLER = MessageHandler(filters=Filters.text & Filters.chat(message.chat.id) & Filters.user(user_id),
-                                       callback=partial_fnc)
-        dispatcher.add_handler(UNI_HANDLER)
-        while handler_dict[user_id]:
-            if time() - start_time > 60:
-                handler_dict[user_id] = False
-                update_user_settings(message, query.from_user, data[4])
-        dispatcher.remove_handler(UNI_HANDLER)
-    elif data[2] == "sremove":
+        buttons.ibutton("Back", f"userset {user_id} back")
+        if user_dict.get('yt_opt', False) or config_dict['YT_DLP_OPTIONS']:
+            buttons.ibutton("Remove YT-DLP Options",
+                            f"userset {user_id} ryto", 'header')
+        buttons.ibutton("Close", f"userset {user_id} close")
+        rmsg = '''
+Send YT-DLP Options. Timeout: 60 sec
+Format: key:value|key:value|key:value.
+Example: format:bv*+mergeall[vcodec=none]|nocheckcertificate:True
+Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184'>FILE</a> or use this <a href='https://t.me/mltb_official/177'>script</a> to convert cli arguments to api options.
+        '''
+        await editMessage(message, rmsg, buttons.build_menu(1))
+        pfunc = partial(set_yt_options, pre_event=query)
+        await event_handler(client, query, pfunc)
+    elif data[2] == 'ryto':
         handler_dict[user_id] = False
-        update_user_ldata(user_id, data[3], False)
-        if DATABASE_URL: 
-            DbManger().update_userval(user_id, data[3])
-        query.answer(text=f"{fname_dict[data[3]]} Removed!", show_alert=True)
-        update_user_settings(message, query.from_user, data[4])
-    elif data[2] == "cfont":
-        handler_dict[user_id] = False
-        update_user_ldata(user_id, 'cfont', False)
-        if DATABASE_URL: 
-            DbManger().update_userval(user_id, 'cfont')
-        query.answer(text="Caption Font Removed!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-    elif data[2] == "font":
-        query.answer()
-        handler_dict[user_id] = False
-        FONT_SPELL = {'b':'<b>Bold</b>', 'i':'<i>Italics</i>', 'code':'<code>Monospace</code>', 's':'<s>Strike</s>', 'u':'<u>Underline</u>', 'tg-spoiler':'<tg-spoiler>Spoiler</tg-spoiler>'}
+        await query.answer()
+        update_user_ldata(user_id, 'yt_opt', '')
+        await update_user_settings(query)
+        if DATABASE_URL:
+            await DbManger().update_user_data(user_id)
+    elif data[2] == 'lss':
+        await query.answer()
         buttons = ButtonMaker()
-        buttons.sbutton("Spoiler", f"userset {user_id} Spoiler")
-        buttons.sbutton("Italics", f"userset {user_id} Italics")
-        buttons.sbutton("Monospace", f"userset {user_id} Code")
-        buttons.sbutton("Strike", f"userset {user_id} Strike")
-        buttons.sbutton("Underline", f"userset {user_id} Underline")
-        buttons.sbutton("Bold", f"userset {user_id} Bold")
-        buttons.sbutton("Regular", f"userset {user_id} Regular")
-        buttons.sbutton("Back", f"userset {user_id} back {data[3]}")
-        buttons.sbutton("Close", f"userset {user_id} close")
-        btns = buttons.build_menu(2)
-        if user_dict and user_dict.get('cfont'): cf = user_data[user_id]['cfont']
-        else: cf = [f'{FONT_SPELL[config_dict["CAPTION_FONT"]]} (Default)']
-        editMessage("<u>Change your Font Style from below:</u>\n\n• Current Style : " + cf[0], message, btns)
-    elif data[2] == "Spoiler":
-        eVal = ["<tg-spoiler>Spoiler</tg-spoiler>", "tg-spoiler"]
-        update_user_ldata(user_id, 'cfont', eVal)
-        if DATABASE_URL:
-            DbManger().update_userval(user_id, 'cfont', eVal)
-            LOGGER.info(f"User : {user_id} Font Style Saved in DB")
-        query.answer(text="Font Style changed to Spoiler!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-    elif data[2] == "Italics":
-        eVal = ["<i>Italics</i>", "i"]
-        update_user_ldata(user_id, 'cfont', eVal)
-        if DATABASE_URL:
-            DbManger().update_userval(user_id, 'cfont', eVal)
-            LOGGER.info(f"User : {user_id} Font Style Saved in DB")
-        query.answer(text="Font Style changed to Italics!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-    elif data[2] == "Code":
-        eVal = ["<code>Monospace</code>", "code"]
-        update_user_ldata(user_id, 'cfont', eVal)
-        if DATABASE_URL:
-            DbManger().update_userval(user_id, 'cfont', eVal)
-            LOGGER.info(f"User : {user_id} Font Style Saved in DB")
-        query.answer(text="Font Style changed to Monospace!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-    elif data[2] == "Strike":
-        eVal = ["<s>Strike</s>", "s"]
-        update_user_ldata(user_id, 'cfont', eVal)
-        if DATABASE_URL:
-            DbManger().update_userval(user_id, 'cfont', eVal)
-            LOGGER.info(f"User : {user_id} Font Style Saved in DB")
-        query.answer(text="Font Style changed to Strike!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-    elif data[2] == "Underline":
-        eVal = ["<u>Underline</u>", "u"]
-        update_user_ldata(user_id, 'cfont', eVal)
-        if DATABASE_URL:
-            DbManger().update_userval(user_id, 'cfont', eVal)
-            LOGGER.info(f"User : {user_id} Font Style Saved in DB")
-        query.answer(text="Font Style changed to Underline!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-    elif data[2] == "Bold":
-        eVal = ["<b>Bold</b>", "b"]
-        update_user_ldata(user_id, 'cfont', eVal)
-        if DATABASE_URL:
-            DbManger().update_userval(user_id, 'cfont', eVal)
-            LOGGER.info(f"User : {user_id} Font Style Saved in DB")
-        query.answer(text="Font Style changed to Bold!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-    elif data[2] == "Regular":
-        eVal = ["Regular", "r"]
-        update_user_ldata(user_id, 'cfont', eVal)
-        if DATABASE_URL:
-            DbManger().update_userval(user_id, 'cfont', eVal)
-            LOGGER.info(f"User : {user_id} Font Style Saved in DB")
-        query.answer(text="Font Style changed to Regular!", show_alert=True)
-        update_user_settings(message, query.from_user, 'leech')
-    elif data[2] == "setulist":
-        query.answer()
-        handler_dict[user_id] = False
-        buttons = ButtonMaker()
-        buttons.sbutton("HTML", f"userset {user_id} ulist HTML")
-        buttons.sbutton("Telegraph", f"userset {user_id} ulist Telegraph")
-        buttons.sbutton("Telegram Direct", f"userset {user_id} ulist Tele_Msg")
-        buttons.sbutton("Back", f"userset {user_id} back {data[3]}", "footer")
-        buttons.sbutton("Close", f"userset {user_id} close", "footer")
-        if user_id in user_data and user_data[user_id].get('ulist_typ'): ul = user_data[user_id]['ulist_typ']
-        else: ul = f'{config_dict["LIST_MODE"].lower().capitalize()} (Default)'
-        editMessage("<u>Change your List Fetch Mode from below:</u>\n\n• Current Mode : " + ul, message, buttons.build_menu(2))
-    elif data[2] == "ulist":
-        update_user_ldata(user_id, 'ulist_typ', data[3])
-        if DATABASE_URL:
-            DbManger().update_userval(user_id, 'ulist_typ', data[3])
-            LOGGER.info(f"User : {user_id} List Mode Saved in DB")
-        query.answer(text=f"List Mode Changed to {data[3]}!", show_alert=True)
-        update_user_settings(message, query.from_user, 'universal')
-    elif data[2] == "showimdb":
-        if user_id not in user_data and not user_data[user_id].get('imdb_temp'):
-            return query.answer(text="Send new settings command.")
-        query.answer()
-        imdb = user_data[user_id].get('imdb_temp')
-        if imdb:
-            msg = f"IMDB Template for: {query.from_user.mention_html()} (<code>{str(user_id)}</code>)\n\n{escape(imdb)}"
-            im = sendMessage(msg, context.bot, message)
-            Thread(args=(context.bot, update.message, im)).start()
-    elif data[2] == "showanilist":
-        if user_id not in user_data and not user_data[user_id].get('ani_temp'):
-            return query.answer(text="Send new settings command. 🙃")
-        query.answer()
-        anilist = user_data[user_id].get('ani_temp')
-        if anilist:
-            msg = f"AniList Template for: {query.from_user.mention_html()} (<code>{str(user_id)}</code>)\n\n{escape(anilist)}"
-            ani = sendMessage(msg, context.bot, message)
-            Thread(args=(context.bot, update.message, ani)).start()
-    elif data[2] == "showusertds":
-       if user_id not in user_data and not user_data[user_id].get('usertd'):
-            return query.answer(text="Old settings!")
-       if user_dict and user_dict.get('usertd'):
-           GNames, GIDs, GIndex = getUserTDs(user_id, force=True)
-           msg = f"<b>User TDs Info :</b>\n\n"
-           for i, _ in enumerate(GNames):
-               msg += f"{i+1}. <i>Name :</i> {GNames[i]}\n"
-               msg += f"   <i>GDrive ID :</i> <code>{GIDs[i]}</code>\n"
-               msg += f"   <i>Index URL :</i> {GIndex[i] if GIndex[i] else 'Not Provided'}\n\n"
-           try:
-               bot.sendMessage(chat_id=user_id, text=msg, parse_mode=ParseMode.HTML)
-               query.answer("UserTD details send in Private (PM) Successfully", show_alert=True)
-           except: query.answer("Start the Bot in Private and Try Again to get your UserTD Details!", show_alert=True)
-    else:
-        query.answer()
-        handler_dict[user_id] = False
-        try:
-            query.message.delete()
-        except:
-            pass
-        try:
-            query.message.reply_to_message.delete()
-        except:
-            pass
-
-def send_users_settings(update, context):
-    msg, auth_chat, sudos, leechlogs, linklogs, mirrorlogs = '', '', '', '', '', ''
-    for u, d in user_data.items():
-        try:
-            for ud, dd in d.items():
-                if ud == 'is_auth' and dd is True:
-                    auth_chat += f"<b>{bot.get_chat(u).title}</b> ( <code>{u}</code> )\n"
-                elif ud == 'is_sudo' and dd is True:
-                    sudos += f"<a href='tg://user?id={u}'>{bot.get_chat(u).first_name}</a> ( <code>{u}</code> )\n"
-        except:
-            if u == 'is_leech_log':
-                leechlogs = '\n'.join(f"<b>{bot.get_chat(ll).title}</b> ( <code>{ll}</code> )" for ll in d) + "\n"
-            elif u == 'mirror_logs':
-                mirrorlogs = '\n'.join(f"<b>{bot.get_chat(ll).title}</b> ( <code>{ll}</code> )" for ll in d) + "\n"
-            elif u == 'link_logs':
-                linklogs = '\n'.join(f"<b>{bot.get_chat(ll).title}</b> ( <code>{ll}</code> )" for ll in d) + "\n"
+        if user_dict.get('split_size', False):
+            buttons.ibutton("Reset Split Size", f"userset {user_id} rlss")
+        if user_dict.get('equal_splits', False) or 'equal_splits' not in user_dict and config_dict['EQUAL_SPLITS']:
+            buttons.ibutton("Disable Equal Splits",
+                            f"userset {user_id} esplits")
         else:
-            continue
-    msg = f'<b><u>Authorized Chats💬 :</u></b>\n{auth_chat}\n<b><u>Sudo Users👤 :</u></b>\n{sudos}\n<b><u>Leech Log:</u></b>\n{leechlogs}\n<b><u>Mirror Log♻️ :</u></b>\n{mirrorlogs}\n<b><u>Links Log🔗 :</u></b>\n{linklogs}'
-    sendMessage(msg, context.bot, update.message)
+            buttons.ibutton("Enable Equal Splits",
+                            f"userset {user_id} esplits")
+        if user_dict.get('media_group', False) or 'media_group' not in user_dict and config_dict['MEDIA_GROUP']:
+            buttons.ibutton("Disable Media Group", f"userset {user_id} mgroup")
+        else:
+            buttons.ibutton("Enable Media Group", f"userset {user_id} mgroup")
+        buttons.ibutton("Back", f"userset {user_id} back")
+        buttons.ibutton("Close", f"userset {user_id} close")
+        await editMessage(message, f'Send Leech split size in bytes. IS_PREMIUM_USER: {IS_PREMIUM_USER}. Timeout: 60 sec', buttons.build_menu(1))
+        pfunc = partial(leech_split_size, pre_event=query)
+        await event_handler(client, query, pfunc)
+    elif data[2] == 'rlss':
+        handler_dict[user_id] = False
+        await query.answer()
+        update_user_ldata(user_id, 'split_size', '')
+        await update_user_settings(query)
+        if DATABASE_URL:
+            await DbManger().update_user_data(user_id)
+    elif data[2] == 'esplits':
+        handler_dict[user_id] = False
+        await query.answer()
+        update_user_ldata(user_id, 'equal_splits',
+                          not user_dict.get('equal_splits', False))
+        await update_user_settings(query)
+        if DATABASE_URL:
+            await DbManger().update_user_data(user_id)
+    elif data[2] == 'mgroup':
+        handler_dict[user_id] = False
+        await query.answer()
+        update_user_ldata(user_id, 'media_group',
+                          not user_dict.get('media_group', False))
+        await update_user_settings(query)
+        if DATABASE_URL:
+            await DbManger().update_user_data(user_id)
+    elif data[2] == 'rcc':
+        await query.answer()
+        buttons = ButtonMaker()
+        if await aiopath.exists(rclone_path):
+            buttons.ibutton("Delete rclone.conf", f"userset {user_id} drcc")
+        buttons.ibutton("Back", f"userset {user_id} back")
+        buttons.ibutton("Close", f"userset {user_id} close")
+        await editMessage(message, 'Send rclone.conf. Timeout: 60 sec', buttons.build_menu(1))
+        pfunc = partial(add_rclone, pre_event=query)
+        await event_handler(client, query, pfunc, document=True)
+    elif data[2] == 'drcc':
+        handler_dict[user_id] = False
+        if await aiopath.exists(rclone_path):
+            await query.answer()
+            await aioremove(rclone_path)
+            update_user_ldata(user_id, 'rclone', '')
+            await update_user_settings(query)
+            if DATABASE_URL:
+                await DbManger().update_user_doc(user_id, 'rclone')
+        else:
+            await query.answer("Old Settings", show_alert=True)
+            await update_user_settings(query)
+    elif data[2] == 'lprefix':
+        await query.answer()
+        buttons = ButtonMaker()
+        if user_dict.get('lprefix', False) or 'lprefix' not in user_dict and config_dict['LEECH_FILENAME_PREFIX']:
+            buttons.ibutton("Remove Leech Prefix",
+                            f"userset {user_id} rlprefix")
+        buttons.ibutton("Back", f"userset {user_id} back")
+        buttons.ibutton("Close", f"userset {user_id} close")
+        await editMessage(message, 'Send Leech Filename Prefix. You can add HTML tags. Timeout: 60 sec', buttons.build_menu(1))
+        pfunc = partial(set_prefix, pre_event=query)
+        await event_handler(client, query, pfunc)
+    elif data[2] == 'rlprefix':
+        handler_dict[user_id] = False
+        await query.answer()
+        update_user_ldata(user_id, 'lprefix', '')
+        await update_user_settings(query)
+        if DATABASE_URL:
+            await DbManger().update_user_data(user_id)
+    elif data[2] == 'ldest':
+        await query.answer()
+        buttons = ButtonMaker()
+        if user_dict.get('leech_dest', False) or 'leech_dest' not in user_dict and config_dict['LOG_CHAT_ID']:
+            buttons.ibutton("Remove Leech Destination",
+                            f"userset {user_id} rldest")
+        buttons.ibutton("Back", f"userset {user_id} back")
+        buttons.ibutton("Close", f"userset {user_id} close")
+        await editMessage(message, 'Send leech destination ID/USERNAME. Timeout: 60 sec', buttons.build_menu(1))
+        pfunc = partial(set_leech_destination, pre_event=query)
+        await event_handler(client, query, pfunc)
+    elif data[2] == 'rldest':
+        handler_dict[user_id] = False
+        await query.answer()
+        update_user_ldata(user_id, 'leech_dest', '')
+        await update_user_settings(query)
+        if DATABASE_URL:
+            await DbManger().update_user_data(user_id)
+    elif data[2] == 'back':
+        handler_dict[user_id] = False
+        await query.answer()
+        await update_user_settings(query)
+    else:
+        handler_dict[user_id] = False
+        await query.answer()
+        await message.reply_to_message.delete()
+        await message.delete()
 
-def sendPaidDetails(update, context):
-    paid = ''
-    for u, d in user_data.items():
-        try:
-            for ud, dd in d.items():
-                if ud == 'is_paid' and dd is True:
-                    ex_date = user_data[u].get('expiry_date', False)
-                    if not ex_date: ex_date = 'Not Specified'
-                    paid += f"<a href='tg://user?id={u}'>{bot.get_chat(u).first_name}</a> ( <code>{u}</code> ) : {ex_date}\n"
-                    break
-        except: 
-            continue
-    if not paid: paid = 'No Data'
-    sendMessage(f'<b><u>Paid Users:</u></b>\n\n{paid}', context.bot, update.message)
+
+async def send_users_settings(client, message):
+    if await is_blacklist(message):
+        return
+    if user_data:
+        msg = ''
+        for u, d in user_data.items():
+            kmsg = f'\n<b>{u}:</b>\n'
+            if vmsg := ''.join(f'{k}: <code>{v}</code>\n' for k, v in d.items() if v):
+                msg += kmsg + vmsg
+
+        msg_ecd = msg.encode()
+        if len(msg_ecd) > 4000:
+            with BytesIO(msg_ecd) as ofile:
+                ofile.name = 'users_settings.txt'
+                await sendFile(message, ofile)
+        else:
+            await sendMessage(message, msg)
+    else:
+        await sendMessage(message, 'No users data!')
 
 
-pdetails_handler = CommandHandler(command=BotCommands.PaidUsersCommand, callback=sendPaidDetails,
-                                    filters=CustomFilters.owner_filter | CustomFilters.sudo_user)
-users_settings_handler = CommandHandler(BotCommands.UsersCommand, send_users_settings,
-                                            filters=CustomFilters.owner_filter | CustomFilters.sudo_user)
-user_set_handler  = CommandHandler(BotCommands.UserSetCommand, user_settings,
-                                   filters=CustomFilters.authorized_chat | CustomFilters.authorized_user)
-but_set_handler = CallbackQueryHandler(edit_user_settings, pattern="userset")
-
-dispatcher.add_handler(user_set_handler )
-dispatcher.add_handler(but_set_handler)
-dispatcher.add_handler(users_settings_handler)
-dispatcher.add_handler(pdetails_handler)
+bot.add_handler(MessageHandler(send_users_settings, filters=command(
+    BotCommands.UsersCommand) & CustomFilters.sudo))
+bot.add_handler(MessageHandler(user_settings, filters=command(
+    BotCommands.UserSetCommand) & CustomFilters.authorized))
+bot.add_handler(CallbackQueryHandler(
+    edit_user_settings, filters=regex("^userset")))

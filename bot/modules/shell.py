@@ -1,41 +1,41 @@
-from subprocess import Popen, PIPE
-from telegram.ext import CommandHandler
-from bot import LOGGER, dispatcher
+#!/usr/bin/env python3
+from pyrogram.handlers import MessageHandler, EditedMessageHandler
+from pyrogram.filters import command
+from io import BytesIO
+
+from bot import LOGGER, bot
+from bot.helper.telegram_helper.message_utils import sendMessage, sendFile
+from bot.helper.ext_utils.bot_utils import cmd_exec, new_task
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
 
-def shell(update, context):
-    message = update.effective_message
+
+@new_task
+async def shell(_, message):
     cmd = message.text.split(maxsplit=1)
     if len(cmd) == 1:
-        return message.reply_text('No command to execute was given.', parse_mode='HTML')
-    cmd = cmd[1].strip()
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    stdout, stderr = process.communicate()
+        await sendMessage(message, 'No command to execute was given.')
+        return
+    cmd = cmd[1]
+    stdout, stderr, _ = await cmd_exec(cmd, shell=True)
     reply = ''
-    stderr = stderr.decode()
-    stdout = stdout.decode()
     if len(stdout) != 0:
-        reply += f"*Stdout*\n`{stdout}`\n"
+        reply += f"*Stdout*\n<code>{stdout}</code>\n"
         LOGGER.info(f"Shell - {cmd} - {stdout}")
     if len(stderr) != 0:
-        reply += f"*Stderr*\n`{stderr}`\n"
+        reply += f"*Stderr*\n<code>{stderr}</code>"
         LOGGER.error(f"Shell - {cmd} - {stderr}")
     if len(reply) > 3000:
-        with open('shell_output.txt', 'w') as file:
-            file.write(reply)
-        with open('shell_output.txt', 'rb') as doc:
-            context.bot.send_document(
-                document=doc,
-                filename=doc.name,
-                reply_to_message_id=message.message_id,
-                chat_id=message.chat_id)
+        with BytesIO(str.encode(reply)) as out_file:
+            out_file.name = "shell_output.txt"
+            await sendFile(message, out_file)
     elif len(reply) != 0:
-        message.reply_text(reply, parse_mode='Markdown')
+        await sendMessage(message, reply)
     else:
-        message.reply_text('No Reply', parse_mode='Markdown')
+        await sendMessage(message, 'No Reply')
 
 
-SHELL_HANDLER = CommandHandler(BotCommands.ShellCommand, shell,
-                               filters=CustomFilters.owner_filter | CustomFilters.sudo_user)
-dispatcher.add_handler(SHELL_HANDLER)
+bot.add_handler(MessageHandler(shell, filters=command(
+    BotCommands.ShellCommand) & CustomFilters.owner))
+bot.add_handler(EditedMessageHandler(shell, filters=command(
+    BotCommands.ShellCommand) & CustomFilters.owner))

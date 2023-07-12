@@ -1,36 +1,56 @@
-from pymongo import MongoClient
-from telegram.ext import CommandHandler, Filters
+#!/usr/bin/env python3
+from time import time
+from asyncio import sleep
+from pyrogram.handlers import MessageHandler
+from pyrogram.filters import command
+from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
 
-from bot import bot, dispatcher, LOGGER, config_dict
+from bot import bot, LOGGER, DATABASE_URL
+from bot.helper.ext_utils.db_handler import DbManger
+from bot.helper.telegram_helper.message_utils import sendMessage, editMessage
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.message_utils import sendMessage
+from bot.helper.telegram_helper.bot_commands import BotCommands
+from bot.helper.telegram_helper.button_build import ButtonMaker
+from bot.helper.ext_utils.bot_utils import new_task, get_readable_time
 
-def broadcast(update, context):
-    reply_to = update.message.reply_to_message
 
-    if not config_dict['DATABASE_URL']:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=f"DATABASE_URL not provided")
-    else:
-        conn = MongoClient(config_dict['DATABASE_URL'])
-        db = conn.mltb
-        users_collection = db.users
-        users_count = db.users.count_documents({})
-    
-        chat_ids = [str(user["_id"]) for user in users_collection.find({}, {"_id": 1})]
-        success = 0
+@new_task
+async def broadcast(_, message):
+    if not DATABASE_URL:
+        return await sendMessage(message, 'DATABASE_URL not provided!')
+    if not message.reply_to_message:
+        return await sendMessage(message, '<b>Reply to any Message to Broadcast Users in Bot PM</b>')
+    t, s, b, d, u = 0, 0, 0, 0, 0
+    start_time = time()
+    status = '''<b>Broadcast Stats:</b>
+<b>Total Users:</b> <code>{t}</code>
+<b>Success:</b> <code>{s}</code>
+<b>Blocked Users:</b> <code>{b}</code>
+<b>Deleted Accounts:</b> <code>{d}</code>
+<b>Unsuccess Attempt:</b> <code>{u}</code>'''
+    updater = time()
+    pls_wait = await sendMessage(message, status.format(**locals()))
+    for uid in (await DbManger().get_pm_uids()):
+        try:
+            await message.reply_to_message.copy(uid)
+            s += 1
+        except FloodWait as e:
+            await sleep(e.value)
+            await message.reply_to_message.copy(uid)
+            s += 1
+        except UserIsBlocked:
+            await DbManger().rm_pm_user(uid)
+            b += 1
+        except InputUserDeactivated:
+            await DbManger().rm_pm_user(uid)
+            d += 1
+        except:
+            u += 1
+        t += 1
+        if (time() - updater) > 10:
+            await editMessage(pls_wait, status.format(**locals()))
+            updater = time()
+    await editMessage(pls_wait, status.format(**locals()) + f"\n\n<b>Elapsed Time:</b> <code>{get_readable_time(time() - start_time)}</code>")
         
-        for chat_id in chat_ids:
-            try:
-                context.bot.copy_message(chat_id=chat_id, from_chat_id=update.message.chat.id, message_id=reply_to.message_id)
-                success += 1
-            except Exception as err:
-                LOGGER.error(err)
-
-        msg = f"<b>Broadcasting Completed</b>\n"
-        msg += f"<b>Total {users_count} users in Database</b>\n"
-        msg += f"<b>Sucess: </b>{success} users\n"
-        msg += f"<b>Failed: </b>{users_count - success} users"
-        return sendMessage(msg, context.bot, update.message) 
-
-broadcast_handler = CommandHandler("broadcast", broadcast, filters=CustomFilters.owner_filter)
-dispatcher.add_handler(broadcast_handler)
+        
+bot.add_handler(MessageHandler(broadcast, filters=command(BotCommands.BroadcastCommand) & CustomFilters.owner))
