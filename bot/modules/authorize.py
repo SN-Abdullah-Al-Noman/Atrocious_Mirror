@@ -126,6 +126,7 @@ async def remove_blacklist(client, message):
         msg = "Give ID or Reply To message of whom you want to remove from blacklist."
     await sendMessage(message, msg)
 
+
 bot.add_handler(MessageHandler(add_blacklist, filters=(command("addblacklist") & CustomFilters.sudo)))
 bot.add_handler(MessageHandler(remove_blacklist, filters=(command("rmblacklist") & CustomFilters.sudo)))
 
