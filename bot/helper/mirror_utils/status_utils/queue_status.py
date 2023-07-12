@@ -1,15 +1,17 @@
+#!/usr/bin/env python3
 from bot import LOGGER
-from bot.helper.ext_utils.bot_utils import get_readable_file_size, MirrorStatus, EngineStatus
+from bot.helper.ext_utils.bot_utils import get_readable_file_size, MirrorStatus
 
 
 class QueueStatus:
-    def __init__(self, name, size, gid, listener, state):
+    def __init__(self, name, size, gid, listener, status):
         self.__name = name
         self.__size = size
         self.__gid = gid
         self.__listener = listener
-        self.__state = state
+        self.__status = status
         self.message = listener.message
+        self.engine = "Queue System"
 
     def gid(self):
         return self.__gid
@@ -17,17 +19,13 @@ class QueueStatus:
     def name(self):
         return self.__name
 
-    def size_raw(self):
-        return self.__size
-
     def size(self):
         return get_readable_file_size(self.__size)
 
     def status(self):
-        if self.__state == 'Dl':
+        if self.__status == 'dl':
             return MirrorStatus.STATUS_QUEUEDL
-        else:
-            return MirrorStatus.STATUS_QUEUEUP
+        return MirrorStatus.STATUS_QUEUEUP
 
     def processed_bytes(self):
         return 0
@@ -44,12 +42,9 @@ class QueueStatus:
     def download(self):
         return self
 
-    def cancel_download(self):
-        LOGGER.info(f'Cancelling Queue{self.__state}: {self.__name}')
-        if self.__state == 'Dl':
-            self.__listener.onDownloadError('task have been removed from queue/download')
+    async def cancel_download(self):
+        LOGGER.info(f'Cancelling Queue{self.__status}: {self.__name}')
+        if self.__status == 'dl':
+            await self.__listener.onDownloadError('task have been removed from queue/download')
         else:
-            self.__listener.onUploadError('task have been removed from queue/upload')
-
-    def eng(self):
-        return EngineStatus.STATUS_QUEUE
+            await self.__listener.onUploadError('task have been removed from queue/upload')

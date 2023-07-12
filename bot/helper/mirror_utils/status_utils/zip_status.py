@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
 from time import time
 
-from bot import DOWNLOAD_DIR, LOGGER
-from bot.helper.ext_utils.bot_utils import get_readable_file_size, MirrorStatus, EngineStatus, get_readable_time
+from bot import LOGGER
+from bot.helper.ext_utils.bot_utils import get_readable_file_size, MirrorStatus, get_readable_time, async_to_sync
 from bot.helper.ext_utils.fs_utils import get_path_size
+
 
 class ZipStatus:
     def __init__(self, name, size, gid, listener):
@@ -13,16 +15,17 @@ class ZipStatus:
         self.__uid = listener.uid
         self.__start_time = time()
         self.message = listener.message
+        self.engine = "7z"
 
     def gid(self):
         return self.__gid
 
     def speed_raw(self):
-        return self.processed_bytes() / (time() - self.__start_time)
+        return self.processed_raw() / (time() - self.__start_time)
 
     def progress_raw(self):
         try:
-            return self.processed_bytes() / self.__size * 100
+            return self.processed_raw() / self.__size * 100
         except:
             return 0
 
@@ -35,36 +38,35 @@ class ZipStatus:
     def name(self):
         return self.__name
 
-    def size_raw(self):
-        return self.__size
-
     def size(self):
         return get_readable_file_size(self.__size)
 
     def eta(self):
         try:
-            seconds = (self.size_raw() - self.processed_bytes()) / self.speed_raw()
-            return f'{get_readable_time(seconds)}'
+            seconds = (self.__size - self.processed_raw()) / self.speed_raw()
+            return get_readable_time(seconds)
         except:
             return '-'
 
     def status(self):
         return MirrorStatus.STATUS_ARCHIVING
 
-    def processed_bytes(self):
+    def processed_raw(self):
         if self.__listener.newDir:
-            return get_path_size(f"{DOWNLOAD_DIR}{self.__uid}10000")
+            return async_to_sync(get_path_size, self.__listener.newDir)
         else:
-            return get_path_size(f"{DOWNLOAD_DIR}{self.__uid}") - self.__size
+            return async_to_sync(get_path_size, self.__listener.dir) - self.__size
+
+    def processed_bytes(self):
+        return get_readable_file_size(self.processed_raw())
 
     def download(self):
         return self
 
-    def cancel_download(self):
+    async def cancel_download(self):
         LOGGER.info(f'Cancelling Archive: {self.__name}')
         if self.__listener.suproc is not None:
             self.__listener.suproc.kill()
-        self.__listener.onUploadError('archiving stopped by user!')
-
-    def eng(self):
-        return EngineStatus.STATUS_ZIP
+        else:
+            self.__listener.suproc = 'cancelled'
+        await self.__listener.onUploadError('archiving stopped by user!')
