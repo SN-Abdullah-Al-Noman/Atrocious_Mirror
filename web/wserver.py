@@ -23,7 +23,7 @@ page = """
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Torrent File Selector</title>
-    <link rel="icon" href="https://graph.org/file/1a6ad157f55bc42b548df.png" type="image/jpg">
+    <link rel="icon" href="https://telegra.ph/file/43af672249c94053356c7.jpg" type="image/jpg">
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
       integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
@@ -142,7 +142,7 @@ span{
 
 span.active{
     transform: rotate(90deg);
-    -ms-transform: rotate(90deg); /* for IE  */
+    -ms-transform: rotate(90deg);	 /* for IE  */
     -webkit-transform: rotate(90deg);/* for browsers supporting webkit (such as chrome, firefox, safari etc.). */
     display: inline-block;
 }
@@ -224,16 +224,16 @@ function s_validate() {
     <header>
       <div class="brand">
         <img
-          src="https://graph.org/file/1a6ad157f55bc42b548df.png"
+          src="https://telegra.ph/file/43af672249c94053356c7.jpg"
           alt="logo"
         />
-        <a href="https://t.me/krn2701">
-          <h2 class="name">Qbittorrent Selection</h2>
+        <a href="https://t.me/ItsBitDefender">
+          <h2 class="name">Bittorrent Selection</h2>
         </a>
       </div>
       <div class="social">
-        <a href="https://github.com/weebzone/WZML"><i class="fab fa-github"></i></a>
-        <a href="https://t.me/krn2701"><i class="fab fa-telegram"></i></a>
+        <a href="https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror"><i class="fab fa-github"></i></a>
+        <a href="https://t.me/ItsBitDefender"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
     <div id="sticks">
@@ -420,7 +420,7 @@ code_page = """
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Torrent Code Checker</title>
-    <link rel="icon" href="https://graph.org/file/1a6ad157f55bc42b548df.png" type="image/jpg">
+    <link rel="icon" href="https://telegra.ph/file/43af672249c94053356c7.jpg" type="image/jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -616,16 +616,16 @@ section span{
     <header>
       <div class="brand">
         <img
-          src="https://graph.org/file/1a6ad157f55bc42b548df.png"
+          src="https://telegra.ph/file/43af672249c94053356c7.jpg"
           alt="logo"
         />
-        <a href="https://t.me/krn2701">
-          <h2 class="name">Qbittorrent Selection</h2>
+        <a href="https://t.me/ItsBitDefender">
+          <h2 class="name">Bittorrent Selection</h2>
         </a>
       </div>
       <div class="social">
-        <a href="https://github.com/weebzone/WZML"><i class="fab fa-github"></i></a>
-        <a href="https://t.me/krn2701"><i class="fab fa-telegram"></i></a>
+        <a href="https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror"><i class="fab fa-github"></i></a>
+        <a href="https://t.me/ItsBitDefender"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
     <section>
@@ -676,14 +676,14 @@ def re_verfiy(paused, resumed, client, hash_id):
         client = qbClient(host="localhost", port="8090")
         try:
             client.torrents_file_priority(torrent_hash=hash_id, file_ids=paused, priority=0)
-        except NotFound404Error:
-            raise NotFound404Error
+        except NotFound404Error as e:
+            raise NotFound404Error from e
         except Exception as e:
             LOGGER.error(f"{e} Errored in reverification paused!")
         try:
             client.torrents_file_priority(torrent_hash=hash_id, file_ids=resumed, priority=1)
-        except NotFound404Error:
-            raise NotFound404Error
+        except NotFound404Error as e:
+            raise NotFound404Error from e
         except Exception as e:
             LOGGER.error(f"{e} Errored in reverification resumed!")
         k += 1
@@ -721,6 +721,7 @@ def list_torrent_contents(id_):
 def set_priority(id_):
 
     data = dict(request.form)
+
     resume = ""
     if len(id_) > 20:
         pause = ""
@@ -741,14 +742,14 @@ def set_priority(id_):
 
         try:
             client.torrents_file_priority(torrent_hash=id_, file_ids=pause, priority=0)
-        except NotFound404Error:
-            raise NotFound404Error
+        except NotFound404Error as e:
+            raise NotFound404Error from e
         except Exception as e:
             LOGGER.error(f"{e} Errored in paused")
         try:
             client.torrents_file_priority(torrent_hash=id_, file_ids=resume, priority=1)
-        except NotFound404Error:
-            raise NotFound404Error
+        except NotFound404Error as e:
+            raise NotFound404Error from e
         except Exception as e:
             LOGGER.error(f"{e} Errored in resumed")
         sleep(1)
@@ -772,7 +773,7 @@ def set_priority(id_):
 
 @app.route('/')
 def homepage():
-    return "<h1>See mirror-with-weeb <a href='https://github.com/weebzone/WZML'>@GitHub</a> By <a href='https://github.com/weebzone'>Code With Weeb</a></h1>"
+    return "<h1>See mirror-leech-telegram-bot <a href='https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror'>@GitHub</a> By <a href='https://github.com/SN-Abdullah-Al-Noman'>Noman</a></h1>"
 
 @app.errorhandler(Exception)
 def page_not_found(e):
