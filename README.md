@@ -7,7 +7,9 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 
 ## By [AL-NOMAN](https://github.com/SN-Abdullah-Al-Noman)
 
-1: DATABASE_NAME - provide the database name which you want to use. Default is mltb. If you want to use old database then give the database name.
+### DATABASE_NAME
+
+- Provide the database name which you want to use. Default is mltb. If you want to use old database then give the database name.
 
 
 ## By [anasty17](https://github.com/anasty17)
