@@ -241,9 +241,6 @@ class TgUploader:
     @retry(wait=wait_exponential(multiplier=2, min=4, max=8), stop=stop_after_attempt(3),
            retry=retry_if_exception_type(Exception))
     async def __upload_file(self, cap_mono, file, force_document=False):
-        user_id = self.__listener.message.from_user.id
-        user_dict = user_data.get(user_id, {})
-        leech_dest = user_dict['leech_dest']
         if self.__thumb is not None and not await aiopath.exists(self.__thumb):
             self.__thumb = None
         thumb = self.__thumb
@@ -263,10 +260,7 @@ class TgUploader:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_document(document=self.__up_path, quote=True, thumb=thumb, caption=cap_mono, force_document=True, disable_notification=True, progress=self.__upload_progress)
                 if config_dict['LOG_CHAT_ID'] and config_dict['BOT_PM']:
-                    if leech_dest:
-                        await client.copy_message(chat_id=leech_dest, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                    else:
-                        await client.copy_message(chat_id=user_id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             elif is_video:
                 key = 'videos'
                 duration = (await get_media_info(self.__up_path))[0]
@@ -294,10 +288,7 @@ class TgUploader:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_video(video=self.__up_path, quote=True, caption=cap_mono, duration=duration, width=width, height=height, thumb=thumb, supports_streaming=True, disable_notification=True, progress=self.__upload_progress)
                 if config_dict['LOG_CHAT_ID'] and config_dict['BOT_PM']:
-                    if leech_dest:
-                        await client.copy_message(chat_id=leech_dest, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                    else:
-                        await client.copy_message(chat_id=user_id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             elif is_audio:
                 key = 'audios'
                 duration, artist, title = await get_media_info(self.__up_path)
@@ -305,20 +296,14 @@ class TgUploader:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_audio(audio=self.__up_path, quote=True, caption=cap_mono, duration=duration, performer=artist, title=title, thumb=thumb, disable_notification=True, progress=self.__upload_progress)
                 if config_dict['LOG_CHAT_ID'] and config_dict['BOT_PM']:
-                    if leech_dest:
-                        await client.copy_message(chat_id=leech_dest, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                    else:
-                        await client.copy_message(chat_id=user_id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             else:
                 key = 'photos'
                 if self.__is_cancelled:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_photo(photo=self.__up_path, quote=True, caption=cap_mono, disable_notification=True, progress=self.__upload_progress)
                 if config_dict['LOG_CHAT_ID'] and config_dict['BOT_PM']:
-                    if leech_dest:
-                        await client.copy_message(chat_id=leech_dest, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                    else:
-                        await client.copy_message(chat_id=user_id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             if not self.__is_cancelled and self.__media_group and (self.__sent_msg.video or self.__sent_msg.document):
                 key = 'documents' if self.__sent_msg.document else 'videos'
                 if match := re_match(r'.+(?=\.0*\d+$)|.+(?=\.part\d+\..+)', self.__up_path):
