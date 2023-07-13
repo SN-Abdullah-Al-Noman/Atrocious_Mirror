@@ -44,7 +44,12 @@ class TgUploader:
         self.__as_doc = False
         self.__media_group = False
         self.__upload_dest = ''
-        
+        user_id = self.__listener.message.from_user.id
+        user_dict = user_data.get(user_id, {})
+        if user_dict.get('leech_dest', False):
+            self.__user_leech_dest = user_dict['leech_dest']
+        else:
+            self.__user_leech_dest = user_id
 
     async def __upload_progress(self, current, total):
         if self.__is_cancelled:
@@ -78,8 +83,10 @@ class TgUploader:
 
     async def __msg_to_reply(self):
         if self.__upload_dest:
-            msg = f"Leech Information"
-            msg += f"\n\n<b>Link: </b>{self.__listener.message.link if self.__listener.isSuperGroup else self.__listener.message.text.lstrip('/')}"
+            msg = f"<b>••••• Leech Information: •••••</b>"
+            msg += f"\n\n<b>• User: </b>{self.__listener.message.from_user.mention(style='HTML')}"
+            msg += f"\n<b>• User ID: </b> <code>{self.__listener.message.from_user.id}</code>"
+            msg += f"\n\n<b>• Source: </b>{self.__listener.message.link if self.__listener.isSuperGroup else self.__listener.message.text.lstrip('/')}"
             try:
                 self.__sent_msg = await client.send_message(chat_id=self.__upload_dest, text=msg, disable_web_page_preview=False, disable_notification=True)
             except Exception as e:
@@ -260,7 +267,8 @@ class TgUploader:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_document(document=self.__up_path, quote=True, thumb=thumb, caption=cap_mono, force_document=True, disable_notification=True, progress=self.__upload_progress)
                 if config_dict['LOG_CHAT_ID'] and config_dict['BOT_PM']:
-                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                    if self.__user_leech_dest:
+                        await client.copy_message(chat_id=self.__user_leech_dest, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             elif is_video:
                 key = 'videos'
                 duration = (await get_media_info(self.__up_path))[0]
@@ -288,7 +296,7 @@ class TgUploader:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_video(video=self.__up_path, quote=True, caption=cap_mono, duration=duration, width=width, height=height, thumb=thumb, supports_streaming=True, disable_notification=True, progress=self.__upload_progress)
                 if config_dict['LOG_CHAT_ID'] and config_dict['BOT_PM']:
-                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                    await client.copy_message(chat_id=self.__user_leech_dest, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             elif is_audio:
                 key = 'audios'
                 duration, artist, title = await get_media_info(self.__up_path)
@@ -296,14 +304,14 @@ class TgUploader:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_audio(audio=self.__up_path, quote=True, caption=cap_mono, duration=duration, performer=artist, title=title, thumb=thumb, disable_notification=True, progress=self.__upload_progress)
                 if config_dict['LOG_CHAT_ID'] and config_dict['BOT_PM']:
-                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                    await client.copy_message(chat_id=self.__user_leech_dest, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             else:
                 key = 'photos'
                 if self.__is_cancelled:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_photo(photo=self.__up_path, quote=True, caption=cap_mono, disable_notification=True, progress=self.__upload_progress)
                 if config_dict['LOG_CHAT_ID'] and config_dict['BOT_PM']:
-                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                    await client.copy_message(chat_id=self.__user_leech_dest, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             if not self.__is_cancelled and self.__media_group and (self.__sent_msg.video or self.__sent_msg.document):
                 key = 'documents' if self.__sent_msg.document else 'videos'
                 if match := re_match(r'.+(?=\.0*\d+$)|.+(?=\.part\d+\..+)', self.__up_path):
