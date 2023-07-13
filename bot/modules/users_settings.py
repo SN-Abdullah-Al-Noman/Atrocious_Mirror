@@ -66,8 +66,6 @@ async def get_user_settings(from_user):
     buttons.ibutton("Leech Destination", f"userset {user_id} ldest")
     if user_dict.get('leech_dest', False):
         leech_dest = user_dict['leech_dest']
-    elif 'leech_dest' not in user_dict and (LD := config_dict['LOG_CHAT_ID']):
-        leech_dest = LD
     else:
         leech_dest = 'None'
 
@@ -372,7 +370,7 @@ Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp
     elif data[2] == 'ldest':
         await query.answer()
         buttons = ButtonMaker()
-        if user_dict.get('leech_dest', False) or 'leech_dest' not in user_dict and config_dict['LOG_CHAT_ID']:
+        if user_dict.get('leech_dest', False) or 'leech_dest' not in user_dict:
             buttons.ibutton("Remove Leech Destination",
                             f"userset {user_id} rldest")
         buttons.ibutton("Back", f"userset {user_id} back")
