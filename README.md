@@ -11,7 +11,7 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 
 - Provide the database name which you want to use. Default is mltb. If you want to use old database then give the database name.
 
-# DISABLE_DRIVE_LINK
+### DISABLE_DRIVE_LINK
 Drive link will not show if DISABLE_DRIVE_LINK enabled. But if owner mirror or search anything in drive then drive link will show.
 
 ## By [anasty17](https://github.com/anasty17)
