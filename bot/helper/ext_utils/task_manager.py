@@ -8,14 +8,13 @@ from bot.helper.ext_utils.bot_utils import sync_to_async, get_telegraph_list, ch
 from bot.helper.telegram_helper.message_utils import forcesub, BotPm_check, user_info
 
 async def stop_duplicate_check(name, listener):
-    if (
-        not config_dict['STOP_DUPLICATE']
+    if (not config_dict['STOP_DUPLICATE']
         or listener.isLeech
         or listener.upPath != 'gd'
-        or listener.select
-    ):
+        or listener.select):
         return False, None
     LOGGER.info(f'Checking File/Folder if already in Drive: {name}')
+    user_id = listener.message.from_user.id
     if listener.compress:
         name = f"{name}.zip"
     elif listener.extract:
@@ -24,7 +23,7 @@ async def stop_duplicate_check(name, listener):
         except:
             name = None
     if name is not None:
-        telegraph_content, contents_no = await sync_to_async(GoogleDriveHelper().drive_list, name, stopDup=True)
+        telegraph_content, contents_no = await sync_to_async(GoogleDriveHelper(user_id=user_id).drive_list, name, stopDup=True)
         if telegraph_content:
             msg = f"File/Folder is already available in Drive.\nHere are {contents_no} list results:"
             button = await get_telegraph_list(telegraph_content)
