@@ -13,7 +13,7 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type, RetryError
 
-from bot import config_dict, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, GLOBAL_EXTENSION_FILTER
+from bot import config_dict, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, GLOBAL_EXTENSION_FILTER, OWNER_ID
 from bot.helper.ext_utils.bot_utils import setInterval
 from bot.helper.ext_utils.fs_utils import get_mime_type
 from bot.helper.ext_utils.bot_utils import async_to_sync, get_readable_file_size
@@ -24,7 +24,7 @@ getLogger('googleapiclient.discovery').setLevel(ERROR)
 
 class GoogleDriveHelper:
 
-    def __init__(self, name=None, path=None, listener=None):
+    def __init__(self, name=None, path=None, listener=None, user_id=None):
         self.__OAUTH_SCOPE = ['https://www.googleapis.com/auth/drive']
         self.__G_DRIVE_DIR_MIME_TYPE = "application/vnd.google-apps.folder"
         self.__G_DRIVE_BASE_DOWNLOAD_URL = "https://drive.google.com/uc?id={}&export=download"
@@ -53,6 +53,7 @@ class GoogleDriveHelper:
         self.__file_processed_bytes = 0
         self.__processed_bytes = 0
         self.name = name
+        self.user_id = user_id
 
     @property
     def speed(self):
@@ -587,7 +588,13 @@ class GoogleDriveHelper:
                 if mime_type == "application/vnd.google-apps.folder":
                     furl = f"https://drive.google.com/drive/folders/{file.get('id')}"
                     msg += f"📁 <code>{file.get('name')}<br>(folder)</code><br>"
-                    msg += f"<b><a href={furl}>Drive Link</a></b>"
+                    if config_dict['DISABLE_DRIVE_LINK']:
+                        if self.user_id == OWNER_ID:
+                            msg += f"<b><a href={furl}>Drive Link</a></b>"
+                        else:
+                            pass
+                    else:
+                        msg += f"<b><a href={furl}>Drive Link</a></b>"
                     if index_url:
                         if isRecur:
                             url_path = "/".join([rquote(n, safe='')
@@ -598,12 +605,25 @@ class GoogleDriveHelper:
                         msg += f' <b>| <a href="{url}">Index Link</a></b>'
                 elif mime_type == 'application/vnd.google-apps.shortcut':
                     furl = f"https://drive.google.com/drive/folders/{file.get('id')}"
-                    msg += f"⁍<a href='https://drive.google.com/drive/folders/{file.get('id')}'>{file.get('name')}" \
-                        f"</a> (shortcut)"
+                    if config_dict['DISABLE_DRIVE_LINK']:
+                        if self.user_id == OWNER_ID:
+                            msg += f"⁍<a href='https://drive.google.com/drive/folders/{file.get('id')}'>{file.get('name')}" \
+                                f"</a> (shortcut)"
+                        else:
+                            pass
+                    else:
+                        msg += f"⁍<a href='https://drive.google.com/drive/folders/{file.get('id')}'>{file.get('name')}" \
+                                f"</a> (shortcut)"
                 else:
                     furl = f"https://drive.google.com/uc?id={file.get('id')}&export=download"
                     msg += f"📄 <code>{file.get('name')}<br>({get_readable_file_size(int(file.get('size', 0)))})</code><br>"
-                    msg += f"<b><a href={furl}>Drive Link</a></b>"
+                    if config_dict['DISABLE_DRIVE_LINK']:
+                        if self.user_id == OWNER_ID:
+                            msg += f"<b><a href={furl}>Drive Link</a></b>"
+                        else:
+                            pass
+                    else:
+                        msg += f"<b><a href={furl}>Drive Link</a></b>"
                     if index_url:
                         if isRecur:
                             url_path = "/".join(rquote(n, safe='')
