@@ -22,9 +22,9 @@ async def list_buttons(user_id, isRecursive=True):
     return buttons.build_menu(2)
 
 
-async def _list_drive(key, message, item_type, isRecursive):
+async def _list_drive(key, message, item_type, isRecursive, user_id):
     LOGGER.info(f"listing: {key}")
-    gdrive = GoogleDriveHelper()
+    gdrive = GoogleDriveHelper(user_id=user_id)
     telegraph_content, contents_no = await sync_to_async(gdrive.drive_list, key, isRecursive=isRecursive, itemType=item_type)
     if telegraph_content:
         try:
@@ -58,7 +58,7 @@ async def select_type(_, query):
     item_type = data[2]
     isRecursive = eval(data[3])
     await editMessage(message, f"<b>Searching for <i>{key}</i></b>")
-    await _list_drive(key, message, item_type, isRecursive)
+    await _list_drive(key, message, item_type, isRecursive, user_id)
 
 
 async def drive_list(_, message):

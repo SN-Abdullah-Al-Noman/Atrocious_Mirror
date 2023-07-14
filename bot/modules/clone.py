@@ -119,6 +119,7 @@ async def rcloneNode(client, message, link, dst_path, rcf, tag):
 
 
 async def gdcloneNode(message, link, tag):
+    user_id = message.from_user.id
     if is_share_link(link):
         try:
             link = await sync_to_async(direct_link_generator, link)
@@ -129,7 +130,7 @@ async def gdcloneNode(message, link, tag):
                 await sendMessage(message, str(e))
                 return
     if is_gdrive_link(link):
-        gd = GoogleDriveHelper()
+        gd = GoogleDriveHelper(user_id=user_id)
         name, mime_type, size, files, _ = await sync_to_async(gd.count, link)
         if mime_type is None:
             await sendMessage(message, name)
@@ -148,7 +149,7 @@ async def gdcloneNode(message, link, tag):
             return
         await listener.onDownloadStart()
         LOGGER.info(f'Clone Started: Name: {name} - Source: {link}')
-        drive = GoogleDriveHelper(name, listener=listener)
+        drive = GoogleDriveHelper(name, listener=listener, user_id=user_id)
         if files <= 20:
             msg = await sendMessage(message, f"Cloning: <code>{link}</code>")
             link, size, mime_type, files, folders = await sync_to_async(drive.clone, link)
