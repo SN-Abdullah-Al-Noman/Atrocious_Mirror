@@ -17,6 +17,10 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 ### SAFE_MODE 
 - File name won't show if SAFE_MODE enabled.
 
+### BOT_PM
+
+- File and link will send in BOT_PM if enabled. User can set their own custom destination for receiving leech file.
+
 ## By [anasty17](https://github.com/anasty17)
 
 In each single file there is a major change from base code, it's almost totaly different. Here some of features and fixes that I remember.
