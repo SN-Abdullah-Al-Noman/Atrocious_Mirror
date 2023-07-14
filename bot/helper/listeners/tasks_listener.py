@@ -336,7 +336,10 @@ class MirrorLeechListener:
     async def onUploadComplete(self, link, size, files, folders, mime_type, name, rclonePath=''):
         if self.isSuperGroup and config_dict['INCOMPLETE_TASK_NOTIFIER'] and DATABASE_URL:
             await DbManger().rm_complete_task(self.message.link)
-        msg = f"<b>Name: </b><code>{'File name is hidden.' if config_dict['SAFE_MODE'] else '<escape(name)'}</code>"
+        if config_dict['SAFE_MODE']:
+            msg = f"<b>Name: </b>Safe Mode Enabled"
+        else:
+            msg = f"<b>Name: </b><code>{escape(name)}</code>"
         msg +=f'\n\n<b>• Size: </b>{get_readable_file_size(size)}'
         LOGGER.info(f'Task Done: {name}')
         if self.isLeech:

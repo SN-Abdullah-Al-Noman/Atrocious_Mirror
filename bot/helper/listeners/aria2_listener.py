@@ -46,6 +46,7 @@ async def __onDownloadStarted(api, gid):
                     await sleep(3)
                     download = download.live
                 LOGGER.info('Checking File/Folder if already in Drive...')
+                user_id = listener.message.from_user.id
                 name = download.name
                 if listener.compress:
                     name = f"{name}.zip"
@@ -55,7 +56,7 @@ async def __onDownloadStarted(api, gid):
                     except:
                         name = None
                 if name is not None:
-                    telegraph_content, contents_no = await sync_to_async(GoogleDriveHelper().drive_list, name, True)
+                    telegraph_content, contents_no = await sync_to_async(GoogleDriveHelper(user_id=user_id).drive_list, name, True)
                     if telegraph_content:
                         msg = f"File/Folder is already available in Drive.\nHere are {contents_no} list results:"
                         button = await get_telegraph_list(telegraph_content)
