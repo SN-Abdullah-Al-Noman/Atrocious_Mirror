@@ -16,4 +16,4 @@ async def callback_handler(client, query):
     if query.data == "close":
         await query.message.edit_reply_markup(None)
 
-bot.add_handler(MessageHandler(keyboard, filters=command("usertd")))
+bot.add_handler(MessageHandler(keyboard, filters=command("usertmd")))
