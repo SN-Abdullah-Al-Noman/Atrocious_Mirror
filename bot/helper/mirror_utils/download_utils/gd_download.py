@@ -11,7 +11,7 @@ from bot.helper.ext_utils.bot_utils import sync_to_async
 from bot.helper.ext_utils.task_manager import is_queued, stop_duplicate_check, limit_checker
 
 
-async def add_gd_download(link, path, listener, newname): 
+async def add_gd_download(link, path, listener, newname):
     drive = GoogleDriveHelper(user_id=listener.message.from_user.id)
     name, mime_type, size, _, _ = await sync_to_async(drive.count, link)
     if mime_type is None:
