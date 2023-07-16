@@ -38,6 +38,7 @@ class _BotCommands:
         self.RssCommand = f'rss{CMD_SUFFIX}'
         self.GDCleanCommand = [f'gdclean{CMD_SUFFIX}', f'gc{CMD_SUFFIX}']
         self.BroadcastCommand = [f'broadcast{CMD_SUFFIX}', f'bc{CMD_SUFFIX}']
+        self.UserTdCommand = f'usertd{CMD_SUFFIX}'
 
 
 BotCommands = _BotCommands()
