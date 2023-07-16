@@ -415,7 +415,7 @@ def get_gdrive_id(user_id):
 
 def get_index_url(user_id):
     user_dict = user_data.get(user_id, {})
-    INDEX_URL = ''
+    INDEX_URL = config_dict['INDEX_URL']
     if not config_dict['USER_TD_ENABLED']:
         INDEX_URL = config_dict['INDEX_URL']
         
