@@ -161,6 +161,18 @@ class DbManger:
         await self.__db.tasks[bot_id].delete_one({'_id': link})
         self.__conn.close
 
+    async def get_pm_uids(self):
+        if self.__err:
+            return
+        return [doc['_id'] async for doc in self.__db.pm_users[bot_id].find({})]
+        self.__conn.close
+
+    async def rm_pm_user(self, user_id):
+        if self.__err:
+            return
+        await self.__db.pm_users[bot_id].delete_one({'_id': user_id})
+        self.__conn.close
+
     async def get_incomplete_tasks(self):
         notifier_dict = {}
         if self.__err:
