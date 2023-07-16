@@ -397,6 +397,35 @@ async def is_blacklist(message):
         return await message.reply(f"<b>Hey {tag}.</b>\n\n<b>You are blacklisted ⚠️.</b>\n\n<b>Possible Reasons:</b>\n<b>1:</b> Mirror or Leech P*r*n Video.\n<b>2:</b> Mirror or Leech illegal files.\n\nContact @ItsBitDefender to remove yourself from blacklist.")
 
 
+def get_gdrive_id(user_id):
+    user_dict = user_data.get(user_id, {})
+    if not config_dict['USER_TD_ENABLED']:
+        GDRIVE_ID = config_dict['GDRIVE_ID']
+
+    if config_dict['USER_TD_ENABLED'] and user_dict.get('users_gdrive_id'):
+        GDRIVE_ID = user_dict['users_gdrive_id']
+    else:
+        GDRIVE_ID = None
+        
+    if GDRIVE_ID is None:
+        GDRIVE_ID = config_dict['GDRIVE_ID']
+        
+    return GDRIVE_ID
+
+
+def get_index_url(user_id):
+    user_dict = user_data.get(user_id, {})
+    INDEX_URL = ''
+    if not config_dict['USER_TD_ENABLED']:
+        INDEX_URL = config_dict['INDEX_URL']
+        
+    if config_dict['USER_TD_ENABLED'] and user_dict.get('users_gdrive_id'):
+        if user_dict.get('users_index_url'):
+            INDEX_URL = user_dict['users_index_url']
+        
+    return INDEX_URL
+
+
 async def set_commands(client):
     if config_dict['SET_COMMANDS']:
         await client.set_bot_commands([
@@ -419,4 +448,5 @@ async def set_commands(client):
         BotCommand(f'{BotCommands.HelpCommand}', 'Get detailed help'),
         BotCommand(f'{BotCommands.BotSetCommand[0]}', 'Change Bot settings'),
         BotCommand(f'{BotCommands.RestartCommand}', 'Restart the bot'),
+        BotCommand(f'{BotCommands.UserTdCommand}', 'Edit your own td and index settings'),
             ])
