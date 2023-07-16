@@ -343,6 +343,9 @@ DIRECT_LIMIT = '' if len(DIRECT_LIMIT) == 0 else float(DIRECT_LIMIT)
 DISABLE_DRIVE_LINK = environ.get('DISABLE_DRIVE_LINK', '')
 DISABLE_DRIVE_LINK = DISABLE_DRIVE_LINK.lower() == 'true'
 
+USER_TD_ENABLED = environ.get('USER_TD_ENABLED', '')
+USER_TD_ENABLED = USER_TD_ENABLED.lower() == 'true'
+
 FSUB_IDS = environ.get('FSUB_IDS', '')
 if len(FSUB_IDS) == 0:
     FSUB_IDS = ''
@@ -372,11 +375,15 @@ MEGA_LIMIT = '' if len(MEGA_LIMIT) == 0 else float(MEGA_LIMIT)
 MIRROR_ENABLED = environ.get('MIRROR_ENABLED', '')
 MIRROR_ENABLED = MIRROR_ENABLED.lower() == 'true'
 
+SA_MAIL = environ.get('SA_MAIL', '')
+if len(SA_MAIL) == 0:
+    SA_MAIL = ''
+            
 SAFE_MODE = environ.get('SAFE_MODE', '')
 if len(SAFE_MODE) == 0:
     log_warning('SAFE_MODE Is Not Enabled')
     SAFE_MODE = ''
-
+            
 SET_COMMANDS = environ.get('SET_COMMANDS', '')
 SET_COMMANDS = SET_COMMANDS.lower() == 'true'
 
@@ -452,6 +459,7 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'RCLONE_SERVE_PORT': RCLONE_SERVE_PORT,
                'RSS_CHAT': RSS_CHAT,
                'RSS_DELAY': RSS_DELAY,
+               'SA_MAIL': SA_MAIL,
                'SAFE_MODE': SAFE_MODE,
                'SEARCH_API_LINK': SEARCH_API_LINK,
                'SEARCH_LIMIT': SEARCH_LIMIT,
@@ -473,6 +481,7 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'UPTOBOX_TOKEN': UPTOBOX_TOKEN,
                'USER_MAX_TASKS': USER_MAX_TASKS,
                'USER_SESSION_STRING': USER_SESSION_STRING,
+               'USER_TD_ENABLED': USER_TD_ENABLED,
                'USE_SERVICE_ACCOUNTS': USE_SERVICE_ACCOUNTS,
                'WEB_PINCODE': WEB_PINCODE,
                'YTDLP_ENABLED': YTDLP_ENABLED,

@@ -20,7 +20,7 @@ from .helper.telegram_helper.message_utils import sendMessage, editMessage, send
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.listeners.aria2_listener import start_aria2_listener
-from .modules import authorize, broadcast, bot_settings, cancel_mirror, clone, eval, extra, gd_clean, gd_count, gd_delete, gd_list, mirror_leech, rss, shell, status, torrent_search, torrent_select, users_settings, ytdlp
+from .modules import authorize, broadcast, bot_settings, cancel_mirror, clone, eval, extra, gd_clean, gd_count, gd_delete, gd_list, mirror_leech, rss, shell, status, torrent_search, torrent_select, users_settings, user_td, ytdlp
 
 
 async def stats(client, message):
