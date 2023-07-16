@@ -9,7 +9,7 @@ from asyncio import create_subprocess_exec, sleep, Event
 from bot import Interval, aria2, DOWNLOAD_DIR, download_dict, download_dict_lock, LOGGER, DATABASE_URL, \
     MAX_SPLIT_SIZE, config_dict, status_reply_dict_lock, user_data, non_queued_up, non_queued_dl, queued_up, \
     queued_dl, queue_dict_lock, GLOBAL_EXTENSION_FILTER, bot_name, OWNER_ID
-from bot.helper.ext_utils.bot_utils import sync_to_async, get_readable_file_size
+from bot.helper.ext_utils.bot_utils import sync_to_async, get_readable_file_size, get_index_url
 from bot.helper.ext_utils.fs_utils import get_base_name, get_path_size, clean_download, clean_target, \
     is_first_archive_split, is_archive, is_archive_split, join_files
 from bot.helper.ext_utils.leech_utils import split_file
@@ -317,7 +317,7 @@ class MirrorLeechListener:
         elif self.upPath == 'gd':
             size = await get_path_size(up_path)
             LOGGER.info(f"Upload Name: {up_name}")
-            drive = GoogleDriveHelper(up_name, up_dir, self)
+            drive = GoogleDriveHelper(up_name, up_dir, self, user_id=self.message.from_user.id)
             upload_status = GdriveStatus(drive, size, self.message, gid, 'up')
             async with download_dict_lock:
                 download_dict[self.uid] = upload_status
@@ -334,13 +334,15 @@ class MirrorLeechListener:
             await RCTransfer.upload(up_path, size)
 
     async def onUploadComplete(self, link, size, files, folders, mime_type, name, rclonePath=''):
+        INDEX_URL = get_index_url(user_id=self.message.from_user.id)
         if self.isSuperGroup and config_dict['INCOMPLETE_TASK_NOTIFIER'] and DATABASE_URL:
             await DbManger().rm_complete_task(self.message.link)
         if config_dict['SAFE_MODE']:
-            msg = f"<b>Name: </b>Safe Mode Enabled"
+            gpmsg = f"<b>Name: </b>Safe Mode Enabled"
         else:
-            msg = f"<b>Name: </b><code>{escape(name)}</code>"
-        msg +=f'\n\n<b>• Size: </b>{get_readable_file_size(size)}'
+            gpmsg = f"<b>Name: </b><code>{escape(name)}</code>"
+        bpmsg = f"<b>Name: </b><code>{escape(name)}</code>"
+        msg = f'\n\n<b>• Size: </b>{get_readable_file_size(size)}'
         LOGGER.info(f'Task Done: {name}')
         if self.isLeech:
             msg += f'\n<b>• Total Files: </b>{folders}'
@@ -355,7 +357,7 @@ class MirrorLeechListener:
             else:
                 bmsg = ''
             if not files:
-                await sendMessage(self.message, msg)
+                await sendMessage(self.message, gpmsg + msg)
             else:
                 fmsg = ''
                 for index, (link, name) in enumerate(files.items(), start=1):
@@ -366,9 +368,9 @@ class MirrorLeechListener:
                         fmsg = ''
                 if fmsg != '':
                     if config_dict['BOT_PM']:
-                        await sendMessage(self.message, msg + fmsg + bmsg, bot_pm_button.build_menu(1))
+                        await sendMessage(self.message, gpmsg + msg + fmsg + bmsg, bot_pm_button.build_menu(1))
                     else:
-                        await sendMessage(self.message, msg + fmsg)
+                        await sendMessage(self.message, gpmsg + msg + fmsg)
             if self.seed:
                 if self.newDir:
                     await clean_target(self.newDir)
@@ -401,7 +403,7 @@ class MirrorLeechListener:
                     if mime_type == "Folder":
                         share_url += '/'
                     buttons.ubutton("🔗 Rclone Link", share_url)
-                elif (INDEX_URL := config_dict['INDEX_URL']) and not rclonePath:
+                elif INDEX_URL and not rclonePath:
                     url_path = rutils.quote(f'{name}')
                     share_url = f'{INDEX_URL}/{url_path}'
                     if mime_type == "Folder":
@@ -419,13 +421,13 @@ class MirrorLeechListener:
                 bmsg = f'\n\n<b>Links has been sent in private.</b>'
                 bot_pm_button = ButtonMaker()
                 bot_pm_button.ubutton("📥 Click Here To Go Bot PM", f"https://t.me/{bot_name}")
-                await send_to_pm(self.message, msg, button)
+                await send_to_pm(self.message, bpmsg + msg, button)
                 if self.message.chat.type != self.message.chat.type.PRIVATE:
-                    await sendMessage(self.message, msg + bmsg, bot_pm_button.build_menu(1))
+                    await sendMessage(self.message, gpmsg + msg + bmsg, bot_pm_button.build_menu(1))
             else:
-                await sendMessage(self.message, msg, button)
+                await sendMessage(self.message, gpmsg + msg, button)
             if config_dict['LOG_CHAT_ID']:
-                await send_to_log_chat(self.message, msg, button)
+                await send_to_log_chat(self.message, bpmsg + msg, button)
             if self.seed:
                 if self.newDir:
                     await clean_target(self.newDir)
