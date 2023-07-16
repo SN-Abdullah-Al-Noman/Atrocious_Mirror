@@ -14,7 +14,7 @@ from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type, RetryError
 
 from bot import config_dict, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, GLOBAL_EXTENSION_FILTER, OWNER_ID
-from bot.helper.ext_utils.bot_utils import setInterval
+from bot.helper.ext_utils.bot_utils import setInterval, get_gdrive_id
 from bot.helper.ext_utils.fs_utils import get_mime_type
 from bot.helper.ext_utils.bot_utils import async_to_sync, get_readable_file_size
 
@@ -204,6 +204,7 @@ class GoogleDriveHelper:
         return msg
         
     def upload(self, file_name, size):
+        GDRIVE_ID = get_gdrive_id(user_id=self.user_id)
         self.__is_uploading = True
         item_path = f"{self.__path}/{file_name}"
         LOGGER.info(f"Uploading: {item_path}")
@@ -214,7 +215,7 @@ class GoogleDriveHelper:
                     raise Exception('This file extension is excluded by extension filter!')
                 mime_type = get_mime_type(item_path)
                 link = self.__upload_file(
-                    item_path, file_name, mime_type, config_dict['GDRIVE_ID'], is_dir=False)
+                    item_path, file_name, mime_type, GDRIVE_ID, is_dir=False)
                 if self.__is_cancelled:
                     return
                 if link is None:
@@ -223,7 +224,7 @@ class GoogleDriveHelper:
             else:
                 mime_type = 'Folder'
                 dir_id = self.__create_directory(ospath.basename(
-                    ospath.abspath(file_name)), config_dict['GDRIVE_ID'])
+                    ospath.abspath(file_name)), GDRIVE_ID)
                 result = self.__upload_dir(item_path, dir_id)
                 if result is None:
                     raise Exception('Upload has been manually cancelled!')
@@ -379,6 +380,7 @@ class GoogleDriveHelper:
         return
 
     def clone(self, link):
+        GDRIVE_ID = get_gdrive_id(user_id=self.user_id)
         self.__is_cloning = True
         self.__start_time = time()
         self.__total_files = 0
@@ -394,7 +396,7 @@ class GoogleDriveHelper:
             mime_type = meta.get("mimeType")
             if mime_type == self.__G_DRIVE_DIR_MIME_TYPE:
                 dir_id = self.__create_directory(
-                    meta.get('name'), config_dict['GDRIVE_ID'])
+                    meta.get('name'), GDRIVE_ID)
                 self.__cloneFolder(meta.get('name'), meta.get(
                     'name'), meta.get('id'), dir_id)
                 durl = self.__G_DRIVE_DIR_BASE_DOWNLOAD_URL.format(dir_id)
@@ -406,7 +408,7 @@ class GoogleDriveHelper:
                 size = self.__processed_bytes
             else:
                 file = self.__copyFile(
-                    meta.get('id'), config_dict['GDRIVE_ID'])
+                    meta.get('id'), GDRIVE_ID)
                 msg += f'<b>Name: </b><code>{file.get("name")}</code>'
                 durl = self.__G_DRIVE_BASE_DOWNLOAD_URL.format(file.get("id"))
                 if mime_type is None:
