@@ -7,10 +7,9 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 
 ## By [AL-NOMAN](https://github.com/SN-Abdullah-Al-Noman)
 
-### USER BLACKLIST 
+### BOT_PM
 
-- /addblacklist {user_id}
-- /rmblacklist {user_id}
+- File and link will send in BOT_PM if enabled. User can set their own custom destination for receiving leech file.
 
 ### DATABASE_NAME
 
@@ -24,9 +23,15 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 
 - File name won't show if SAFE_MODE enabled.
 
-### BOT_PM
+### USER BLACKLIST 
 
-- File and link will send in BOT_PM if enabled. User can set their own custom destination for receiving leech file.
+- /addblacklist {user_id}
+- /rmblacklist {user_id}
+
+### User Team Drive Support
+
+- File will mirror or clone in your own share drive. Command- usertd
+
 
 ## By [anasty17](https://github.com/anasty17)
 
