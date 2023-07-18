@@ -7,7 +7,7 @@ from random import choice as rchoice
 from aiofiles.os import remove as aioremove
 from pyrogram.errors import ReplyMarkupInvalid, FloodWait, PeerIdInvalid, RPCError, UserNotParticipant, PhotoInvalidDimensions, WebpageCurlFailed, MediaEmpty
 
-from bot import config_dict, LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, user, download_dict_lock, OWNER_ID
+from bot import config_dict, LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, user, download_dict_lock, bot_name, OWNER_ID
 from bot.helper.ext_utils.bot_utils import get_readable_message, setInterval, sync_to_async
 from bot.helper.ext_utils.exceptions import TgLinkException
 from bot.helper.telegram_helper.button_build import ButtonMaker
