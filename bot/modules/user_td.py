@@ -46,7 +46,7 @@ async def get_user_settings(from_user):
 \n<b>Please add the S.A mail in your share drive as content manager</b>
 \n<b>S.A Mail: </b><code>{SA_MAIL}</code>"""
 
-    return text, buttons.build_menu(1)
+    return text, buttons.build_menu(2)
 
 
 async def update_user_settings(query):
