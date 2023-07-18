@@ -93,7 +93,7 @@ Leech Destination is <code>{leech_dest}</code>
 Rclone Config <b>{rccmsg}</b>
 YT-DLP Options is <b><code>{escape(ytopt)}</code></b>"""
 
-    return text, buttons.build_menu(1)
+    return text, buttons.build_menu(2)
 
 
 async def update_user_settings(query):
