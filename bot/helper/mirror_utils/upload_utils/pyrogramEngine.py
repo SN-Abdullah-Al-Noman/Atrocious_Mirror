@@ -86,7 +86,7 @@ class TgUploader:
             msg = f"<b>••••• Leech Information: •••••</b>"
             msg += f"\n\n<b>• User: </b>{self.__listener.message.from_user.mention(style='HTML')}"
             msg += f"\n<b>• User ID: </b> <code>{self.__listener.message.from_user.id}</code>"
-            msg += f"\n\n<b>• Source: </b>{self.__listener.message.link if self.__listener.isSuperGroup else self.__listener.message.text.lstrip('/')}"
+            msg += f"\n<b><a href='{self.__listener.message.link if self.__listener.isSuperGroup else self.__listener.message.text.lstrip('/')}'>• Leech Source Link</a></b>"
             try:
                 self.__sent_msg = await client.send_message(chat_id=self.__upload_dest, text=msg, disable_web_page_preview=False, disable_notification=True)
             except Exception as e:
