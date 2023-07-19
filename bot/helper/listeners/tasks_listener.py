@@ -350,12 +350,6 @@ class MirrorLeechListener:
                 msg += f'\n<b>• Corrupted Files: </b>{mime_type}'
             msg += f'\n\n<b>• User: </b>{self.tag}'
             msg += f'\n<b>• User ID: </b> <code>{self.message.from_user.id}</code>\n\n'
-            if config_dict['BOT_PM']:
-                bmsg = f'\n<b>Files has been sent in private.</b>'
-                bot_pm_button = ButtonMaker()
-                bot_pm_button.ubutton("📥 Click Here To Go Bot PM", f"https://t.me/{bot_name}")
-            else:
-                bmsg = ''
             if not files:
                 await sendMessage(self.message, gpmsg + msg)
             else:
@@ -367,8 +361,11 @@ class MirrorLeechListener:
                         await sleep(1)
                         fmsg = ''
                 if fmsg != '':
-                    if config_dict['BOT_PM']:
-                        await sendMessage(self.message, gpmsg + msg + fmsg + bmsg, bot_pm_button.build_menu(1))
+                    if config_dict['BOT_PM'] and self.message.chat.type != self.message.chat.type.PRIVATE:
+                        lbpmsg = f'\n<b>Files has been sent in private.</b>'
+                        bot_pm_button = ButtonMaker()
+                        bot_pm_button.ubutton("📥 Click Here To Go Bot PM", f"https://t.me/{bot_name}")
+                        await sendMessage(self.message, gpmsg + msg + fmsg + lbpmsg, bot_pm_button.build_menu(1))
                     else:
                         await sendMessage(self.message, gpmsg + msg + fmsg)
             if self.seed:
