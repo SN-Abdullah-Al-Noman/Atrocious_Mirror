@@ -20,7 +20,7 @@ from .helper.telegram_helper.message_utils import sendMessage, editMessage, send
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.listeners.aria2_listener import start_aria2_listener
-from .modules import authorize, broadcast, bot_settings, cancel_mirror, clone, eval, extra, gd_clean, gd_count, gd_delete, gd_list, mirror_leech, rss, shell, status, torrent_search, torrent_select, users_settings, user_td, ytdlp
+from .modules import authorize, broadcast, bot_settings, cancel_mirror, clone, eval, extra, gd_clean, gd_count, gd_delete, gd_list, mirror_leech, rss, shell, status, torrent_search, torrent_select, user_info, users_settings, user_td, ytdlp
 
 
 async def stats(client, message):
@@ -71,6 +71,7 @@ async def start(client, message):
         reply_markup = buttons.build_menu(2)
         start_string = f'''This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\nType /{BotCommands.HelpCommand} to get a list of available commands'''
         await sendMessage(message, start_string, reply_markup)
+    await DbManger().update_pm_users(message.from_user.id)
 
 async def restart(client, message):
     restart_message = await sendMessage(message, "Restarting...")
