@@ -77,27 +77,28 @@ async def removeSudo(client, message):
         update_user_ldata(id_, 'is_sudo', False)
         if DATABASE_URL:
             await DbManger().update_user_data(id_)
-        msg = 'Demoted'
+        msg = 'Demoted from sudo'
     else:
         msg = "Give ID or Reply To message of whom you want to remove from Sudo"
     await sendMessage(message, msg)
 
 
-async def add_blacklist(client, message):
+async def add_to_blacklist(client, message):
     id_ = ""
     msg = message.text.split()
     if len(msg) > 1:
         id_ = int(msg[1].strip())
     elif reply_to := message.reply_to_message:
         id_ = reply_to.from_user.id
-    if id_ == OWNER_ID:
-        msg = f"<b>{id_}</b> is OWNER_ID. I can't do anything against the OWNER."
-    elif id_:
-        if id_ in user_data and user_data[id_].get('is_blacklist'):
+    if id_:
+        if id_ == OWNER_ID:
+            msg = 'You are playing with owner'
+        elif id_ in user_data and user_data[id_].get('is_blacklist'):
             msg = 'User already in blacklist.'
         else:
             update_user_ldata(id_, 'is_blacklist', True)
             update_user_ldata(id_, 'is_good_friend', False)
+            update_user_ldata(id_, 'is_paid_user', False)
             update_user_ldata(id_, 'is_sudo', False)
             if DATABASE_URL:
                 await DbManger().update_user_data(id_)
@@ -107,7 +108,7 @@ async def add_blacklist(client, message):
     await sendMessage(message, msg)
 
 
-async def remove_blacklist(client, message):
+async def remove_from_blacklist(client, message):
     id_ = ""
     msg = message.text.split()
     if len(msg) > 1:
@@ -115,7 +116,9 @@ async def remove_blacklist(client, message):
     elif reply_to := message.reply_to_message:
         id_ = reply_to.from_user.id
     if id_:
-        if id_ not in user_data and user_data[id_].get('is_blacklist'):
+        if id_ == OWNER_ID:
+            msg = 'You are playing with owner'
+        elif id_ not in user_data and user_data[id_].get('is_blacklist'):
             msg = 'User not in blacklist.'
         else:
             update_user_ldata(id_, 'is_blacklist', False)
@@ -127,14 +130,11 @@ async def remove_blacklist(client, message):
     await sendMessage(message, msg)
 
 
-bot.add_handler(MessageHandler(add_blacklist, filters=(command("addblacklist") & CustomFilters.sudo)))
-bot.add_handler(MessageHandler(remove_blacklist, filters=(command("rmblacklist") & CustomFilters.sudo)))
+bot.add_handler(MessageHandler(add_to_blacklist, filters=(command("addblacklist") & CustomFilters.sudo)))
+bot.add_handler(MessageHandler(remove_from_blacklist, filters=(command("rmblacklist") & CustomFilters.sudo)))
 
-bot.add_handler(MessageHandler(authorize, filters=command(
-    BotCommands.AuthorizeCommand) & CustomFilters.sudo))
-bot.add_handler(MessageHandler(unauthorize, filters=command(
-    BotCommands.UnAuthorizeCommand) & CustomFilters.sudo))
-bot.add_handler(MessageHandler(addSudo, filters=command(
-    BotCommands.AddSudoCommand) & CustomFilters.sudo))
-bot.add_handler(MessageHandler(removeSudo, filters=command(
-    BotCommands.RmSudoCommand) & CustomFilters.sudo))
+bot.add_handler(MessageHandler(authorize, filters=command(BotCommands.AuthorizeCommand) & CustomFilters.sudo))
+bot.add_handler(MessageHandler(unauthorize, filters=command(BotCommands.UnAuthorizeCommand) & CustomFilters.sudo))
+
+bot.add_handler(MessageHandler(addSudo, filters=command(BotCommands.AddSudoCommand) & CustomFilters.sudo))
+bot.add_handler(MessageHandler(removeSudo, filters=command(BotCommands.RmSudoCommand) & CustomFilters.sudo))
