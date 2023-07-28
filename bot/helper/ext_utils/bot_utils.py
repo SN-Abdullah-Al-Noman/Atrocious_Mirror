@@ -394,7 +394,7 @@ async def is_blacklist(message):
         tag = message.from_user.mention
    
     if id_ in user_data and user_data[id_].get('is_blacklist'):
-        return await message.reply(f"<b>Hey {tag}.</b>\n\n<b>You are blacklisted ⚠️.</b>\n\n<b>Possible Reasons:</b>\n<b>1:</b> Mirror or Leech P*r*n Video.\n<b>2:</b> Mirror or Leech illegal files.\n\nContact @ItsBitDefender to remove yourself from blacklist.")
+        return await message.reply(f"<b>Hey {tag}.</b>\n<b>User Id: </b><code>{id_}</code>.\n\n<b>You are blacklisted ⚠️.</b>\n\n<b>Possible Reasons:</b>\n<b>1:</b> Mirror or Leech P*r*n Video.\n<b>2:</b> Mirror or Leech illegal files.\n\nContact with bot owner to remove yourself from blacklist.")
 
 
 def get_gdrive_id(user_id):
