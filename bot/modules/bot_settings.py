@@ -852,7 +852,7 @@ async def load_config():
 
     SA_MAIL = environ.get('SA_MAIL', '')
     if len(SA_MAIL) == 0:
-      SA_MAIL = ''
+        SA_MAIL = ''
   
     SAFE_MODE = environ.get('SAFE_MODE', '')
     if len(SAFE_MODE) == 0:
