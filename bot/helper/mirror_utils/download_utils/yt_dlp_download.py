@@ -7,11 +7,14 @@ from yt_dlp import YoutubeDL, DownloadError
 from re import search as re_search
 
 from bot import download_dict_lock, download_dict, non_queued_dl, queue_dict_lock
-from bot.helper.telegram_helper.message_utils import sendStatusMessage
+from bot.helper.telegram_helper.message_utils import sendStatusMessage, check_filename
 from ..status_utils.yt_dlp_download_status import YtDlpDownloadStatus
 from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
-from bot.helper.ext_utils.bot_utils import sync_to_async, async_to_sync
+from bot.helper.ext_utils.bot_utils import sync_to_async, async_to_sync, get_telegraph_list
 from bot.helper.ext_utils.task_manager import is_queued, stop_duplicate_check, limit_checker
+from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
+from bot.helper.ext_utils.fs_utils import get_base_name
+
 
 LOGGER = getLogger(__name__)
 
@@ -249,10 +252,17 @@ class YoutubeDLHelper:
         elif not self.__listener.isLeech:
             self.opts['writethumbnail'] = False
 
-        msg, button = await stop_duplicate_check(name, self.__listener)
-        if msg:
-            await self.__listener.onDownloadError(msg, button)
-            return
+        LOGGER.info(f'Checking File/Folder if already in Drive: {self.name}')
+        message = self.__listener.message
+        user_id = message.from_user.id
+        filename = self.name 
+        if filename:
+            telegraph_content = await sync_to_async(GoogleDriveHelper(user_id).drive_list, filename, stopDup=True)
+            if telegraph_content:
+                msg = f"File/Folder is already available in Drive."
+                await self.__listener.onDownloadError(msg)
+                return
+            
         if limit_exceeded := await limit_checker(self.__size, self.__listener, isYtdlp=True):
             await self.__listener.onDownloadError(limit_exceeded)
             return

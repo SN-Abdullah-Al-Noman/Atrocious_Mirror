@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 from logging import getLogger, ERROR
 from time import time
-from asyncio import Lock
+from asyncio import Lock, sleep
 
 from bot import LOGGER, download_dict, download_dict_lock, non_queued_dl, queue_dict_lock, bot, user, IS_PREMIUM_USER
 from bot.helper.mirror_utils.status_utils.telegram_status import TelegramStatus
 from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
-from bot.helper.telegram_helper.message_utils import sendStatusMessage, sendMessage, delete_links
-from bot.helper.ext_utils.task_manager import is_queued, limit_checker, stop_duplicate_check
+from bot.helper.telegram_helper.message_utils import sendStatusMessage, sendMessage
+from bot.helper.ext_utils.task_manager import is_queued, stop_duplicate_check, limit_checker
 
 
 global_lock = Lock()
@@ -114,10 +114,11 @@ class TelegramDownloadHelper:
                 if msg:
                     await sendMessage(self.__listener.message, msg, button)
                     return
+                    
                 if limit_exceeded := await limit_checker(size, self.__listener):
                     await sendMessage(self.__listener.message, limit_exceeded)
-                    await delete_links(self.__listener.message)
                     return
+                    
                 added_to_queue, event = await is_queued(self.__listener.uid)
                 if added_to_queue:
                     LOGGER.info(f"Added to Queue/Download: {name}")
