@@ -818,10 +818,7 @@ async def load_config():
 
     DELETE_LINKS = environ.get('DELETE_LINKS', '')
     DELETE_LINKS = DELETE_LINKS.lower() == 'true'
-
-    MIRROR_LIMIT = environ.get('MIRROR_LIMIT', '')
-    MIRROR_LIMIT = '' if len(MIRROR_LIMIT) == 0 else float(MIRROR_LIMIT)
-
+  
     DISABLE_DRIVE_LINK = environ.get('DISABLE_DRIVE_LINK', '')
     DISABLE_DRIVE_LINK = DISABLE_DRIVE_LINK.lower() == 'true'
 
@@ -857,8 +854,8 @@ async def load_config():
     MIRROR_ENABLED = environ.get('MIRROR_ENABLED', '')
     MIRROR_ENABLED = MIRROR_ENABLED.lower() == 'true'
 
-    ONLY_PAID_SERVICE = environ.get('ONLY_PAID_SERVICE', '')
-    ONLY_PAID_SERVICE = ONLY_PAID_SERVICE.lower() == 'true'
+    MIRROR_LIMIT = environ.get('MIRROR_LIMIT', '')
+    MIRROR_LIMIT = '' if len(MIRROR_LIMIT) == 0 else float(MIRROR_LIMIT)
   
     SA_MAIL = environ.get('SA_MAIL', '')
     if len(SA_MAIL) == 0:
@@ -937,7 +934,6 @@ async def load_config():
                         'DATABASE_URL': DATABASE_URL,
                         'DEFAULT_UPLOAD': DEFAULT_UPLOAD,
                         'DELETE_LINKS': DELETE_LINKS,
-                        'MIRROR_LIMIT': MIRROR_LIMIT,
                         'DISABLE_DRIVE_LINK': DISABLE_DRIVE_LINK,
                         'DOWNLOAD_DIR': DOWNLOAD_DIR,
                         'EQUAL_SPLITS': EQUAL_SPLITS,
@@ -961,7 +957,7 @@ async def load_config():
                         'MEGA_LIMIT': MEGA_LIMIT,
                         'MEGA_PASSWORD': MEGA_PASSWORD,
                         'MIRROR_ENABLED': MIRROR_ENABLED,
-                        'ONLY_PAID_SERVICE': ONLY_PAID_SERVICE,
+                        'MIRROR_LIMIT': MIRROR_LIMIT,
                         'OWNER_ID': OWNER_ID,
                         'QUEUE_ALL': QUEUE_ALL,
                         'QUEUE_DOWNLOAD': QUEUE_DOWNLOAD,
