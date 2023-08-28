@@ -7,7 +7,7 @@ from random import choice as rchoice
 from aiofiles.os import remove as aioremove
 from pyrogram.errors import ReplyMarkupInvalid, FloodWait, PeerIdInvalid, RPCError, UserNotParticipant, PhotoInvalidDimensions, WebpageCurlFailed, MediaEmpty
 
-from bot import config_dict, LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, user, download_dict_lock, bot_name, OWNER_ID
+from bot import config_dict, LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, user, download_dict_lock, bot_name, OWNER_ID, GLOBAL_BLACKLIST_FILE_KEYWORDS
 from bot.helper.ext_utils.bot_utils import get_readable_message, setInterval, sync_to_async
 from bot.helper.ext_utils.exceptions import TgLinkException
 from bot.helper.telegram_helper.button_build import ButtonMaker
@@ -115,6 +115,19 @@ async def delete_links(message):
         if reply_to := message.reply_to_message:
             await deleteMessage(reply_to)
         await deleteMessage(message)
+
+
+async def check_filename(message, filename=None):
+    if username := message.from_user.username:
+        tag = f"@{username}"
+    else:
+        tag = message.from_user.mention
+
+    if filename is not None and any(filter_word in filename.lower() for filter_word in GLOBAL_BLACKLIST_FILE_KEYWORDS):
+        msg = f"Hey {tag}.\n\nA Blacklist keyword found in your file/link.\n\n"
+        msg += f"You can not mirror or leech this file/link."
+        await delete_links(message)
+        return await message.reply(msg)
 
 
 async def get_tg_link_content(link):
@@ -243,10 +256,6 @@ async def forcesub(message, ids, button=None):
     return _msg, button
 
 
-async def user_info(client, userId):
-    return await client.get_users(userId)
-
-
 async def BotPm_check(message, button=None):
     try:
         temp_msg = await message._client.send_message(chat_id=message.from_user.id, text='<b>Checking Access...</b>')
@@ -255,17 +264,18 @@ async def BotPm_check(message, button=None):
     except Exception as e:
         if button is None:
             button = ButtonMaker()
-        _msg = "<i>You didn't START the bot in PM (Private)</i>"
+        _msg = "You didn't START the bot in PM (Private)."
         button.ubutton("Start Bot Now", f"https://t.me/{bot_name}?start=start", 'header')
         return _msg, button
 
 
 async def send_to_pm(message, text, buttons=None):
     user_id = message.from_user.id
-    try:
-        return await message._client.send_message(chat_id=user_id, text=text, disable_web_page_preview=True, reply_markup=buttons)
-    except:
-        pass
+    if config_dict['BOT_PM']:
+        try:
+            return await message._client.send_message(chat_id=user_id, text=text, disable_web_page_preview=True, reply_markup=buttons)
+        except:
+            pass
 
 
 async def send_to_log_chat(message, text, buttons=None):
