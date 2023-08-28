@@ -13,7 +13,7 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type, RetryError
 
-from bot import config_dict, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, GLOBAL_EXTENSION_FILTER, OWNER_ID
+from bot import config_dict, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, GLOBAL_EXTENSION_FILTER, OWNER_ID, user_data
 from bot.helper.ext_utils.bot_utils import setInterval, get_gdrive_id
 from bot.helper.ext_utils.fs_utils import get_mime_type
 from bot.helper.ext_utils.bot_utils import async_to_sync, get_readable_file_size
@@ -562,6 +562,7 @@ class GoogleDriveHelper:
 
     def drive_list(self, fileName, stopDup=False, noMulti=False, isRecursive=True, itemType=""):
         msg = ""
+        user_dict = user_data.get(self.user_id, {})
         fileName = self.__escapes(str(fileName))
         contents_no = 0
         telegraph_content = []
@@ -571,10 +572,13 @@ class GoogleDriveHelper:
             if token_service is not None:
                 self.__service = token_service
         for drive_name, dir_id, index_url in zip(DRIVES_NAMES, DRIVES_IDS, INDEX_URLS):
-            isRecur = False if isRecursive and len(
-                dir_id) > 23 else isRecursive
-            response = self.__drive_query(
-                dir_id, fileName, stopDup, isRecur, itemType)
+            isRecur = False if isRecursive and len(dir_id) > 23 else isRecursive
+            if config_dict['USER_TD_ENABLED'] and user_dict.get('users_gdrive_id'):
+                dir_id = user_dict['users_gdrive_id']
+                isRecur = False
+            if config_dict['USER_TD_ENABLED'] and user_dict.get('users_gdrive_id') and user_dict.get('users_index_url'):
+                index_url = user_dict['users_index_url']
+            response = self.__drive_query(dir_id, fileName, stopDup, isRecur, itemType)
             if not response["files"]:
                 if noMulti:
                     break
