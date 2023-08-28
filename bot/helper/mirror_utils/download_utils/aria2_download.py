@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from asyncio import sleep
 from aiofiles.os import remove as aioremove, path as aiopath
 
 from bot import aria2, download_dict_lock, download_dict, LOGGER, config_dict, aria2_options, aria2c_global, non_queued_dl, queue_dict_lock
