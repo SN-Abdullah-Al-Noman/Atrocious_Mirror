@@ -20,7 +20,7 @@ from .helper.telegram_helper.message_utils import sendMessage, editMessage, send
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.listeners.aria2_listener import start_aria2_listener
-from .modules import authorize, broadcast, bot_settings, cancel_mirror, clone, eval, extra, gd_clean, gd_count, gd_delete, gd_list, mirror_leech, rss, shell, status, torrent_search, torrent_select, users_settings, user_td, ytdlp
+from .modules import authorize, broadcast, bot_settings, cancel_mirror, clone, eval, gd_clean, gd_count, gd_delete, gd_list, mirror_leech, photo_upload, rss, shell, status, torrent_search, torrent_select, users_settings, user_td, ytdlp
 
 
 async def stats(client, message):
@@ -209,7 +209,7 @@ async def main():
         BotCommands.HelpCommand) & CustomFilters.authorized))
     bot.add_handler(MessageHandler(stats, filters=command(
         BotCommands.StatsCommand) & CustomFilters.authorized))
-    LOGGER.info("Atrocious Mirror Bot Started!")
+    LOGGER.info("💥 Atrocious Mirror Bot Started!")
     signal(SIGINT, exit_clean_up)
 
 bot.loop.run_until_complete(main())

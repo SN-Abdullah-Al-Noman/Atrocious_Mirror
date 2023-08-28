@@ -37,6 +37,7 @@ DRIVES_NAMES = []
 DRIVES_IDS = []
 INDEX_URLS = []
 GLOBAL_EXTENSION_FILTER = ['aria2', '!qB']
+GLOBAL_BLACKLIST_FILE_KEYWORDS = []
 user_data = {}
 shorteneres_list = []
 aria2_options = {}
@@ -175,6 +176,7 @@ if len(EXTENSION_FILTER) > 0:
 
 IS_PREMIUM_USER = False
 user = ''
+
 USER_SESSION_STRING = environ.get('USER_SESSION_STRING', '')
 if len(USER_SESSION_STRING) != 0:
     log_info("Creating client from USER_SESSION_STRING")
@@ -322,6 +324,13 @@ RCLONE_SERVE_PASS = environ.get('RCLONE_SERVE_PASS', '')
 if len(RCLONE_SERVE_PASS) == 0:
     RCLONE_SERVE_PASS = ''
 
+BLACKLIST_FILE_KEYWORDS = environ.get('BLACKLIST_FILE_KEYWORDS', '')
+if len(BLACKLIST_FILE_KEYWORDS) > 0:
+    fx = BLACKLIST_FILE_KEYWORDS.split()
+    for x in fx:
+        x = x.lstrip('.')
+        GLOBAL_BLACKLIST_FILE_KEYWORDS.append(x.strip().lower())
+
 BOT_MAX_TASKS = environ.get('BOT_MAX_TASKS', '')
 BOT_MAX_TASKS = int(BOT_MAX_TASKS) if BOT_MAX_TASKS.isdigit() else ''
 
@@ -336,9 +345,6 @@ CLONE_LIMIT = '' if len(CLONE_LIMIT) == 0 else float(CLONE_LIMIT)
 
 DELETE_LINKS = environ.get('DELETE_LINKS', '')
 DELETE_LINKS = DELETE_LINKS.lower() == 'true'
-
-DIRECT_LIMIT = environ.get('DIRECT_LIMIT', '')
-DIRECT_LIMIT = '' if len(DIRECT_LIMIT) == 0 else float(DIRECT_LIMIT)
 
 DISABLE_DRIVE_LINK = environ.get('DISABLE_DRIVE_LINK', '')
 DISABLE_DRIVE_LINK = DISABLE_DRIVE_LINK.lower() == 'true'
@@ -359,7 +365,7 @@ GDRIVE_LIMIT = '' if len(GDRIVE_LIMIT) == 0 else float(GDRIVE_LIMIT)
 IMAGES = environ.get('IMAGES', '')
 IMAGES = (IMAGES.replace("'", '').replace('"', '').replace(
     '[', '').replace(']', '').replace(",", "")).split()
-            
+
 LEECH_ENABLED = environ.get('LEECH_ENABLED', '')
 LEECH_ENABLED = LEECH_ENABLED.lower() == 'true'
 
@@ -374,6 +380,12 @@ MEGA_LIMIT = '' if len(MEGA_LIMIT) == 0 else float(MEGA_LIMIT)
 
 MIRROR_ENABLED = environ.get('MIRROR_ENABLED', '')
 MIRROR_ENABLED = MIRROR_ENABLED.lower() == 'true'
+
+MIRROR_LIMIT = environ.get('MIRROR_LIMIT', '')
+MIRROR_LIMIT = '' if len(MIRROR_LIMIT) == 0 else float(MIRROR_LIMIT)
+
+ONLY_PAID_SERVICE = environ.get('ONLY_PAID_SERVICE', '')
+ONLY_PAID_SERVICE = ONLY_PAID_SERVICE.lower() == 'true'
 
 SA_MAIL = environ.get('SA_MAIL', '')
 if len(SA_MAIL) == 0:
@@ -414,6 +426,7 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'AUTO_DELETE_MESSAGE_DURATION': AUTO_DELETE_MESSAGE_DURATION,
                'BASE_URL': BASE_URL,
                'BASE_URL_PORT': BASE_URL_PORT,
+               'BLACKLIST_FILE_KEYWORDS': BLACKLIST_FILE_KEYWORDS,
                'BOT_MAX_TASKS': BOT_MAX_TASKS,
                'BOT_PM': BOT_PM,
                'BOT_TOKEN': BOT_TOKEN,
@@ -423,7 +436,6 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'DATABASE_URL': DATABASE_URL,
                'DEFAULT_UPLOAD': DEFAULT_UPLOAD,
                'DELETE_LINKS': DELETE_LINKS,
-               'DIRECT_LIMIT': DIRECT_LIMIT,
                'DISABLE_DRIVE_LINK': DISABLE_DRIVE_LINK,
                'DOWNLOAD_DIR': DOWNLOAD_DIR,
                'EQUAL_SPLITS': EQUAL_SPLITS,
@@ -447,6 +459,8 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'MEGA_LIMIT': MEGA_LIMIT,
                'MEGA_PASSWORD': MEGA_PASSWORD,
                'MIRROR_ENABLED': MIRROR_ENABLED,
+               'MIRROR_LIMIT': MIRROR_LIMIT,
+               'ONLY_PAID_SERVICE': ONLY_PAID_SERVICE,
                'OWNER_ID': OWNER_ID,
                'QUEUE_ALL': QUEUE_ALL,
                'QUEUE_DOWNLOAD': QUEUE_DOWNLOAD,
@@ -516,8 +530,7 @@ if ospath.exists('shorteners.txt'):
 
 
 if BASE_URL:
-    Popen(
-        f"gunicorn web.wserver:app --bind 0.0.0.0:{BASE_URL_PORT} --worker-class gevent", shell=True)
+    Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{BASE_URL_PORT} --worker-class gevent", shell=True)
 
 srun(["qbittorrent-nox", "-d", f"--profile={getcwd()}"])
 if not ospath.exists('.netrc'):
