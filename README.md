@@ -32,6 +32,9 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 
 - File will mirror or clone in your own share drive. Command- usertd
 
+### BLACKLIST_FILE_KEYWORDS
+
+- If any filename match with BLACKLIST_FILE_KEYWORDS then task will cancel
 
 ## By [anasty17](https://github.com/anasty17)
 
