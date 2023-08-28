@@ -7,7 +7,7 @@ from bot import LOGGER, download_dict, download_dict_lock, non_queued_dl, queue_
 from bot.helper.mirror_utils.status_utils.telegram_status import TelegramStatus
 from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.telegram_helper.message_utils import sendStatusMessage, sendMessage, delete_links
-from bot.helper.ext_utils.task_manager import is_queued, stop_duplicate_check, limit_checker
+from bot.helper.ext_utils.task_manager import is_queued, limit_checker, stop_duplicate_check
 
 
 global_lock = Lock()
