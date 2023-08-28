@@ -25,9 +25,41 @@ from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
 from bot.helper.mirror_utils.upload_utils.pyrogramEngine import TgUploader
 from bot.helper.mirror_utils.rclone_utils.transfer import RcloneTransferHelper
-from bot.helper.telegram_helper.message_utils import sendMessage, delete_all_messages, update_all_messages, send_to_pm, send_to_log_chat
+from bot.helper.telegram_helper.message_utils import sendMessage, delete_all_messages, update_all_messages, send_to_pm, send_to_log_chat, delete_links
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.db_handler import DbManger
+
+
+async def command_listener(message, isClone=False, isGdrive=False, isLeech=False, isMega=False, isMirror=False, isQbit=False, isYtdl=False):
+    msg = ""
+    if username := message.from_user.username:
+        tag = f"@{username}"
+    else:
+        tag = message.from_user.mention
+
+    if message.from_user.id != OWNER_ID:
+        if isClone and not config_dict['CLONE_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nCloning file in Gdrive is disabled.</b>"
+        elif isGdrive and not config_dict['GDRIVE_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nGdrive link is disabled.</b>"
+        elif isLeech and not config_dict['LEECH_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nLeeching file in telegram is disabled.</b>"
+        elif isMega and not config_dict['MEGA_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nMega link is disabled.</b>"
+        elif isMirror and not config_dict['MIRROR_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nMirroring file in Gdrive is disabled.</b>"
+        elif isQbit and not config_dict['TORRENT_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nTorrent download is disabled.</b>"
+        elif isQbit and isLeech and not config_dict['TORRENT_ENABLED'] and not config_dict['LEECH_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nTorrent download and Leech both are disabled.</b>"
+        elif isYtdl and not config_dict['YTDLP_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nYouTube download is disabled.</b>"
+        elif isYtdl and IsLeech and not config_dict['YTDLP_ENABLED'] and not config_dict['LEECH_ENABLED']:
+            msg = f"<b>Dear {tag}.\n\nYoutube download and Leeching file in telegram both are disabled.</b>"
+        
+    if msg:
+        await delete_links(message)
+        return await sendMessage(message, msg)
 
 
 class MirrorLeechListener:
