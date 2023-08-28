@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from aiohttp import ClientSession
 from pyrogram.types import BotCommand
 
-from bot import download_dict, download_dict_lock, botStartTime, user_data, config_dict, bot_loop, OWNER_ID, bot_name, LOGGER
+from bot import download_dict, download_dict_lock, botStartTime, user_data, config_dict, bot_loop, OWNER_ID, bot_name
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.telegraph_helper import telegraph
@@ -180,6 +180,7 @@ def get_readable_message():
                 up_speed += float(spd.split('K')[0]) * 1024
             elif 'M' in spd:
                 up_speed += float(spd.split('M')[0]) * 1048576
+    msg += f"_______________________________"
     buttons = ButtonMaker()
     buttons.ubutton(f"Repo", f"https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror")
     buttons.ibutton("Refresh", "status ref")
@@ -192,7 +193,7 @@ def get_readable_message():
         buttons.ibutton("Next", "status nex")
         button = buttons.build_menu(3)
     if config_dict['BOT_MAX_TASKS']:
-        TASKS_COUNT = f"<b>Task Limit: </b>{config_dict['BOT_MAX_TASKS']} | <b>Run:</b> {len(download_dict)} | <b>Free:</b> {config_dict['BOT_MAX_TASKS'] - len(download_dict)}\n"
+        TASKS_COUNT = f"\n<b>Task Limit: </b>{config_dict['BOT_MAX_TASKS']} | <b>Run:</b> {len(download_dict)} | <b>Free:</b> {config_dict['BOT_MAX_TASKS'] - len(download_dict)}\n"
     else:
         TASKS_COUNT = f"<b>Tasks Running:</b> {len(download_dict)}\n"
     msg += f"{TASKS_COUNT}"
@@ -360,8 +361,24 @@ async def get_user_tasks(user_id, maxtask):
         return len(tasks) >= maxtask
 
 
-def checking_access(user_id, button=None):
-    if not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo')):
+def checking_access(message, button=None):
+    user_id = message.from_user.id
+    if username := message.from_user.username:
+        tag = f"@{username}"
+    else:
+        tag = message.from_user.mention
+
+    if user_id in user_data and user_data[user_id].get('is_blacklist'):
+        if button is None:
+            button = ButtonMaker()
+        button.ubutton('Contact with bot owner', 'https://t.me/ItsBitDefender')
+        return f"<b>Hey {tag}.</b>\n<b>User Id: </b><code>{user_id}</code>.\n\n<b>You are blacklisted ⚠️.</b>\n\n<b>Possible Reasons:</b>\n<b>1:</b> Mirror or Leech P*r*n Video.\n<b>2:</b> Mirror or Leech illegal files.\n\nClick the button for chat with bot owner to remove yourself from blacklist.", button
+    elif config_dict['ONLY_PAID_SERVICE'] and not (user_id == OWNER_ID or (user_id in user_data and (user_data[user_id].get('is_sudo') or user_data[user_id].get('is_good_friend') or user_data[user_id].get('is_paid_user')))):
+        if button is None:
+            button = ButtonMaker()
+        button.ubutton('Contact with bot owner', 'https://t.me/ItsBitDefender')
+        return f"<b>Sorry, {tag} you are not paid user.</b>\n\nThis bot is only for paid users.\nYou need to pay monthly 20 Taka or 20 Rupee for use this bot.\n\nClick the button for chat with bot owner for paid membership.", button
+    elif not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo') or user_id in user_data and user_data[user_id].get('is_good_friend') or user_id in user_data and user_data[user_id].get('is_paid_user')):
         return None, button
     user_data.setdefault(user_id, {})
     data = user_data[user_id]
@@ -379,47 +396,25 @@ def checking_access(user_id, button=None):
             button = ButtonMaker()
         button.ubutton('Generate Token', short_url(
             f'https://t.me/{bot_name}?start={token}'))
-        return f"Your Ads token is expired, generate your token and try again.\n\n<b>Token Timeout:</b> {get_readable_time(int(config_dict['TOKEN_TIMEOUT']))}.\n\n<b>What is token?</b>\nThis is an ads token. If you pass 1 ad, you can use the bot for {get_readable_time(int(config_dict['TOKEN_TIMEOUT']))} after passing the ad.\n\n<b>Token Generate Video Tutorial:</b> ⬇️\nhttps://t.me/AtrociousMirrorBackup/116", button
+        return f"Dear {tag} your Ads token is expired, generate your token and try again.\n\n<b>Token Timeout:</b> {get_readable_time(int(config_dict['TOKEN_TIMEOUT']))}.\n\n<b>What is token?</b>\nThis is an ads token. If you pass 1 ad, you can use the bot for {get_readable_time(int(config_dict['TOKEN_TIMEOUT']))} after passing the ad.\n\n<b>Token Generate Video Tutorial:</b> ⬇️\nhttps://t.me/AtrociousMirrorBackup/116", button
     return None, button
-
-
-async def is_blacklist(message):
-    id_ = message.from_user.id
-    if id_ == OWNER_ID:
-        LOGGER.info('Bot owner detected. Skipping blacklist checking...')
-        return
-    if username := message.from_user.username:
-        tag = f"@{username}"
-    else:
-        tag = message.from_user.mention
-   
-    if id_ in user_data and user_data[id_].get('is_blacklist'):
-        return await message.reply(f"<b>Hey {tag}.</b>\n<b>User Id: </b><code>{id_}</code>.\n\n<b>You are blacklisted ⚠️.</b>\n\n<b>Possible Reasons:</b>\n<b>1:</b> Mirror or Leech P*r*n Video.\n<b>2:</b> Mirror or Leech illegal files.\n\nContact with bot owner to remove yourself from blacklist.")
-
+    
 
 def get_gdrive_id(user_id):
     user_dict = user_data.get(user_id, {})
-    if not config_dict['USER_TD_ENABLED']:
-        GDRIVE_ID = config_dict['GDRIVE_ID']
-
     if config_dict['USER_TD_ENABLED'] and user_dict.get('users_gdrive_id'):
         GDRIVE_ID = user_dict['users_gdrive_id']
     else:
-        GDRIVE_ID = None
-        
-    if GDRIVE_ID is None:
-        GDRIVE_ID = config_dict['GDRIVE_ID']
-        
+        GDRIVE_ID = config_dict['GDRIVE_ID']  
     return GDRIVE_ID
 
 
 def get_index_url(user_id):
     user_dict = user_data.get(user_id, {})
-    INDEX_URL = config_dict['INDEX_URL']
-    if config_dict['USER_TD_ENABLED']:
-        if user_dict.get('users_gdrive_id') and user_dict.get('users_index_url'):
-            INDEX_URL = user_dict['users_index_url']
-
+    if config_dict['USER_TD_ENABLED'] and user_dict.get('users_gdrive_id') and user_dict.get('users_index_url'):
+        INDEX_URL = user_dict['users_index_url']
+    else:
+        INDEX_URL = config_dict['INDEX_URL']  
     return INDEX_URL
 
 

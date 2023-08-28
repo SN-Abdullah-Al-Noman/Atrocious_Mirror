@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
 from asyncio import Event
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot import config_dict, queued_dl, queued_up, non_queued_up, non_queued_dl, queue_dict_lock, LOGGER, download_dict, OWNER_ID, user_data
-from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
+from bot import bot_name, config_dict, queued_dl, queued_up, non_queued_up, non_queued_dl, queue_dict_lock, LOGGER, download_dict, OWNER_ID, user_data
 from bot.helper.ext_utils.fs_utils import get_base_name, check_storage_threshold
 from bot.helper.ext_utils.bot_utils import sync_to_async, get_telegraph_list, checking_access, get_readable_file_size, get_user_tasks
-from bot.helper.telegram_helper.message_utils import forcesub, BotPm_check, user_info
+from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
+from bot.helper.telegram_helper.message_utils import forcesub, BotPm_check, send_to_pm
 
-async def stop_duplicate_check(name, listener):
-    if (not config_dict['STOP_DUPLICATE']
-        or listener.isLeech
-        or listener.upPath != 'gd'
-        or listener.select):
+
+async def stop_duplicate_check(name, listener, isClone=None):
+    message = listener.message
+    user_id = message.from_user.id
+    
+    if username := message.from_user.username:
+        tag = f"@{username}"
+    else:
+        tag = message.from_user.mention
+
+    if not isClone and (not config_dict['STOP_DUPLICATE'] or listener.isLeech or listener.upPath != 'gd' or listener.select):
         return False, None
-    LOGGER.info(f'Checking File/Folder if already in Drive: {name}')
-    user_id = listener.message.from_user.id
+
     if listener.compress:
         name = f"{name}.zip"
     elif listener.extract:
@@ -25,9 +31,17 @@ async def stop_duplicate_check(name, listener):
     if name is not None:
         telegraph_content, contents_no = await sync_to_async(GoogleDriveHelper(user_id=user_id).drive_list, name, stopDup=True)
         if telegraph_content:
-            msg = f"File/Folder is already available in Drive.\nHere are {contents_no} list results:"
-            button = await get_telegraph_list(telegraph_content)
-            return msg, button
+            if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
+                msg = f"\n\nFile/Folder is already available in Drive.\n\nI have sent available file link in pm."
+                pmmsg = f"Hey {tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
+                pmbutton = await get_telegraph_list(telegraph_content)
+                keyboard = InlineKeyboardButton("📥 Click Here To Go Bot PM", url=f"https://t.me/{bot_name}")
+                button = InlineKeyboardMarkup([[keyboard]])
+                await send_to_pm(message, text=pmmsg, buttons=pmbutton)
+            else:
+                msg = f"\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
+                button = await get_telegraph_list(telegraph_content)
+        return msg, button
     return False, None
 
 
@@ -143,8 +157,8 @@ async def limit_checker(size, listener, isTorrent=False, isMega=False, isDriveLi
             limit = TORRENT_LIMIT * 1024**3
             if size > limit:
                 limit_exceeded = f'\nTorrent limit is {get_readable_file_size(limit)}'
-    elif DIRECT_LIMIT := config_dict['DIRECT_LIMIT']:
-        limit = DIRECT_LIMIT * 1024**3
+    elif MIRROR_LIMIT := config_dict['MIRROR_LIMIT']:
+        limit = MIRROR_LIMIT * 1024**3
         if size > limit:
             limit_exceeded = f'\nDirect limit is {get_readable_file_size(limit)}'
     if not limit_exceeded:
@@ -164,30 +178,35 @@ async def limit_checker(size, listener, isTorrent=False, isMega=False, isDriveLi
 
 
 async def task_utils(message):
-    LOGGER.info('Checking Task Utilities ...')
     msg = []
     button = None
-    token_msg, button = checking_access(message.from_user.id, button)
+    user_id = message.from_user.id
+    user_dict = user_data.get(user_id, {})
+    user = await message._client.get_users(user_id)
+    
+    if user_id == OWNER_ID:
+        return msg, button
+        
+    token_msg, button = checking_access(message, button)
     if token_msg is not None:
         msg.append(token_msg)
+        
     if ids := config_dict['FSUB_IDS']:
         _msg, button = await forcesub(message, ids, button)
         if _msg:
             msg.append(_msg)
-    user_id = message.from_user.id
-    user_dict = user_data.get(user_id, {})
-    user = await user_info(message._client, message.from_user.id)
+            
     if config_dict['BOT_PM'] or user_dict.get('bot_pm'):
         if user.status == user.status.LONG_AGO:
             _msg, button = await BotPm_check(message, button)
             if _msg:
                 msg.append(_msg)
-    if message.from_user.id == OWNER_ID:
-        LOGGER.info('Bot owner detected. Skipping task checking...')
         return msg, button
+        
     if len(download_dict) >= config_dict['BOT_MAX_TASKS']:
         msg.append(f"Bot max tasks limit exceeded.\nBot max tasks limit is {config_dict['BOT_MAX_TASKS']}.\nPlease wait for the completion of other tasks.")
         return msg, button
+        
     if (maxtask := config_dict['USER_MAX_TASKS']) and await get_user_tasks(message.from_user.id, maxtask):
         msg.append(f"User's max tasks limit is {maxtask}.\nPlease wait to complete your old tasks.")
     return msg, button
