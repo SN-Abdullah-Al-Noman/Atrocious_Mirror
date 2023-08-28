@@ -34,7 +34,11 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 
 ### BLACKLIST_FILE_KEYWORDS
 
-- If any filename match with BLACKLIST_FILE_KEYWORDS then task will cancel
+- If any filename match with BLACKLIST_FILE_KEYWORDS then task will cancel.
+
+### Index Folder Support
+
+- You can mirror or leech index folder link with replying link with /cmd -b like bulk.
 
 ## By [anasty17](https://github.com/anasty17)
 
