@@ -9,14 +9,14 @@ from functools import partial
 from time import time
 
 from bot import DOWNLOAD_DIR, bot, config_dict, user_data, LOGGER, OWNER_ID
-from bot.helper.telegram_helper.message_utils import sendMessage, editMessage
+from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, check_filename, delete_links
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.ext_utils.bot_utils import get_readable_file_size, is_url, new_task, sync_to_async, new_task, is_rclone_path, new_thread, get_readable_time, arg_parser, is_blacklist 
+from bot.helper.ext_utils.bot_utils import get_readable_file_size, is_url, new_task, sync_to_async, new_task, is_rclone_path, new_thread, get_readable_time, arg_parser 
 from bot.helper.mirror_utils.download_utils.yt_dlp_download import YoutubeDLHelper
 from bot.helper.mirror_utils.rclone_utils.list import RcloneList
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.listeners.tasks_listener import MirrorLeechListener
+from bot.helper.listeners.tasks_listener import MirrorLeechListener, command_listener
 from bot.helper.ext_utils.help_messages import YT_HELP_MESSAGE
 from bot.helper.ext_utils.bulk_links import extract_bulk_links
 from bot.helper.ext_utils.task_manager import task_utils
@@ -240,8 +240,6 @@ async def _mdisk(link, name):
 
 @new_task
 async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
-    if await is_blacklist(message):
-        return
     text = message.text.split('\n')
     input_list = text[0].split(' ')
     qual = ''
@@ -346,11 +344,12 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
     if not is_url(link):
         await sendMessage(message, YT_HELP_MESSAGE)
         return
-
+    
     error_msg = []
     error_button = None
     task_utilis_msg, error_button = await task_utils(message)
     if task_utilis_msg:
+        await delete_links(message)
         error_msg.extend(task_utilis_msg)
 
     if error_msg:
@@ -448,16 +447,14 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
 
 
 async def ytdl(client, message):
-    if not config_dict['YTDLP_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️ Sorry Ytdl Disabled.</b>")
+    if await command_listener(message, isYtdl=True):
+        return
     _ytdl(client, message)
 
 
 async def ytdlleech(client, message):
-    if not config_dict['YTDLP_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️ Sorry Ytdl Disabled.</b>")
-    if not config_dict['LEECH_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️ Sorry Leech Disabled.</b>")
+    if await command_listener(message, isLeech=True, isYtdl=True):
+        return
     _ytdl(client, message, isLeech=True)
 
 

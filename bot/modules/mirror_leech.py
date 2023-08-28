@@ -7,7 +7,7 @@ from asyncio import sleep
 from aiofiles.os import path as aiopath
 
 from bot import bot, DOWNLOAD_DIR, LOGGER, config_dict, OWNER_ID
-from bot.helper.ext_utils.bot_utils import is_url, is_magnet, is_mega_link, is_gdrive_link, get_content_type, new_task, sync_to_async, is_rclone_path, is_telegram_link, arg_parser, is_blacklist
+from bot.helper.ext_utils.bot_utils import is_url, is_magnet, is_mega_link, is_gdrive_link, get_content_type, new_task, sync_to_async, is_rclone_path, is_telegram_link, arg_parser
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
 from bot.helper.mirror_utils.download_utils.aria2_download import add_aria2c_download
 from bot.helper.mirror_utils.download_utils.gd_download import add_gd_download
@@ -19,8 +19,8 @@ from bot.helper.mirror_utils.download_utils.direct_link_generator import direct_
 from bot.helper.mirror_utils.download_utils.telegram_download import TelegramDownloadHelper
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.message_utils import sendMessage, get_tg_link_content
-from bot.helper.listeners.tasks_listener import MirrorLeechListener
+from bot.helper.telegram_helper.message_utils import sendMessage, get_tg_link_content, check_filename, delete_links
+from bot.helper.listeners.tasks_listener import MirrorLeechListener, command_listener
 from bot.helper.ext_utils.help_messages import MIRROR_HELP_MESSAGE
 from bot.helper.ext_utils.bulk_links import extract_bulk_links
 from bot.helper.ext_utils.task_manager import task_utils
@@ -28,8 +28,13 @@ from bot.helper.ext_utils.task_manager import task_utils
 
 @new_task
 async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=None, bulk=[]):
-    if await is_blacklist(message):
-        return
+    if username := message.from_user.username:
+        tag = f"@{username}"
+    else:
+        tag = message.from_user.mention
+        
+    await delete_links(message)
+    
     text = message.text.split('\n')
     input_list = text[0].split(' ')
 
@@ -92,7 +97,7 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
             if len(bulk) == 0:
                 raise ValueError('Bulk Empty!')
         except:
-            await sendMessage(message, 'Reply to text file or tg message that have links seperated by new line!')
+            await sendMessage(message, 'Hey {tag}. Reply to text file or tg message that have links seperated by new line!')
             return
         b_msg = input_list[:1]
         b_msg.append(f'{bulk[0]} -i {len(bulk)}')
@@ -139,11 +144,6 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
         except:
             pass
 
-    if username := message.from_user.username:
-        tag = f"@{username}"
-    else:
-        tag = message.from_user.mention
-
     if link and is_telegram_link(link):
         try:
             reply_to, session = await get_tg_link_content(link)
@@ -161,9 +161,10 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
                     return
 
     if reply_to:
-        file_ = reply_to.document or reply_to.photo or reply_to.video or reply_to.audio or \
-            reply_to.voice or reply_to.video_note or reply_to.sticker or reply_to.animation or None
-
+        file_ = reply_to.document or reply_to.photo or reply_to.video or reply_to.audio or reply_to.voice or reply_to.video_note or reply_to.sticker or reply_to.animation or None
+        if file_ is not None and await check_filename(message, filename=file_.file_name):
+            return
+                
         if file_ is None:
             reply_text = reply_to.text.split('\n', 1)[0].strip()
             if is_url(reply_text) or is_magnet(reply_text):
@@ -174,6 +175,9 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
 
     if not is_url(link) and not is_magnet(link) and not await aiopath.exists(link) and not is_rclone_path(link) and file_ is None:
         await sendMessage(message, MIRROR_HELP_MESSAGE)
+        return
+
+    if await check_filename(message, filename=link):
         return
 
     error_msg = []
@@ -213,10 +217,10 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
         if not up and config_dict['DEFAULT_UPLOAD'] == 'gd':
             up = 'gd'
         if up == 'gd' and not config_dict['GDRIVE_ID']:
-            await sendMessage(message, 'GDRIVE_ID not Provided!')
+            await sendMessage(message, 'Hey {tag}. GDRIVE_ID not Provided!')
             return
         elif not up:
-            await sendMessage(message, 'No Rclone Destination!')
+            await sendMessage(message, 'Hey {tag}. No Rclone Destination!')
             return
         elif up not in ['rcl', 'gd']:
             if up.startswith('mrcc:'):
@@ -227,7 +231,7 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
                 await sendMessage(message, f"Rclone Config: {config_path} not Exists!")
                 return
         if up != 'gd' and not is_rclone_path(up):
-            await sendMessage(message, 'Wrong Rclone Upload Destination!')
+            await sendMessage(message, 'Hey {tag}. Wrong Rclone Upload Destination!')
             return
     elif up.isdigit() or up.startswith('-'):
         up = int(up)
@@ -256,20 +260,25 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
         else:
             config_path = 'rclone.conf'
         if not await aiopath.exists(config_path):
-            await sendMessage(message, f"Rclone Config: {config_path} not Exists!")
-            return
+            return await sendMessage(message, f"Rclone Config: {config_path} not Exists!")
         await add_rclone_download(link, config_path, f'{path}/', name, listener)
     elif is_gdrive_link(link):
-        if not config_dict['GDRIVE_ENABLED'] and listener.message.from_user.id != OWNER_ID:
-            return await message.reply(f"<b>⚠️ Sorry Gdrive Link Disabled.</b>")
+        if await command_listener(message, isGdrive=True):
+            return
         await add_gd_download(link, path, listener, name)
     elif is_mega_link(link):
-        if not config_dict['MEGA_ENABLED'] and listener.message.from_user.id != OWNER_ID:
-            return await message.reply(f"<b>⚠️ Sorry Mega Link Disabled.</b>")
+        if await command_listener(message, isMega=True):
+            return
         await add_mega_download(link, f'{path}/', listener, name)
-    elif isQbit:
+    elif isQbit or is_magnet(link) or link.endswith('.torrent'):
         await add_qb_torrent(link, path, listener, ratio, seed_time)
     else:
+        if link.endswith('/'):
+            msg = f"<b>Hey {tag}</b>.\n\nYour link ended with /.Maybe its a index folder link.\n\n"
+            msg += f"To mirror or leech index folder reply your link with <code>mirror{config_dict['CMD_SUFFIX']} -b</code> or <code>leech{config_dict['CMD_SUFFIX']} -b</code>"
+            await sendMessage(message, msg)
+            return
+            
         ussr = args['-au']
         pssw = args['-ap']
         if ussr or pssw:
@@ -281,28 +290,26 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
 
 
 async def mirror(client, message):
-    if not config_dict['MIRROR_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️ Sorry Mirror Disabled.</b>")
+    if await command_listener(message, isMirror=True):
+        return
     _mirror_leech(client, message)
 
 
 async def qb_mirror(client, message):
-    if not config_dict['TORRENT_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️Sorry Torrent Disabled.</b>")
+    if await command_listener(message, isQbit=True):
+        return
     _mirror_leech(client, message, isQbit=True)
 
 
 async def leech(client, message):
-    if not config_dict['LEECH_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️ Sorry Leech Disabled.</b>")
+    if await command_listener(message, isLeech=True):
+        return
     _mirror_leech(client, message, isLeech=True)
 
 
 async def qb_leech(client, message):
-    if not config_dict['TORRENT_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️ Sorry Torrent Disabled.</b>")
-    if not config_dict['LEECH_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️ Sorry Torrent Leech Both Are Disabled.</b>")
+    if await command_listener(message, isLeech=True, isQbit=True):
+        return
     _mirror_leech(client, message, isQbit=True, isLeech=True)
 
 

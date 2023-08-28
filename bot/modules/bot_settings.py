@@ -797,6 +797,13 @@ async def load_config():
     if len(UPSTREAM_BRANCH) == 0:
         UPSTREAM_BRANCH = 'master'
 
+    BLACKLIST_FILE_KEYWORDS = environ.get('BLACKLIST_FILE_KEYWORDS', '')
+    if len(BLACKLIST_FILE_KEYWORDS) > 0:
+        fx = BLACKLIST_FILE_KEYWORDS.split()
+        for x in fx:
+            x = x.lstrip('.')
+            GLOBAL_BLACKLIST_FILE_KEYWORDS.append(x.strip().lower())
+
     BOT_MAX_TASKS = environ.get('BOT_MAX_TASKS', '')
     BOT_MAX_TASKS = int(BOT_MAX_TASKS) if BOT_MAX_TASKS.isdigit() else ''
 
@@ -812,8 +819,8 @@ async def load_config():
     DELETE_LINKS = environ.get('DELETE_LINKS', '')
     DELETE_LINKS = DELETE_LINKS.lower() == 'true'
 
-    DIRECT_LIMIT = environ.get('DIRECT_LIMIT', '')
-    DIRECT_LIMIT = '' if len(DIRECT_LIMIT) == 0 else float(DIRECT_LIMIT)
+    MIRROR_LIMIT = environ.get('MIRROR_LIMIT', '')
+    MIRROR_LIMIT = '' if len(MIRROR_LIMIT) == 0 else float(MIRROR_LIMIT)
 
     DISABLE_DRIVE_LINK = environ.get('DISABLE_DRIVE_LINK', '')
     DISABLE_DRIVE_LINK = DISABLE_DRIVE_LINK.lower() == 'true'
@@ -850,6 +857,9 @@ async def load_config():
     MIRROR_ENABLED = environ.get('MIRROR_ENABLED', '')
     MIRROR_ENABLED = MIRROR_ENABLED.lower() == 'true'
 
+    ONLY_PAID_SERVICE = environ.get('ONLY_PAID_SERVICE', '')
+    ONLY_PAID_SERVICE = ONLY_PAID_SERVICE.lower() == 'true'
+  
     SA_MAIL = environ.get('SA_MAIL', '')
     if len(SA_MAIL) == 0:
         SA_MAIL = ''
@@ -917,6 +927,7 @@ async def load_config():
                         'AUTO_DELETE_MESSAGE_DURATION': AUTO_DELETE_MESSAGE_DURATION,
                         'BASE_URL': BASE_URL,
                         'BASE_URL_PORT': BASE_URL_PORT,
+                        'BLACKLIST_FILE_KEYWORDS': BLACKLIST_FILE_KEYWORDS,
                         'BOT_MAX_TASKS': BOT_MAX_TASKS,
                         'BOT_PM': BOT_PM,
                         'BOT_TOKEN': BOT_TOKEN,
@@ -926,7 +937,7 @@ async def load_config():
                         'DATABASE_URL': DATABASE_URL,
                         'DEFAULT_UPLOAD': DEFAULT_UPLOAD,
                         'DELETE_LINKS': DELETE_LINKS,
-                        'DIRECT_LIMIT': DIRECT_LIMIT,
+                        'MIRROR_LIMIT': MIRROR_LIMIT,
                         'DISABLE_DRIVE_LINK': DISABLE_DRIVE_LINK,
                         'DOWNLOAD_DIR': DOWNLOAD_DIR,
                         'EQUAL_SPLITS': EQUAL_SPLITS,
@@ -950,6 +961,7 @@ async def load_config():
                         'MEGA_LIMIT': MEGA_LIMIT,
                         'MEGA_PASSWORD': MEGA_PASSWORD,
                         'MIRROR_ENABLED': MIRROR_ENABLED,
+                        'ONLY_PAID_SERVICE': ONLY_PAID_SERVICE,
                         'OWNER_ID': OWNER_ID,
                         'QUEUE_ALL': QUEUE_ALL,
                         'QUEUE_DOWNLOAD': QUEUE_DOWNLOAD,

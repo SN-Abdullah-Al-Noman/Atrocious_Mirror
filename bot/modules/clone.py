@@ -7,21 +7,21 @@ from asyncio import sleep, gather
 from aiofiles.os import path as aiopath
 from json import loads
 
-from bot import LOGGER, download_dict, download_dict_lock, config_dict, bot, OWNER_ID
+from bot import LOGGER, download_dict, download_dict_lock, config_dict, bot
 from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
-from bot.helper.telegram_helper.message_utils import sendMessage, deleteMessage, sendStatusMessage
+from bot.helper.telegram_helper.message_utils import sendMessage, deleteMessage, sendStatusMessage, delete_links
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.mirror_utils.status_utils.gdrive_status import GdriveStatus
-from bot.helper.ext_utils.bot_utils import is_gdrive_link, new_task, sync_to_async, is_share_link, new_task, is_rclone_path, cmd_exec, get_telegraph_list, arg_parser, is_blacklist
+from bot.helper.ext_utils.bot_utils import is_gdrive_link, new_task, sync_to_async, is_share_link, new_task, is_rclone_path, cmd_exec, arg_parser
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
 from bot.helper.mirror_utils.download_utils.direct_link_generator import direct_link_generator
 from bot.helper.mirror_utils.rclone_utils.list import RcloneList
 from bot.helper.mirror_utils.rclone_utils.transfer import RcloneTransferHelper
 from bot.helper.ext_utils.help_messages import CLONE_HELP_MESSAGE
 from bot.helper.mirror_utils.status_utils.rclone_status import RcloneStatus
-from bot.helper.listeners.tasks_listener import MirrorLeechListener
-from bot.helper.ext_utils.task_manager import limit_checker, task_utils
+from bot.helper.listeners.tasks_listener import MirrorLeechListener, command_listener
+from bot.helper.ext_utils.task_manager import limit_checker, task_utils, stop_duplicate_check
 
 
 async def rcloneNode(client, message, link, dst_path, rcf, tag):
@@ -129,21 +129,20 @@ async def gdcloneNode(message, link, tag):
             if str(e).startswith('ERROR:'):
                 await sendMessage(message, str(e))
                 return
+                
     if is_gdrive_link(link):
         gd = GoogleDriveHelper(user_id=user_id)
         name, mime_type, size, files, _ = await sync_to_async(gd.count, link)
         if mime_type is None:
             await sendMessage(message, name)
             return
+                
+        listener = MirrorLeechListener(message, tag=tag)
         if config_dict['STOP_DUPLICATE']:
-            LOGGER.info('Checking File/Folder if already in Drive...')
-            telegraph_content, contents_no = await sync_to_async(gd.drive_list, name, True, True)
-            if telegraph_content:
-                msg = f"File/Folder is already available in Drive.\nHere are {contents_no} list results:"
-                button = await get_telegraph_list(telegraph_content)
-                await sendMessage(message, msg, button)
+            msg, button = await stop_duplicate_check(name, listener, isClone=True)
+            if msg:
+                await sendMessage(listener.message, msg, button)
                 return
-        listener = MirrorLeechListener(message, tag=tag, isClone=True)
         if limit_exceeded := await limit_checker(size, listener):
             await sendMessage(listener.message, limit_exceeded)
             return
@@ -171,10 +170,7 @@ async def gdcloneNode(message, link, tag):
 
 @new_task
 async def clone(client, message):
-    if await is_blacklist(message):
-        return
-    if not config_dict['CLONE_ENABLED'] and message.from_user.id != OWNER_ID:
-        return await message.reply(f"<b>⚠️ Sorry Clone Disabled.</b>")
+    await delete_links(message)
     input_list = message.text.split(' ')
 
     arg_base = {'link': '', '-i': 0, '-up': '', '-rcf': ''}
@@ -218,6 +214,9 @@ async def clone(client, message):
         await sendMessage(message, CLONE_HELP_MESSAGE)
         return
 
+    if await command_listener(message, isClone=True):
+        return
+        
     error_msg = []
     error_button = None
     task_utilis_msg, error_button = await task_utils(message)

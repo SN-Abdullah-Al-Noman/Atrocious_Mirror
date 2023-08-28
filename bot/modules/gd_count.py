@@ -7,13 +7,11 @@ from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
 from bot.helper.telegram_helper.message_utils import deleteMessage, sendMessage
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
-from bot.helper.ext_utils.bot_utils import is_gdrive_link, sync_to_async, new_task, get_readable_file_size, is_blacklist 
+from bot.helper.ext_utils.bot_utils import is_gdrive_link, sync_to_async, new_task, get_readable_file_size 
 
 
 @new_task
 async def countNode(_, message):
-    if await is_blacklist(message):
-        return
     args = message.text.split()
     if username := message.from_user.username:
             tag = f"@{username}"

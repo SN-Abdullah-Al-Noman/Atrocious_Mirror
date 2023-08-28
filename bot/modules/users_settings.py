@@ -17,7 +17,7 @@ from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.db_handler import DbManger
-from bot.helper.ext_utils.bot_utils import update_user_ldata, sync_to_async, new_thread, is_blacklist
+from bot.helper.ext_utils.bot_utils import update_user_ldata, sync_to_async, new_thread
 
 handler_dict = {}
 
@@ -102,8 +102,6 @@ async def update_user_settings(query):
 
 
 async def user_settings(_, message):
-    if await is_blacklist(message):
-        return
     from_user = message.from_user
     handler_dict[from_user.id] = False
     msg, button = await get_user_settings(from_user)
@@ -397,8 +395,6 @@ Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp
 
 
 async def send_users_settings(client, message):
-    if await is_blacklist(message):
-        return
     if user_data:
         msg = ''
         for u, d in user_data.items():

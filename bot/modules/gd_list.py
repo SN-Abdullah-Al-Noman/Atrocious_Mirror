@@ -2,13 +2,14 @@
 from pyrogram.handlers import MessageHandler, CallbackQueryHandler
 from pyrogram.filters import command, regex
 
-from bot import LOGGER, bot
+from bot import LOGGER, bot, bot_name, config_dict
 from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
-from bot.helper.telegram_helper.message_utils import sendMessage, editMessage
+from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, delete_links
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.ext_utils.bot_utils import sync_to_async, new_task, get_telegraph_list, checking_access, is_blacklist
+from bot.helper.ext_utils.bot_utils import sync_to_async, new_task, get_telegraph_list, checking_access
+from bot.helper.ext_utils.task_manager import task_utils
 
 
 async def list_buttons(user_id, isRecursive=True):
@@ -23,9 +24,8 @@ async def list_buttons(user_id, isRecursive=True):
 
 
 async def _list_drive(key, message, item_type, isRecursive, user_id):
-    LOGGER.info(f"listing: {key}")
-    gdrive = GoogleDriveHelper(user_id=user_id)
-    telegraph_content, contents_no = await sync_to_async(gdrive.drive_list, key, isRecursive=isRecursive, itemType=item_type)
+    LOGGER.info(f"Listing: {key} for {user_id}")
+    telegraph_content, contents_no = await sync_to_async(GoogleDriveHelper(user_id=user_id).drive_list, key, isRecursive=isRecursive, itemType=item_type)
     if telegraph_content:
         try:
             button = await get_telegraph_list(telegraph_content)
@@ -33,7 +33,14 @@ async def _list_drive(key, message, item_type, isRecursive, user_id):
             await editMessage(message, e)
             return
         msg = f"<b>Found {contents_no} result for <i>{key}</i></b>"
-        await editMessage(message, msg, button)
+        if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
+            ibmsg = f"<b>Hey. I have sent google drive search result in pm.</b>"
+            bot_pm_button = ButtonMaker()
+            bot_pm_button.ubutton("📥 Click Here To Go Bot PM", f"https://t.me/{bot_name}")
+            await bot.send_message(chat_id=user_id, text=msg, reply_markup=button)
+            await editMessage(message, ibmsg, bot_pm_button.build_menu(1))
+        else:
+            await editMessage(message, msg, button)
     else:
         await editMessage(message, f'No result found for <i>{key}</i>')
 
@@ -62,12 +69,10 @@ async def select_type(_, query):
 
 
 async def drive_list(_, message):
-    if await is_blacklist(message):
-        return
     if len(message.text.split()) == 1:
         return await sendMessage(message, 'Send a search key along with command')
     user_id = message.from_user.id
-    msg, btn = checking_access(user_id)
+    msg, btn = checking_access(message)
     if msg is not None:
         await sendMessage(message, msg, btn.build_menu(1))
         return

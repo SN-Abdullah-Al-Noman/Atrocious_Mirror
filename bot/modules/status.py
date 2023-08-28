@@ -8,19 +8,17 @@ from bot import status_reply_dict_lock, download_dict, download_dict_lock, botSt
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import sendMessage, deleteMessage, auto_delete_message, sendStatusMessage, update_all_messages
-from bot.helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time, turn_page, setInterval, new_task, is_blacklist
+from bot.helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time, turn_page, setInterval, new_task
 
 
 @new_task
 async def mirror_status(_, message):
-    if await is_blacklist(message):
-        return
     async with download_dict_lock:
         count = len(download_dict)
     if count == 0:
         currentTime = get_readable_time(time() - botStartTime)
         free = get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)
-        msg = 'No Active Downloads !\n___________________________'
+        msg = 'No Active Downloads !\n_______________________________'
         msg += f"\n<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {free}" \
             f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UP:</b> {currentTime}"
         reply_message = await sendMessage(message, msg)
