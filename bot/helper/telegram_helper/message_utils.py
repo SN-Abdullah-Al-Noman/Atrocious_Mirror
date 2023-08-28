@@ -127,7 +127,7 @@ async def check_filename(message, filename=None):
         msg = f"Hey {tag}.\n\nA Blacklist keyword found in your file/link.\n\n"
         msg += f"You can not mirror or leech this file/link."
         await delete_links(message)
-        return await message.reply(msg)
+        return await message.reply_photo(photo="https://graph.org/file/e6c2c38bc24feda59ad14.jpg", caption=msg)
 
 
 async def get_tg_link_content(link):
