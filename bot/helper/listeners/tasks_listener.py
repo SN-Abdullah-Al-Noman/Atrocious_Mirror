@@ -39,23 +39,23 @@ async def command_listener(message, isClone=False, isGdrive=False, isLeech=False
 
     if message.from_user.id != OWNER_ID:
         if isClone and not config_dict['CLONE_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nCloning file in Gdrive is disabled.</b>"
+            msg = f"Hey {tag}.\n\nCloning file in Gdrive is disabled."
         elif isGdrive and not config_dict['GDRIVE_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nGdrive link is disabled.</b>"
+            msg = f"Hey {tag}.\n\nGdrive link is disabled."
         elif isLeech and not config_dict['LEECH_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nLeeching file in telegram is disabled.</b>"
+            msg = f"Hey {tag}.\n\nLeeching file in telegram is disabled."
         elif isMega and not config_dict['MEGA_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nMega link is disabled.</b>"
+            msg = f"Hey {tag}.\n\nMega link is disabled."
         elif isMirror and not config_dict['MIRROR_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nMirroring file in Gdrive is disabled.</b>"
+            msg = f"Hey {tag}.\n\nMirroring file in Gdrive is disabled."
         elif isQbit and not config_dict['TORRENT_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nTorrent download is disabled.</b>"
+            msg = f"Hey {tag}.\n\nTorrent download is disabled."
         elif isQbit and isLeech and not config_dict['TORRENT_ENABLED'] and not config_dict['LEECH_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nTorrent download and Leech both are disabled.</b>"
+            msg = f"Hey {tag}.\n\nTorrent download and Leech both are disabled."
         elif isYtdl and not config_dict['YTDLP_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nYouTube download is disabled.</b>"
+            msg = f"Hey {tag}.\n\nYouTube download is disabled.</b>"
         elif isYtdl and IsLeech and not config_dict['YTDLP_ENABLED'] and not config_dict['LEECH_ENABLED']:
-            msg = f"<b>Dear {tag}.\n\nYoutube download and Leeching file in telegram both are disabled.</b>"
+            msg = f"Hey {tag}.\n\nYoutube download and Leeching file in telegram both are disabled."
         
     if msg:
         await delete_links(message)
