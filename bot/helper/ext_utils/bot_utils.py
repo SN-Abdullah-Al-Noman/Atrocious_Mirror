@@ -195,7 +195,7 @@ def get_readable_message():
     if config_dict['BOT_MAX_TASKS']:
         TASKS_COUNT = f"\n<b>Task Limit: </b>{config_dict['BOT_MAX_TASKS']} | <b>Run:</b> {len(download_dict)} | <b>Free:</b> {config_dict['BOT_MAX_TASKS'] - len(download_dict)}\n"
     else:
-        TASKS_COUNT = f"<b>Tasks Running:</b> {len(download_dict)}\n"
+        TASKS_COUNT = f"\n<b>Tasks Running:</b> {len(download_dict)}\n"
     msg += f"{TASKS_COUNT}"
     msg += f"<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(config_dict['DOWNLOAD_DIR']).free)}"
     msg += f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UP:</b> {get_readable_time(time() - botStartTime)}"
