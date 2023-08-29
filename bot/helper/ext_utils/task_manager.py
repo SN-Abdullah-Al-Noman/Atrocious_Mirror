@@ -10,8 +10,6 @@ from bot.helper.telegram_helper.message_utils import forcesub, BotPm_check, send
 
 
 async def stop_duplicate_check(name, listener, isClone=None):
-    msg = ""
-    button = None
     message = listener.message
     user_id = message.from_user.id
     
@@ -43,7 +41,7 @@ async def stop_duplicate_check(name, listener, isClone=None):
             else:
                 msg = f"\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
                 button = await get_telegraph_list(telegraph_content)
-        return msg, button
+            return msg, button
     return False, None
 
 
