@@ -856,14 +856,14 @@ async def load_config():
 
     MIRROR_LIMIT = environ.get('MIRROR_LIMIT', '')
     MIRROR_LIMIT = '' if len(MIRROR_LIMIT) == 0 else float(MIRROR_LIMIT)
-
+  
     OWNER_USERNAME = environ.get('OWNER_USERNAME', '')
     if OWNER_USERNAME.startswith('@'):
         OWNER_USERNAME = OWNER_USERNAME[1:]
     if len(OWNER_USERNAME) == 0:
         OWNER_USERNAME = 'ItsBitDefender'
     OWNER_USERNAME = f"https://t.me/{OWNER_USERNAME}"
-
+  
     SA_MAIL = environ.get('SA_MAIL', '')
     if len(SA_MAIL) == 0:
         SA_MAIL = ''
