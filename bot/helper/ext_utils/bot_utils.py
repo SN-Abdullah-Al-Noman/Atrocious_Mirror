@@ -373,7 +373,7 @@ def checking_access(message, button=None):
             button = ButtonMaker()
         button.ubutton('Contact with bot owner', 'https://t.me/ItsBitDefender')
         return f"<b>Hey {tag}.</b>\n\n<b>User Id: </b><code>{user_id}</code>.\n\n<b>You are blacklisted ⚠️.</b>\n\n<b>Possible Reasons:</b>\n<b>1:</b> Mirror or Leech P*r*n Video.\n<b>2:</b> Mirror or Leech illegal files.\n\nClick the button for chat with bot owner to remove yourself from blacklist.", button
-    elif not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo') or user_id in user_data and user_data[user_id].get('is_good_friend') or user_id in user_data and user_data[user_id].get('is_paid_user')):
+    elif not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo')):
         return None, button
     user_data.setdefault(user_id, {})
     data = user_data[user_id]
