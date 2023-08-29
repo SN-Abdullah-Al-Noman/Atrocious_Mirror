@@ -10,6 +10,7 @@ from bot.helper.telegram_helper.message_utils import forcesub, BotPm_check, send
 
 
 async def stop_duplicate_check(name, listener, isClone=None):
+    msg = ""
     message = listener.message
     user_id = message.from_user.id
     
