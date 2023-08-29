@@ -97,7 +97,7 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
             if len(bulk) == 0:
                 raise ValueError('Bulk Empty!')
         except:
-            await sendMessage(message, 'Hey {tag}. Reply to text file or tg message that have links seperated by new line!')
+            await sendMessage(message, 'Hey {tag}.\n\nReply to text file or tg message that have links seperated by new line!')
             return
         b_msg = input_list[:1]
         b_msg.append(f'{bulk[0]} -i {len(bulk)}')
