@@ -372,12 +372,7 @@ def checking_access(message, button=None):
         if button is None:
             button = ButtonMaker()
         button.ubutton('Contact with bot owner', 'https://t.me/ItsBitDefender')
-        return f"<b>Hey {tag}.</b>\n<b>User Id: </b><code>{user_id}</code>.\n\n<b>You are blacklisted ⚠️.</b>\n\n<b>Possible Reasons:</b>\n<b>1:</b> Mirror or Leech P*r*n Video.\n<b>2:</b> Mirror or Leech illegal files.\n\nClick the button for chat with bot owner to remove yourself from blacklist.", button
-    elif config_dict['ONLY_PAID_SERVICE'] and not (user_id == OWNER_ID or (user_id in user_data and (user_data[user_id].get('is_sudo') or user_data[user_id].get('is_good_friend') or user_data[user_id].get('is_paid_user')))):
-        if button is None:
-            button = ButtonMaker()
-        button.ubutton('Contact with bot owner', 'https://t.me/ItsBitDefender')
-        return f"<b>Sorry, {tag} you are not paid user.</b>\n\nThis bot is only for paid users.\nYou need to pay monthly 20 Taka or 20 Rupee for use this bot.\n\nClick the button for chat with bot owner for paid membership.", button
+        return f"<b>Hey {tag}.</b>\n\n<b>User Id: </b><code>{user_id}</code>.\n\n<b>You are blacklisted ⚠️.</b>\n\n<b>Possible Reasons:</b>\n<b>1:</b> Mirror or Leech P*r*n Video.\n<b>2:</b> Mirror or Leech illegal files.\n\nClick the button for chat with bot owner to remove yourself from blacklist.", button
     elif not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo') or user_id in user_data and user_data[user_id].get('is_good_friend') or user_id in user_data and user_data[user_id].get('is_paid_user')):
         return None, button
     user_data.setdefault(user_id, {})
@@ -396,7 +391,7 @@ def checking_access(message, button=None):
             button = ButtonMaker()
         button.ubutton('Generate Token', short_url(
             f'https://t.me/{bot_name}?start={token}'))
-        return f"Dear {tag} your Ads token is expired, generate your token and try again.\n\n<b>Token Timeout:</b> {get_readable_time(int(config_dict['TOKEN_TIMEOUT']))}.\n\n<b>What is token?</b>\nThis is an ads token. If you pass 1 ad, you can use the bot for {get_readable_time(int(config_dict['TOKEN_TIMEOUT']))} after passing the ad.\n\n<b>Token Generate Video Tutorial:</b> ⬇️\nhttps://t.me/AtrociousMirrorBackup/116", button
+        return f"Hey {tag}.\n\nYour Ads token is expired, generate your token and try again.\n\n<b>Token Timeout:</b> {get_readable_time(int(config_dict['TOKEN_TIMEOUT']))}.\n\n<b>What is token?</b>\nThis is an ads token. If you pass 1 ad, you can use the bot for {get_readable_time(int(config_dict['TOKEN_TIMEOUT']))} after passing the ad.\n\n<b>Token Generate Video Tutorial:</b> ⬇️\nhttps://t.me/AtrociousMirrorBackup/116", button
     return None, button
     
 
