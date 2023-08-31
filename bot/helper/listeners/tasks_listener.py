@@ -54,7 +54,7 @@ async def command_listener(message, isClone=False, isGdrive=False, isLeech=False
             msg = f"Hey {tag}.\n\nTorrent download and Leech both are disabled."
         elif isYtdl and not config_dict['YTDLP_ENABLED']:
             msg = f"Hey {tag}.\n\nYouTube download is disabled.</b>"
-        elif isYtdl and IsLeech and not config_dict['YTDLP_ENABLED'] and not config_dict['LEECH_ENABLED']:
+        elif isYtdl and isLeech and not config_dict['YTDLP_ENABLED'] and not config_dict['LEECH_ENABLED']:
             msg = f"Hey {tag}.\n\nYoutube download and Leeching file in telegram both are disabled."
         
     if msg:
