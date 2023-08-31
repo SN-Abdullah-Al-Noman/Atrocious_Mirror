@@ -31,8 +31,6 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
     try:
         download = (await sync_to_async(aria2.add, link, a2c_opt))[0]
         if await check_filename(message=listener.message, filename=download.name):
-            if downloads := download.followed_by:
-                downloads.append(download)
             return
     except Exception as e:
         LOGGER.info(f"Aria2c Download Error: {e}")
