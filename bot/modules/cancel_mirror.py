@@ -3,22 +3,19 @@ from asyncio import sleep
 from pyrogram.handlers import MessageHandler, CallbackQueryHandler
 from pyrogram.filters import command, regex
 
-from bot import download_dict, bot, bot_name, download_dict_lock, OWNER_ID, user_data
+from bot import download_dict, bot, download_dict_lock, OWNER_ID, user_data, config_dict
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.message_utils import sendMessage, auto_delete_message, deleteMessage
+from bot.helper.telegram_helper.message_utils import sendMessage, auto_delete_message
 from bot.helper.ext_utils.bot_utils import getDownloadByGid, getAllDownload, MirrorStatus, new_task
 from bot.helper.telegram_helper import button_build
 
 
-async def cancel_mirror(client, message):
+async def cancel_mirror(_, message):
     user_id = message.from_user.id
-    msg = message.text.split('_', maxsplit=1)
+    msg = message.text.split()
     if len(msg) > 1:
-        cmd_data = msg[1].split('@', maxsplit=1)
-        if len(cmd_data) > 1 and cmd_data[1].strip() != bot_name:
-            return
-        gid = cmd_data[0]
+        gid = msg[1]
         dl = await getDownloadByGid(gid)
         if dl is None:
             await sendMessage(message, f"GID: <code>{gid}</code> Not Found.")
@@ -41,7 +38,6 @@ async def cancel_mirror(client, message):
     obj = dl.download()
     await obj.cancel_download()
 
-cancel_listener = {}
 
 async def cancel_all(status):
     matches = await getAllDownload(status)
@@ -54,7 +50,7 @@ async def cancel_all(status):
     return True
 
 
-async def cancell_all_buttons(client, message):
+async def cancell_all_buttons(_, message):
     async with download_dict_lock:
         count = len(download_dict)
     if count == 0:
@@ -80,13 +76,12 @@ async def cancell_all_buttons(client, message):
 @new_task
 async def cancel_all_update(_, query):
     data = query.data.split()
-    user_id = query.from_user.id
     message = query.message
     reply_to = message.reply_to_message
     await query.answer()
     if data[1] == 'close':
-        await deleteMessage(reply_to)
-        await deleteMessage(message)
+        await reply_to.delete()
+        await message.delete()
     else:
         res = await cancel_all(data[1])
         if not res:
