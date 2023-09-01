@@ -12,10 +12,6 @@ from bot.helper.telegram_helper import button_build
 
 
 async def cancel_mirror(client, message):
-    if not message.from_user:
-        message.from_user = await anno_checker(message)
-    if not message.from_user:
-        return
     user_id = message.from_user.id
     msg = message.text.split('_', maxsplit=1)
     if len(msg) > 1:
