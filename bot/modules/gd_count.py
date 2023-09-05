@@ -45,28 +45,3 @@ async def countNode(_, message):
 
 bot.add_handler(MessageHandler(countNode, filters=command(
     BotCommands.CountCommand) & CustomFilters.authorized))
-
-
-
-from bot import bot, config_dict
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-
-@bot.on_callback_query()
-async def callback_handler(client, CallbackQuery):
-    limit_msg = f"Clone Limit: {config_dict['CLONE_LIMIT']} GB\n"
-    limit_msg += f"Gdrive Limit: {config_dict['GDRIVE_LIMIT']} GB\n"
-    limit_msg += f"Leech Limit: {config_dict['LEECH_LIMIT']} GB\n"
-    limit_msg += f"Mega Limit: {config_dict['MEGA_LIMIT']} GB\n"
-    limit_msg += f"Mirror Limit: {config_dict['MIRROR_LIMIT']} GB\n"
-    limit_msg += f"Storage Threshold: {config_dict['STORAGE_THRESHOLD']} GB\n"
-    limit_msg += f"Torrent Limit: {config_dict['TORRENT_LIMIT']} GB\n"
-    limit_msg += f"Ytdlp Limit: {config_dict['YTDLP_LIMIT']} GB\n"
-    await CallbackQuery.answer(text=limit_msg, show_alert=True)
-
-
-async def show_limits(client, message):
-    limit_button = InlineKeyboardMarkup([[InlineKeyboardButton("See Limits", callback_data="msg")]])
-    await message.reply("Click the button to see limits.", reply_markup=limit_button)
-
-
-bot.add_handler(MessageHandler(show_limits, filters=command("limits")))
