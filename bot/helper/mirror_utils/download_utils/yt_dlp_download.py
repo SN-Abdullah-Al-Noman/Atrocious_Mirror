@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 from os import path as ospath, listdir
-from random import SystemRandom
-from string import ascii_letters, digits
+from secrets import token_urlsafe
 from logging import getLogger
 from yt_dlp import YoutubeDL, DownloadError
 from re import search as re_search
 
 from bot import download_dict_lock, download_dict, non_queued_dl, queue_dict_lock
-from bot.helper.telegram_helper.message_utils import sendStatusMessage, check_filename
+from bot.helper.telegram_helper.message_utils import sendStatusMessage
 from ..status_utils.yt_dlp_download_status import YtDlpDownloadStatus
 from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
-from bot.helper.ext_utils.bot_utils import sync_to_async, async_to_sync, get_telegraph_list
-from bot.helper.ext_utils.task_manager import is_queued, stop_duplicate_check, limit_checker
-from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
-from bot.helper.ext_utils.fs_utils import get_base_name
+from bot.helper.ext_utils.bot_utils import sync_to_async, async_to_sync
+from bot.helper.ext_utils.task_manager import is_queued
+from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check
 
 
 LOGGER = getLogger(__name__)
@@ -69,10 +67,10 @@ class YoutubeDLHelper:
                      'overwrites': True,
                      'writethumbnail': True,
                      'trim_file_name': 220,
-                     'retry_sleep_functions': {'http': lambda x: 2,
-                                               'fragment': lambda x: 2,
-                                               'file_access': lambda x: 2,
-                                               'extractor': lambda x: 2}}
+                     'retry_sleep_functions': {'http': lambda n: 3,
+                                               'fragment': lambda n: 3,
+                                               'file_access': lambda n: 3,
+                                               'extractor': lambda n: 3}}
 
     @property
     def download_speed(self):
@@ -165,10 +163,6 @@ class YoutubeDLHelper:
                 self.name = f"{name}{ext}" if name else realName
                 if not self.__ext:
                     self.__ext = ext
-                if result.get('filesize'):
-                    self.__size = result['filesize']
-                elif result.get('filesize_approx'):
-                    self.__size = result['filesize_approx']
 
     def __download(self, link, path):
         try:
@@ -194,8 +188,7 @@ class YoutubeDLHelper:
             self.opts['ignoreerrors'] = True
             self.is_playlist = True
 
-        self.__gid = ''.join(SystemRandom().choices(
-            ascii_letters + digits, k=10))
+        self.__gid = token_urlsafe(10)
 
         await self.__onDownloadStart()
 
@@ -246,26 +239,27 @@ class YoutubeDLHelper:
         if self.__listener.isLeech:
             self.opts['postprocessors'].append(
                 {'format': 'jpg', 'key': 'FFmpegThumbnailsConvertor', 'when': 'before_dl'})
-        if self.__ext in ['.mp3', '.mkv', '.mka', '.ogg', '.opus', '.flac', '.m4a', '.mp4', '.mov']:
+        if self.__ext in ['.mp3', '.mkv', '.mka', '.ogg', '.opus', '.flac', '.m4a', '.mp4', '.mov', 'm4v']:
             self.opts['postprocessors'].append(
                 {'already_have_thumbnail': self.__listener.isLeech, 'key': 'EmbedThumbnail'})
         elif not self.__listener.isLeech:
             self.opts['writethumbnail'] = False
 
-        LOGGER.info(f'Checking File/Folder if already in Drive: {self.name}')
-        message = self.__listener.message
-        user_id = message.from_user.id
-        filename = self.name 
-        if filename:
-            telegraph_content = await sync_to_async(GoogleDriveHelper(user_id).drive_list, filename, stopDup=True)
-            if telegraph_content:
-                msg = f"File/Folder is already available in Drive."
-                await self.__listener.onDownloadError(msg)
-                return
-            
-        if limit_exceeded := await limit_checker(self.__size, self.__listener, isYtdlp=True):
-            await self.__listener.onDownloadError(limit_exceeded)
+        if msg := await check_filename(name):
+            warn = f"Hey {listener.tag}.\n\n{msg}"
+            await self.__listener.onDownloadError(warn)
             return
+            
+        msg, button = await stop_duplicate_check(name, self.__listener)
+        if msg:
+            await self.__listener.onDownloadError(msg, button)
+            return
+
+        limit_exceeded, button = await limit_checker(self.__size, self.__listener, isYtdlp=True)
+        if limit_exceeded:
+            await self.__listener.onDownloadError(limit_exceeded, button)
+            return
+            
         added_to_queue, event = await is_queued(self.__listener.uid)
         if added_to_queue:
             LOGGER.info(f"Added to Queue/Download: {self.name}")
@@ -298,9 +292,9 @@ class YoutubeDLHelper:
             key, value = map(str.strip, opt.split(':', 1))
             if value.startswith('^'):
                 if '.' in value or value == '^inf':
-                    value = float(value.split('^')[1])
+                    value = float(value.split('^', 1)[1])
                 else:
-                    value = int(value.split('^')[1])
+                    value = int(value.split('^', 1)[1])
             elif value.lower() == 'true':
                 value = True
             elif value.lower() == 'false':

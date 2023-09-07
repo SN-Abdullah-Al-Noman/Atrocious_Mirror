@@ -4,7 +4,7 @@ from aiofiles.os import remove as aioremove, path as aiopath
 from bot import aria2, download_dict_lock, download_dict, LOGGER, config_dict, aria2_options, aria2c_global, non_queued_dl, queue_dict_lock
 from bot.helper.ext_utils.bot_utils import bt_selection_buttons, sync_to_async
 from bot.helper.mirror_utils.status_utils.aria2_status import Aria2Status
-from bot.helper.telegram_helper.message_utils import sendStatusMessage, sendMessage, check_filename
+from bot.helper.telegram_helper.message_utils import sendStatusMessage, sendMessage
 from bot.helper.ext_utils.task_manager import is_queued
 
 
@@ -15,7 +15,7 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
     if filename:
         a2c_opt['out'] = filename
     if auth:
-        a2c_opt['header'] = f"authorization: {auth}"
+        a2c_opt['header'] = auth
     if ratio:
         a2c_opt['seed-ratio'] = ratio
     if seed_time:
@@ -30,8 +30,6 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
             a2c_opt['pause'] = 'true'
     try:
         download = (await sync_to_async(aria2.add, link, a2c_opt))[0]
-        if await check_filename(message=listener.message, filename=download.name):
-            return
     except Exception as e:
         LOGGER.info(f"Aria2c Download Error: {e}")
         await sendMessage(listener.message, f'{e}')
@@ -81,6 +79,6 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
 
         await sync_to_async(aria2.client.unpause, new_gid)
         LOGGER.info(f'Start Queued Download from Aria2c: {name}. Gid: {gid}')
-        
+
         async with queue_dict_lock:
             non_queued_dl.add(listener.uid)

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-from random import SystemRandom
-from string import ascii_letters, digits
+from secrets import token_urlsafe
 from aiofiles.os import makedirs
-from asyncio import Event, sleep
+from asyncio import Event
 from mega import (MegaApi, MegaListener, MegaRequest, MegaTransfer, MegaError)
 
 from bot import LOGGER, config_dict, download_dict_lock, download_dict, non_queued_dl, queue_dict_lock
-from bot.helper.telegram_helper.message_utils import sendMessage, sendStatusMessage, check_filename
+from bot.helper.telegram_helper.message_utils import sendMessage, sendStatusMessage
 from bot.helper.ext_utils.bot_utils import get_mega_link_type, async_to_sync, sync_to_async
 from bot.helper.mirror_utils.status_utils.mega_download_status import MegaDownloadStatus
 from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
-from bot.helper.ext_utils.task_manager import is_queued, stop_duplicate_check, limit_checker
+from bot.helper.ext_utils.task_manager import is_queued
+from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check
 
 
 class MegaAppListener(MegaListener):
@@ -148,6 +148,14 @@ async def add_mega_download(mega_link, path, listener, name):
         return
 
     name = name or node.getName()
+    if msg := await check_filename(name):
+        warn = f"Hey {listener.tag}.\n\n{msg}"
+        await sendMessage(listener.message, warn)
+        await executor.do(api.logout, ())
+        if folder_api is not None:
+            await executor.do(folder_api.logout, ())
+        return
+        
     msg, button = await stop_duplicate_check(name, listener)
     if msg:
         await sendMessage(listener.message, msg, button)
@@ -156,12 +164,19 @@ async def add_mega_download(mega_link, path, listener, name):
             await executor.do(folder_api.logout, ())
         return
 
-    gid = ''.join(SystemRandom().choices(ascii_letters + digits, k=8))
+    gid = token_urlsafe(8)
     size = api.getSize(node)
-    if limit_exceeded := await limit_checker(size, listener, isMega=True):
-        await sendMessage(listener.message, limit_exceeded)
+    
+    limit_exceeded, button = await limit_checker(size, listener, isMega=True)
+    if limit_exceeded:
+        msg = f"Hey {listener.tag}.\n\n{limit_exceeded}"
+        await sendMessage(listener.message, msg, button)
+        await executor.do(api.logout, ())
+        if folder_api is not None:
+            await executor.do(folder_api.logout, ())
         return
-        
+
+    
     added_to_queue, event = await is_queued(listener.uid)
     if added_to_queue:
         LOGGER.info(f"Added to Queue/Download: {name}")
@@ -183,7 +198,8 @@ async def add_mega_download(mega_link, path, listener, name):
         from_queue = False
 
     async with download_dict_lock:
-        download_dict[listener.uid] = MegaDownloadStatus(name, size, gid, mega_listener, listener.message)
+        download_dict[listener.uid] = MegaDownloadStatus(
+            name, size, gid, mega_listener, listener.message)
     async with queue_dict_lock:
         non_queued_dl.add(listener.uid)
 
