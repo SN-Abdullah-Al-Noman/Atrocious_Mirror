@@ -32,6 +32,8 @@ class RcloneTransferHelper:
         self.__sa_index = 0
         self.__sa_number = 0
         self.name = name
+        self.extension_filter = ['aria2', '!qB']
+        self.user_settings()
 
     @property
     def transferred_size(self):
@@ -52,6 +54,14 @@ class RcloneTransferHelper:
     @property
     def size(self):
         return self.__size
+
+    def user_settings(self):
+        if self.__listener.user_dict.get('excluded_extensions', False):
+            self.extension_filter = self.__listener.user_dict['excluded_extensions']
+        elif 'excluded_extensions' not in self.__listener.user_dict:
+            self.extension_filter = GLOBAL_EXTENSION_FILTER
+        else:
+            self.extension_filter = ['aria2', '!qB']
 
     async def __progress(self):
         while not (self.__proc is None or self.__is_cancelled):
@@ -213,12 +223,14 @@ class RcloneTransferHelper:
 
     async def upload(self, path, size):
         self.__is_upload = True
-        rc_path = self.__listener.upPath.strip('/')
+        rc_path = self.__listener.upDest.strip('/')
         if rc_path.startswith('mrcc:'):
             rc_path = rc_path.split('mrcc:', 1)[1]
-            oconfig_path = f'rclone/{self.__listener.message.from_user.id}.conf'
+            oconfig_path = f'rclone/{self.__listener.user_id}.conf'
+            private = True
         else:
             oconfig_path = 'rclone.conf'
+            private = False
 
         oremote, rc_path = rc_path.split(':', 1)
 
@@ -227,7 +239,7 @@ class RcloneTransferHelper:
             folders, files = await count_files_and_folders(path)
             rc_path += f"/{self.name}" if rc_path else self.name
         else:
-            if path.lower().endswith(tuple(GLOBAL_EXTENSION_FILTER)):
+            if path.lower().endswith(tuple(self.extension_filter)):
                 await self.__listener.onUploadError('This file extension is excluded by extension filter!')
                 return
             mime_type = await sync_to_async(get_mime_type, path)
@@ -289,9 +301,10 @@ class RcloneTransferHelper:
         if self.__is_cancelled:
             return
         LOGGER.info(f'Upload Done. Path: {destination}')
-        await self.__listener.onUploadComplete(link, size, files, folders, mime_type, self.name, destination)
+        await self.__listener.onUploadComplete(link, size, files, folders, mime_type, self.name, destination, private=private)
 
-    async def clone(self, config_path, src_remote, src_path, destination, rcflags, mime_type):
+    async def clone(self, config_path, src_remote, src_path, rcflags, mime_type):
+        destination = self.__listener.upDest
         dst_remote, dst_path = destination.split(':', 1)
 
         try:
@@ -349,9 +362,8 @@ class RcloneTransferHelper:
                     await self.__listener.onUploadError(err[:4000])
                     return None, None
 
-    @staticmethod
-    def __getUpdatedCommand(config_path, source, destination, rcflags, method):
-        ext = '*.{' + ','.join(GLOBAL_EXTENSION_FILTER) + '}'
+    def __getUpdatedCommand(self, config_path, source, destination, rcflags, method):
+        ext = '*.{' + ','.join(self.extension_filter) + '}'
         cmd = ['rclone', method, '--fast-list', '--config', config_path, '-P', source, destination,
                '--exclude', ext, '--ignore-case', '--low-level-retries', '1', '-M', '--log-file',
                'rlog.txt', '--log-level', 'DEBUG']
