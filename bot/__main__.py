@@ -5,22 +5,22 @@ from aiofiles import open as aiopen
 from os import execl as osexecl
 from psutil import disk_usage, cpu_percent, swap_memory, cpu_count, virtual_memory, net_io_counters, boot_time
 from time import time
-from uuid import uuid4
 from sys import executable
 from pyrogram.handlers import MessageHandler
 from pyrogram.filters import command
 from asyncio import create_subprocess_exec, gather
 
 from bot import bot, botStartTime, LOGGER, Interval, DATABASE_URL, QbInterval, INCOMPLETE_TASK_NOTIFIER, scheduler, user_data
+from bot.helper.ext_utils.atrocious_utils import set_commands
 from .helper.ext_utils.fs_utils import start_cleanup, clean_all, exit_clean_up
-from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time, cmd_exec, sync_to_async, set_commands
+from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time, cmd_exec, sync_to_async
 from .helper.ext_utils.db_handler import DbManger
 from .helper.telegram_helper.bot_commands import BotCommands
-from .helper.telegram_helper.message_utils import sendMessage, editMessage, sendFile
+from .helper.telegram_helper.message_utils import sendMessage, editMessage, sendFile, delete_all_messages
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.listeners.aria2_listener import start_aria2_listener
-from .modules import authorize, broadcast, bot_settings, cancel_mirror, clone, eval, gd_clean, gd_count, gd_delete, gd_list, mirror_leech, photo_upload, rss, shell, status, torrent_search, torrent_select, users_settings, user_td, ytdlp
+from .modules import authorize, broadcast, clone, gd_count, gd_delete, cancel_mirror, gd_search, mirror_leech, photo_upload, status, torrent_search, torrent_select, ytdlp, rss, shell, eval, users_settings, bot_settings
 
 
 async def stats(client, message):
@@ -53,16 +53,16 @@ async def stats(client, message):
 
 async def start(client, message):
     if len(message.command) > 1:
-        userid = message.from_user.id
+        user_id = message.from_user.id
         input_token = message.command[1]
-        if userid not in user_data:
+        if user_id not in user_data:
             return await sendMessage(message, 'Who are you?')
-        data = user_data[userid]
+        data = user_data[user_id]
         if 'token' not in data or data['token'] != input_token:
             return await sendMessage(message, 'This token already expired')
         data['token'] = str(uuid4())
         data['time'] = time()
-        user_data[userid].update(data)
+        user_data[user_id].update(data)
         return await sendMessage(message, 'Token refreshed successfully!')
     else:
         buttons = ButtonMaker()
@@ -72,8 +72,10 @@ async def start(client, message):
         start_string = f'''This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\nType /{BotCommands.HelpCommand} to get a list of available commands'''
         await sendMessage(message, start_string, reply_markup)
     await DbManger().update_pm_users(message.from_user.id)
+    
 
-async def restart(client, message):
+async def restart(_, message):
+    await delete_all_messages()
     restart_message = await sendMessage(message, "Restarting...")
     if scheduler.running:
         scheduler.shutdown(wait=False)
@@ -89,7 +91,7 @@ async def restart(client, message):
     osexecl(executable, executable, "-m", "bot")
 
 
-async def ping(client, message):
+async def ping(_, message):
     start_time = int(round(time() * 1000))
     reply = await sendMessage(message, "Starting Ping")
     end_time = int(round(time() * 1000))
@@ -149,7 +151,7 @@ NOTE: Try each command without any argument to see more detalis.
 '''
 
 
-async def bot_help(client, message):
+async def bot_help(_, message):
     await sendMessage(message, help_string)
 
 
@@ -209,7 +211,7 @@ async def main():
         BotCommands.HelpCommand) & CustomFilters.authorized))
     bot.add_handler(MessageHandler(stats, filters=command(
         BotCommands.StatsCommand) & CustomFilters.authorized))
-    LOGGER.info("💥 Atrocious Mirror Bot Started!")
+    LOGGER.info("💥 Bot Started!")
     signal(SIGINT, exit_clean_up)
 
 bot.loop.run_until_complete(main())

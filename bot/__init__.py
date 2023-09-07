@@ -37,15 +37,16 @@ DRIVES_NAMES = []
 DRIVES_IDS = []
 INDEX_URLS = []
 GLOBAL_EXTENSION_FILTER = ['aria2', '!qB']
-GLOBAL_BLACKLIST_FILE_KEYWORDS = []
 user_data = {}
-shorteneres_list = []
 aria2_options = {}
 qbit_options = {}
 queued_dl = {}
 queued_up = {}
 non_queued_dl = set()
 non_queued_up = set()
+shorteneres_list = []
+bot_cache = {}
+GLOBAL_BLACKLIST_FILE_KEYWORDS = []
 
 try:
     if bool(environ.get('_____REMOVE_THIS_LINE_____')):
@@ -73,13 +74,9 @@ DATABASE_URL = environ.get('DATABASE_URL', '')
 if len(DATABASE_URL) == 0:
     DATABASE_URL = ''
 
-DATABASE_NAME = environ.get('DATABASE_NAME', '')
-if len(DATABASE_NAME) == 0:
-    DATABASE_NAME = 'mltb'
-
 if DATABASE_URL:
     conn = MongoClient(DATABASE_URL)
-    db = conn.get_database(DATABASE_NAME)
+    db = conn.mltb
     current_config = dict(dotenv_values('config.env'))
     old_config = db.settings.deployConfig.find_one({'_id': bot_id})
     if old_config is None:
@@ -174,15 +171,15 @@ if len(EXTENSION_FILTER) > 0:
         x = x.lstrip('.')
         GLOBAL_EXTENSION_FILTER.append(x.strip().lower())
 
-IS_PREMIUM_USER = False
-user = ''
-
 USER_SESSION_STRING = environ.get('USER_SESSION_STRING', '')
 if len(USER_SESSION_STRING) != 0:
     log_info("Creating client from USER_SESSION_STRING")
     user = tgClient('user', TELEGRAM_API, TELEGRAM_HASH, session_string=USER_SESSION_STRING,
                     parse_mode=enums.ParseMode.HTML).start()
     IS_PREMIUM_USER = user.me.is_premium
+else:
+    IS_PREMIUM_USER = False
+    user = ''
 
 MEGA_EMAIL = environ.get('MEGA_EMAIL', '')
 MEGA_PASSWORD = environ.get('MEGA_PASSWORD', '')
@@ -214,7 +211,7 @@ if len(SEARCH_PLUGINS) == 0:
 MAX_SPLIT_SIZE = 4194304000 if IS_PREMIUM_USER else 2097152000
 
 LEECH_SPLIT_SIZE = environ.get('LEECH_SPLIT_SIZE', '')
-if len(LEECH_SPLIT_SIZE) == 0 or int(LEECH_SPLIT_SIZE) > MAX_SPLIT_SIZE:
+if len(LEECH_SPLIT_SIZE) == 0 or int(LEECH_SPLIT_SIZE) > MAX_SPLIT_SIZE or LEECH_SPLIT_SIZE == '2097152000':
     LEECH_SPLIT_SIZE = MAX_SPLIT_SIZE
 else:
     LEECH_SPLIT_SIZE = int(LEECH_SPLIT_SIZE)
@@ -238,10 +235,10 @@ if len(YT_DLP_OPTIONS) == 0:
 SEARCH_LIMIT = environ.get('SEARCH_LIMIT', '')
 SEARCH_LIMIT = 0 if len(SEARCH_LIMIT) == 0 else int(SEARCH_LIMIT)
 
-LOG_CHAT_ID = environ.get('LOG_CHAT_ID', '')
-LOG_CHAT_ID = '' if len(LOG_CHAT_ID) == 0 else LOG_CHAT_ID
-if LOG_CHAT_ID.isdigit() or LOG_CHAT_ID.startswith('-'):
-    LOG_CHAT_ID = int(LOG_CHAT_ID)
+LEECH_DUMP_CHAT = environ.get('LEECH_DUMP_CHAT', '')
+LEECH_DUMP_CHAT = '' if len(LEECH_DUMP_CHAT) == 0 else LEECH_DUMP_CHAT
+if LEECH_DUMP_CHAT.isdigit() or LEECH_DUMP_CHAT.startswith('-'):
+    LEECH_DUMP_CHAT = int(LEECH_DUMP_CHAT)
 
 STATUS_LIMIT = environ.get('STATUS_LIMIT', '')
 STATUS_LIMIT = 10 if len(STATUS_LIMIT) == 0 else int(STATUS_LIMIT)
@@ -254,7 +251,7 @@ if RSS_CHAT.isdigit() or RSS_CHAT.startswith('-'):
     RSS_CHAT = int(RSS_CHAT)
 
 RSS_DELAY = environ.get('RSS_DELAY', '')
-RSS_DELAY = 900 if len(RSS_DELAY) == 0 else int(RSS_DELAY)
+RSS_DELAY = 600 if len(RSS_DELAY) == 0 else int(RSS_DELAY)
 
 TORRENT_TIMEOUT = environ.get('TORRENT_TIMEOUT', '')
 TORRENT_TIMEOUT = '' if len(TORRENT_TIMEOUT) == 0 else int(TORRENT_TIMEOUT)
@@ -291,6 +288,9 @@ EQUAL_SPLITS = EQUAL_SPLITS.lower() == 'true'
 
 MEDIA_GROUP = environ.get('MEDIA_GROUP', '')
 MEDIA_GROUP = MEDIA_GROUP.lower() == 'true'
+
+USER_LEECH = environ.get('USER_LEECH', '')
+USER_LEECH = USER_LEECH.lower() == 'true' and IS_PREMIUM_USER
 
 BASE_URL_PORT = environ.get('BASE_URL_PORT', '')
 BASE_URL_PORT = 80 if len(BASE_URL_PORT) == 0 else int(BASE_URL_PORT)
@@ -384,6 +384,9 @@ MIRROR_ENABLED = MIRROR_ENABLED.lower() == 'true'
 MIRROR_LIMIT = environ.get('MIRROR_LIMIT', '')
 MIRROR_LIMIT = '' if len(MIRROR_LIMIT) == 0 else float(MIRROR_LIMIT)
 
+MIRROR_LOG_CHAT = environ.get('MIRROR_LOG_CHAT', '')
+MIRROR_LOG_CHAT = '' if len(MIRROR_LOG_CHAT) == 0 else float(MIRROR_LOG_CHAT)
+
 SA_MAIL = environ.get('SA_MAIL', '')
 if len(SA_MAIL) == 0:
     SA_MAIL = ''
@@ -442,14 +445,14 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'GDRIVE_ID': GDRIVE_ID,
                'GDRIVE_LIMIT': GDRIVE_LIMIT,
                'INCOMPLETE_TASK_NOTIFIER': INCOMPLETE_TASK_NOTIFIER,
-               'IMAGES': IMAGES,
                'INDEX_URL': INDEX_URL,
+               'IMAGES': IMAGES,
                'IS_TEAM_DRIVE': IS_TEAM_DRIVE,
+               'LEECH_DUMP_CHAT': LEECH_DUMP_CHAT,
                'LEECH_ENABLED': LEECH_ENABLED,
                'LEECH_FILENAME_PREFIX': LEECH_FILENAME_PREFIX,
                'LEECH_LIMIT': LEECH_LIMIT,
                'LEECH_SPLIT_SIZE': LEECH_SPLIT_SIZE,
-               'LOG_CHAT_ID': LOG_CHAT_ID,
                'MEDIA_GROUP': MEDIA_GROUP,
                'MEGA_EMAIL': MEGA_EMAIL,
                'MEGA_ENABLED': MEGA_ENABLED,
@@ -457,6 +460,7 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'MEGA_PASSWORD': MEGA_PASSWORD,
                'MIRROR_ENABLED': MIRROR_ENABLED,
                'MIRROR_LIMIT': MIRROR_LIMIT,
+               'MIRROR_LOG_CHAT': MIRROR_LOG_CHAT,
                'OWNER_ID': OWNER_ID,
                'QUEUE_ALL': QUEUE_ALL,
                'QUEUE_DOWNLOAD': QUEUE_DOWNLOAD,
@@ -481,17 +485,17 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'STORAGE_THRESHOLD': STORAGE_THRESHOLD,
                'SUDO_USERS': SUDO_USERS,
                'TELEGRAM_API': TELEGRAM_API,
-               'TELEGRAM_HASH': TELEGRAM_HASH,   
+               'TELEGRAM_HASH': TELEGRAM_HASH,
                'TOKEN_TIMEOUT': TOKEN_TIMEOUT,
                'TORRENT_ENABLED': TORRENT_ENABLED,
                'TORRENT_LIMIT': TORRENT_LIMIT,
                'TORRENT_TIMEOUT': TORRENT_TIMEOUT,
+               'USER_LEECH': USER_LEECH,
+               'USER_MAX_TASKS': USER_MAX_TASKS,
                'UPSTREAM_REPO': UPSTREAM_REPO,
                'UPSTREAM_BRANCH': UPSTREAM_BRANCH,
                'UPTOBOX_TOKEN': UPTOBOX_TOKEN,
-               'USER_MAX_TASKS': USER_MAX_TASKS,
                'USER_SESSION_STRING': USER_SESSION_STRING,
-               'USER_TD_ENABLED': USER_TD_ENABLED,
                'USE_SERVICE_ACCOUNTS': USE_SERVICE_ACCOUNTS,
                'WEB_PINCODE': WEB_PINCODE,
                'YTDLP_ENABLED': YTDLP_ENABLED,
@@ -526,7 +530,8 @@ if ospath.exists('shorteners.txt'):
 
 
 if BASE_URL:
-    Popen(f"gunicorn web.wserver:app --bind 0.0.0.0:{BASE_URL_PORT} --worker-class gevent", shell=True)
+    Popen(
+        f"gunicorn web.wserver:app --bind 0.0.0.0:{BASE_URL_PORT} --worker-class gevent", shell=True)
 
 srun(["qbittorrent-nox", "-d", f"--profile={getcwd()}"])
 if not ospath.exists('.netrc'):
