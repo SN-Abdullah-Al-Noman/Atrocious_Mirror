@@ -12,7 +12,7 @@ from re import split as re_split
 from io import BytesIO
 
 from bot import scheduler, rss_dict, LOGGER, DATABASE_URL, config_dict, bot
-from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, sendRss, sendFile
+from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, sendRss, sendFile, deleteMessage
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.ext_utils.db_handler import DbManger
@@ -145,6 +145,12 @@ async def rssSub(client, message, pre_event):
     if msg:
         await sendMessage(message, msg)
     await updateRssMenu(pre_event)
+    is_sudo = await CustomFilters.sudo(client, message)
+    if scheduler.state == 2:
+        scheduler.resume()
+    elif is_sudo and not scheduler.running:
+        addJob(config_dict['RSS_DELAY'])
+        scheduler.start()
 
 
 async def getUserId(title):
@@ -275,7 +281,7 @@ async def rssGet(client, message, pre_event):
                     with BytesIO(item_info_ecd) as out_file:
                         out_file.name = f"rssGet {title} items_no. {count}.txt"
                         await sendFile(message, out_file)
-                    await msg.delete()
+                    await deleteMessage(msg)
                 else:
                     await editMessage(msg, item_info)
             except IndexError as e:
@@ -378,8 +384,8 @@ async def rssListener(client, query):
     elif data[1] == 'close':
         await query.answer()
         handler_dict[user_id] = False
-        await message.reply_to_message.delete()
-        await message.delete()
+        await deleteMessage(message.reply_to_message)
+        await deleteMessage(message)
     elif data[1] == 'back':
         await query.answer()
         handler_dict[user_id] = False
@@ -564,7 +570,6 @@ async def rssMonitor():
     all_paused = True
     for user, items in list(rss_dict.items()):
         for title, data in list(items.items()):
-            await sleep(0)
             try:
                 if data['paused']:
                     continue
@@ -576,11 +581,11 @@ async def rssMonitor():
                     last_link = rss_d.entries[0]['links'][1]['href']
                 except IndexError:
                     last_link = rss_d.entries[0]['link']
+                finally:
+                    all_paused = False
                 last_title = rss_d.entries[0]['title']
                 if data['last_feed'] == last_link or data['last_title'] == last_title:
-                    all_paused = False
                     continue
-                all_paused = False
                 feed_count = 0
                 while True:
                     try:
@@ -637,7 +642,7 @@ async def rssMonitor():
                 break
             except Exception as e:
                 LOGGER.error(
-                    f"{e} Feed Name: {title} - Feed Link: {data['link']}")
+                    f"{e} - Feed Name: {title} - Feed Link: {data['link']}")
                 continue
     if all_paused:
         scheduler.pause()

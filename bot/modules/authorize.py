@@ -83,6 +83,49 @@ async def removeSudo(client, message):
     await sendMessage(message, msg)
 
 
+async def add_to_good_friend(client, message):
+    id_ = ""
+    msg = message.text.split()
+    if len(msg) > 1:
+        id_ = int(msg[1].strip())
+    elif reply_to := message.reply_to_message:
+        id_ = reply_to.from_user.id
+    if id_:
+        if id_ == OWNER_ID:
+            msg = 'You are playing with owner.'
+        elif id_ in user_data and user_data[id_].get('is_good_friend'):
+            msg = 'User already in good friend list.'
+        else:
+            update_user_ldata(id_, 'is_good_friend', True)
+            update_user_ldata(id_, 'is_blacklist', False)
+            if DATABASE_URL:
+                await DbManger().update_user_data(id_)
+            msg = 'User added in good friend list.'
+    else:
+        msg = "Give ID or Reply To message of whom you want to add in good friend list."
+    await sendMessage(message, msg)
+
+
+async def remove_good_friend(client, message):
+    id_ = ""
+    msg = message.text.split()
+    if len(msg) > 1:
+        id_ = int(msg[1].strip())
+    elif reply_to := message.reply_to_message:
+        id_ = reply_to.from_user.id
+    if id_:
+        if id_ == OWNER_ID:
+            msg = 'You are playing with owner.'
+        elif id_ in user_data or user_data[id_].get('is_good_friend'):
+            update_user_ldata(id_, 'is_good_friend', False)
+            if DATABASE_URL:
+                await DbManger().update_user_data(id_)
+            msg = 'User removed from good friend list.'
+    else:
+        msg = "Give ID or Reply To message of whom you want to remove from good friend list."
+    await sendMessage(message, msg)
+
+
 async def add_to_blacklist(client, message):
     id_ = ""
     msg = message.text.split()
@@ -130,11 +173,14 @@ async def remove_from_blacklist(client, message):
     await sendMessage(message, msg)
 
 
+bot.add_handler(MessageHandler(authorize, filters=command(BotCommands.AuthorizeCommand) & CustomFilters.sudo))
+bot.add_handler(MessageHandler(unauthorize, filters=command(BotCommands.UnAuthorizeCommand) & CustomFilters.sudo))
+
 bot.add_handler(MessageHandler(add_to_blacklist, filters=(command("addblacklist") & CustomFilters.sudo)))
 bot.add_handler(MessageHandler(remove_from_blacklist, filters=(command("rmblacklist") & CustomFilters.sudo)))
 
-bot.add_handler(MessageHandler(authorize, filters=command(BotCommands.AuthorizeCommand) & CustomFilters.sudo))
-bot.add_handler(MessageHandler(unauthorize, filters=command(BotCommands.UnAuthorizeCommand) & CustomFilters.sudo))
+bot.add_handler(MessageHandler(add_to_good_friend, filters=(command("addgdf") & CustomFilters.sudo)))
+bot.add_handler(MessageHandler(remove_good_friend, filters=(command("rmgdf") & CustomFilters.sudo)))
 
 bot.add_handler(MessageHandler(addSudo, filters=command(BotCommands.AddSudoCommand) & CustomFilters.sudo))
 bot.add_handler(MessageHandler(removeSudo, filters=command(BotCommands.RmSudoCommand) & CustomFilters.sudo))

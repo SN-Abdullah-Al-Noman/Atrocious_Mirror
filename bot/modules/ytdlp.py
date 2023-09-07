@@ -8,18 +8,18 @@ from yt_dlp import YoutubeDL
 from functools import partial
 from time import time
 
-from bot import DOWNLOAD_DIR, bot, config_dict, user_data, LOGGER, OWNER_ID
-from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, check_filename, delete_links
+from bot import DOWNLOAD_DIR, bot, config_dict, user_data, LOGGER
+from bot.helper.telegram_helper.message_utils import sendMessage, editMessage, deleteMessage
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.ext_utils.bot_utils import get_readable_file_size, is_url, new_task, sync_to_async, new_task, is_rclone_path, new_thread, get_readable_time, arg_parser 
+from bot.helper.ext_utils.bot_utils import get_readable_file_size, is_url, new_task, sync_to_async, new_task, is_rclone_path, new_thread, get_readable_time, arg_parser, is_gdrive_id
 from bot.helper.mirror_utils.download_utils.yt_dlp_download import YoutubeDLHelper
 from bot.helper.mirror_utils.rclone_utils.list import RcloneList
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.listeners.tasks_listener import MirrorLeechListener, command_listener
+from bot.helper.listeners.task_listener import MirrorLeechListener
 from bot.helper.ext_utils.help_messages import YT_HELP_MESSAGE
 from bot.helper.ext_utils.bulk_links import extract_bulk_links
-from bot.helper.ext_utils.task_manager import task_utils
+from bot.helper.ext_utils.atrocious_utils import command_listener, delete_links, task_utils
 
 
 @new_task
@@ -158,7 +158,7 @@ class YtSelection:
         self.__reply_to = await sendMessage(self.__message, msg, self.__main_buttons)
         await wrap_future(future)
         if not self.is_cancelled:
-            await self.__reply_to.delete()
+            await deleteMessage(self.__reply_to)
         return self.qual
 
     async def back_to_main(self):
@@ -267,6 +267,8 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
     bulk_start = 0
     bulk_end = 0
 
+    await delete_links(message)
+    
     if not isinstance(isBulk, bool):
         dargs = isBulk.split(':')
         bulk_start = dargs[0] or None
@@ -333,6 +335,8 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
         except:
             pass
 
+    user_id = message.from_user.id
+
     if username := message.from_user.username:
         tag = f'@{username}'
     else:
@@ -344,7 +348,7 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
     if not is_url(link):
         await sendMessage(message, YT_HELP_MESSAGE)
         return
-    
+
     error_msg = []
     error_button = None
     task_utilis_msg, error_button = await task_utils(message)
@@ -353,7 +357,7 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
         error_msg.extend(task_utilis_msg)
 
     if error_msg:
-        final_msg = f'Hey \n'
+        final_msg = f'Hey {tag}.\n'
         for __i, __msg in enumerate(error_msg, 1):
             final_msg += f'\n<b>{__i}</b>: {__msg}\n'
         if error_button is not None:
@@ -362,29 +366,36 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
         return
         
     if not isLeech:
-        if config_dict['DEFAULT_UPLOAD'] == 'rc' and not up or up == 'rc':
-            up = config_dict['RCLONE_PATH']
-        if not up and config_dict['DEFAULT_UPLOAD'] == 'gd':
-            up = 'gd'
-        if up == 'gd' and not config_dict['GDRIVE_ID']:
-            await sendMessage(message, 'GDRIVE_ID not Provided!')
+        user_dict = user_data.get(user_id, {})
+        default_upload = user_dict.get('default_upload', '')
+        if not up and (default_upload == 'rc' or not default_upload and config_dict['DEFAULT_UPLOAD'] == 'rc') or up == 'rc':
+            up = user_dict.get('rclone_path') or config_dict['RCLONE_PATH']
+        if not up and (default_upload == 'gd' or not default_upload and config_dict['DEFAULT_UPLOAD'] == 'gd') or up == 'gd':
+            up = user_dict.get('gdrive_id') or config_dict['GDRIVE_ID']
+        if not up:
+            await sendMessage(message, 'No Upload Destination!')
             return
-        elif not up:
-            await sendMessage(message, 'No Rclone Destination!')
-            return
-        elif up not in ['rcl', 'gd']:
+        elif up != 'rcl' and is_rclone_path(up):
             if up.startswith('mrcc:'):
-                config_path = f'rclone/{message.from_user.id}.conf'
+                config_path = f'rclone/{user_id}.conf'
             else:
                 config_path = 'rclone.conf'
             if not await aiopath.exists(config_path):
-                await sendMessage(message, f'Rclone Config: {config_path} not Exists!')
+                await sendMessage(message, f"Rclone Config: {config_path} not Exists!")
                 return
-        if up != 'gd' and not is_rclone_path(up):
-            await sendMessage(message, 'Wrong Rclone Upload Destination!')
+        elif up != 'gdl' and is_gdrive_id(up):
+            if up.startswith('mtp:'):
+                token_path = f'tokens/{user_id}.pickle'
+            elif not config_dict['USE_SERVICE_ACCOUNTS']:
+                token_path = 'token.pickle'
+            else:
+                token_path = 'accounts'
+            if not await aiopath.exists(token_path):
+                await sendMessage(message, f"token.pickle or service accounts: {token_path} not Exists!")
+                return
+        if not is_gdrive_id(up) and not is_rclone_path(up):
+            await sendMessage(message, 'Wrong Upload Destination!')
             return
-    elif up.isdigit() or up.startswith('-'):
-        up = int(up)
 
     if up == 'rcl' and not isLeech:
         up = await RcloneList(client, message).get_rclone_path('rcu')
@@ -393,7 +404,7 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
             return
 
     listener = MirrorLeechListener(
-        message, compress, isLeech=isLeech, tag=tag, sameDir=sameDir, rcFlags=rcf, upPath=up)
+        message, compress, isLeech=isLeech, tag=tag, sameDir=sameDir, rcFlags=rcf, upDest=up)
 
     if 'mdisk.me' in link:
         name, link = await _mdisk(link, name)
@@ -429,7 +440,6 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
     __run_multi()
 
     if not select:
-        user_id = message.from_user.id
         user_dict = user_data.get(user_id, {})
         if 'format' in options:
             qual = options['format']
@@ -453,7 +463,7 @@ async def ytdl(client, message):
 
 
 async def ytdlleech(client, message):
-    if await command_listener(message, isLeech=True, isYtdl=True):
+    if await command_listener(message, isYtdl=True, isLeech=True):
         return
     _ytdl(client, message, isLeech=True)
 

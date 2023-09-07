@@ -6,13 +6,13 @@ from html import escape
 from urllib.parse import quote
 
 from bot import bot, LOGGER, config_dict, get_client, bot_name
-from bot.helper.telegram_helper.message_utils import editMessage, sendMessage, delete_links
+from bot.helper.telegram_helper.message_utils import editMessage, sendMessage
 from bot.helper.ext_utils.telegraph_helper import telegraph
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
-from bot.helper.ext_utils.bot_utils import get_readable_file_size, sync_to_async, new_task, checking_access 
+from bot.helper.ext_utils.bot_utils import get_readable_file_size, sync_to_async, new_task 
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.ext_utils.task_manager import task_utils
+from bot.helper.ext_utils.atrocious_utils import delete_links, send_to_chat, task_utils
 
 
 PLUGINS = []
@@ -116,10 +116,10 @@ async def __search(key, site, message, method, user_id):
     buttons.ubutton("🔎 View Search Result", link)
     button = buttons.build_menu(1)
     if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
-        ibmsg = f"<b>Hey. I have sent torrent search result in pm.</b>"
+        ibmsg = f"Hey.\n\nTorrent search result sent in pm."
         bot_pm_button = ButtonMaker()
-        bot_pm_button.ubutton("📥 Click Here To Go Bot PM", f"https://t.me/{bot_name}")
-        await bot.send_message(chat_id=user_id, text=msg, reply_markup=button)
+        bot_pm_button.ubutton("Click here to go bot pm", f"https://t.me/{bot_name}")
+        await send_to_chat(chat_id=user_id, text=msg, button=button)
         await editMessage(message, ibmsg, bot_pm_button.build_menu(1))
     else:
         await editMessage(message, msg, button)
@@ -244,12 +244,7 @@ async def torrentSearch(_, message):
             error_button = error_button.build_menu(2)
         await sendMessage(message, final_msg, error_button)
         return
-        
-    msg, btn = checking_access(message)
-    if msg is not None:
-        await sendMessage(message, msg, btn.build_menu(1))
-        return
-        
+
     if SITES is None and not SEARCH_PLUGINS:
         await sendMessage(message, "No API link or search PLUGINS added for this function")
     elif len(key) == 1 and SITES is None:
