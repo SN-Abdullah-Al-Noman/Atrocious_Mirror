@@ -2,7 +2,7 @@
 from os import walk, path as ospath
 from aiofiles.os import remove as aioremove, path as aiopath, listdir, rmdir, makedirs
 from aioshutil import rmtree as aiormtree
-from shutil import rmtree, disk_usage
+from shutil import rmtree
 from magic import Magic
 from re import split as re_split, I, search as re_search
 from subprocess import run as srun
@@ -64,7 +64,7 @@ async def start_cleanup():
         await aiormtree(DOWNLOAD_DIR)
     except:
         pass
-    await makedirs(DOWNLOAD_DIR)
+    await makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 
 def clean_all():
@@ -154,26 +154,11 @@ async def join_files(path):
                 LOGGER.error(f'Failed to join {final_name}, stderr: {stderr}')
             else:
                 results.append(final_name)
+        else:
+            LOGGER.warning('No Binary files to join!')
     if results:
+        LOGGER.info('Join Completed!')
         for res in results:
             for file_ in files:
                 if re_search(fr"{res}\.0[0-9]+$", file_):
                     await aioremove(f'{path}/{file_}')
-
-
-def check_storage_threshold(size, threshold, arch=False, alloc=False):
-    free = disk_usage(DOWNLOAD_DIR).free
-    if not alloc:
-        if (
-            not arch
-            and free - size < threshold
-            or arch
-            and free - (size * 2) < threshold
-        ):
-            return False
-    elif not arch:
-        if free < threshold:
-            return False
-    elif free - size < threshold:
-        return False
-    return True

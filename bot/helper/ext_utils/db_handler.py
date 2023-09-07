@@ -5,7 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import PyMongoError
 from dotenv import dotenv_values
 
-from bot import DATABASE_URL, DATABASE_NAME, user_data, rss_dict, LOGGER, bot_id, config_dict, aria2_options, qbit_options, bot_loop
+from bot import DATABASE_URL, user_data, rss_dict, LOGGER, bot_id, config_dict, aria2_options, qbit_options, bot_loop
 
 
 class DbManger:
@@ -18,7 +18,7 @@ class DbManger:
     def __connect(self):
         try:
             self.__conn = AsyncIOMotorClient(DATABASE_URL)
-            self.__db = self.__conn.get_database(DATABASE_NAME)
+            self.__db = self.__conn.mltb
         except PyMongoError as e:
             LOGGER.error(f"Error in DB connection: {e}")
             self.__err = True
@@ -37,24 +37,31 @@ class DbManger:
         # User Data
         if await self.__db.users.find_one():
             rows = self.__db.users.find({})
-            # return a dict ==> {_id, is_sudo, is_auth, as_doc, thumb, yt_opt, media_group, equal_splits, split_size, rclone}
+            # return a dict ==> {_id, is_sudo, is_auth, as_doc, thumb, yt_opt, media_group, equal_splits, split_size, rclone, rclone_path, token_pickle, gdrive_id, leech_dest, lperfix, lprefix, excluded_extensions, user_leech, index_url, index_url, default_upload}
             async for row in rows:
                 uid = row['_id']
                 del row['_id']
                 thumb_path = f'Thumbnails/{uid}.jpg'
-                rclone_path = f'rclone/{uid}.conf'
+                rclone_config_path = f'rclone/{uid}.conf'
+                token_path = f'tokens/{uid}.pickle'
                 if row.get('thumb'):
                     if not await aiopath.exists('Thumbnails'):
                         await makedirs('Thumbnails')
                     async with aiopen(thumb_path, 'wb+') as f:
                         await f.write(row['thumb'])
                     row['thumb'] = thumb_path
-                if row.get('rclone'):
+                if row.get('rclone_config'):
                     if not await aiopath.exists('rclone'):
                         await makedirs('rclone')
-                    async with aiopen(rclone_path, 'wb+') as f:
-                        await f.write(row['rclone'])
-                    row['rclone'] = rclone_path
+                    async with aiopen(rclone_config_path, 'wb+') as f:
+                        await f.write(row['rclone_config'])
+                    row['rclone_config'] = rclone_config_path
+                if row.get('token_pickle'):
+                    if not await aiopath.exists('tokens'):
+                        await makedirs('tokens')
+                    async with aiopen(token_path, 'wb+') as f:
+                        await f.write(row['token_pickle'])
+                    row['token_pickle'] = token_path
                 user_data[uid] = row
             LOGGER.info("Users data has been imported from Database")
         # Rss Data
@@ -114,8 +121,10 @@ class DbManger:
         data = user_data[user_id]
         if data.get('thumb'):
             del data['thumb']
-        if data.get('rclone'):
-            del data['rclone']
+        if data.get('rclone_config'):
+            del data['rclone_config']
+        if data.get('token_pickle'):
+            del data['token_pickle']
         await self.__db.users.replace_one({'_id': user_id}, data, upsert=True)
         self.__conn.close
 
@@ -161,26 +170,6 @@ class DbManger:
         await self.__db.tasks[bot_id].delete_one({'_id': link})
         self.__conn.close
 
-    async def get_pm_uids(self):
-        if self.__err:
-            return
-        return [doc['_id'] async for doc in self.__db.pm_users[bot_id].find({})]
-        self.__conn.close
-        
-    async def update_pm_users(self, user_id):
-        if self.__err:
-            return
-        if not bool(await self.__db.pm_users[bot_id].find_one({'_id': user_id})):
-            await self.__db.pm_users[bot_id].insert_one({'_id': user_id})
-            LOGGER.info(f'New PM User Added : {user_id}')
-        self.__conn.close
-        
-    async def rm_pm_user(self, user_id):
-        if self.__err:
-            return
-        await self.__db.pm_users[bot_id].delete_one({'_id': user_id})
-        self.__conn.close
-
     async def get_incomplete_tasks(self):
         notifier_dict = {}
         if self.__err:
@@ -207,6 +196,25 @@ class DbManger:
         await self.__db[name][bot_id].drop()
         self.__conn.close
 
+    async def get_pm_uids(self):
+        if self.__err:
+            return
+        return [doc['_id'] async for doc in self.__db.pm_users[bot_id].find({})]
+        self.__conn.close
+        
+    async def update_pm_users(self, user_id):
+        if self.__err:
+            return
+        if not bool(await self.__db.pm_users[bot_id].find_one({'_id': user_id})):
+            await self.__db.pm_users[bot_id].insert_one({'_id': user_id})
+            LOGGER.info(f'New PM User Added : {user_id}')
+        self.__conn.close
+        
+    async def rm_pm_user(self, user_id):
+        if self.__err:
+            return
+        await self.__db.pm_users[bot_id].delete_one({'_id': user_id})
+        self.__conn.close
 
 if DATABASE_URL:
     bot_loop.run_until_complete(DbManger().db_load())

@@ -32,14 +32,13 @@ You can add tuple and dict also. Use double quotes inside dict.
 <code>/cmd</code> -i 10(number of links) -m folder name
 
 <b>Upload</b>: -up
-<code>/cmd</code> link -up <code>rcl</code> (To select rclone config, remote & path or Tg id/username)
-You can directly add the upload path: -up remote:dir/subdir
+<code>/cmd</code> link -up <code>rcl/gdl</code> (To select rclone config/token.pickle, remote & path/ gdrive id or Tg id/username)
+You can directly add the upload path: -up remote:dir/subdir or -up (Gdrive_id) or -up id/username
 If DEFAULT_UPLOAD is `rc` then you can pass up: `gd` to upload using gdrive tools to GDRIVE_ID.
 If DEFAULT_UPLOAD is `gd` then you can pass up: `rc` to upload to RCLONE_PATH.
-If you want to add path manually from your config (uploaded from usetting) add <code>mrcc:</code> before the path without space
-<code>/cmd</code> link -up <code>mrcc:</code>main:dump
+If you want to add path or gdrive manually from your config/token (uploaded from usetting) add <code>mrcc:</code> for rclone and <code>mtp:</code> before the path/gdrive_id without space
+<code>/cmd</code> link -up <code>mrcc:</code>main:dump or -up <code>mtp:</code>gdrive_id or -up b:id/username(leech by bot) or -up u:id/username(leech by user)
 DEFAULT_UPLOAD doesn't effect on leech cmds.
-<code>/yl</code> link -up chat_id or username
 
 <b>Rclone Flags</b>: -rcf
 <code>/cmd</code> link -up path|rcl -rcf --buffer-size:8M|--drive-starred-only|key|key:value
@@ -59,7 +58,7 @@ link pswd: pass(zip/unzip) opt: ytdlpoptions up: remote2:path2
 Reply to this example by this cmd <code>/cmd</code> b(bulk)
 You can set start and end of the links from the bulk with -b start:end or only end by -b :end or only start by -b start. The default start is from zero(first link) to inf.
 
-
+Check here all supported <a href='https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md'>SITES</a>
 Check all yt-dlp api options from this <a href='https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184'>FILE</a> or use this <a href='https://t.me/mltb_official_channel/177'>script</a> to convert cli arguments to api options.
 """
 
@@ -75,6 +74,9 @@ Note: Doesn't work with torrents.
 
 <b>Direct link authorization</b>: -au -ap
 <code>/cmd</code> link -au username -ap password
+
+<b>Direct link custom headers</b>: -h
+<code>/cmd</code> link -h Key: value Key1: value1
 
 <b>Extract/Zip</b>: -e -z
 <code>/cmd</code> link -e password (extract password protected)
@@ -98,14 +100,13 @@ To specify ratio and seed time add -d ratio:time. Ex: -d 0.7:10 (ratio and time)
 <code>/cmd</code> -b -m folder name (bulk-message/file)
 
 <b>Upload</b>: -up
-<code>/cmd</code> link -up <code>rcl</code> (To select rclone config, remote & path or Tg id/username)
-You can directly add the upload path: -up remote:dir/subdir
+<code>/cmd</code> link -up <code>rcl/gdl</code> (To select rclone config/token.pickle, remote & path/ gdrive id or Tg id/username)
+You can directly add the upload path: -up remote:dir/subdir or -up (Gdrive_id) or -up id/username
 If DEFAULT_UPLOAD is `rc` then you can pass up: `gd` to upload using gdrive tools to GDRIVE_ID.
 If DEFAULT_UPLOAD is `gd` then you can pass up: `rc` to upload to RCLONE_PATH.
-If you want to add path manually from your config (uploaded from usetting) add <code>mrcc:</code> before the path without space
-<code>/cmd</code> link -up <code>mrcc:</code>main:dump
+If you want to add path or gdrive manually from your config/token (uploaded from usetting) add <code>mrcc:</code> for rclone and <code>mtp:</code> before the path/gdrive_id without space
+<code>/cmd</code> link -up <code>mrcc:</code>main:dump or -up <code>mtp:</code>gdrive_id or -up b:id/username(leech by bot) or -up u:id/username(leech by user)
 DEFAULT_UPLOAD doesn't effect on leech cmds.
-<code>/leech</code> link -up chat_id or username
 
 <b>Rclone Flags</b>: -rcf
 <code>/cmd</code> link|path|rcl -up path|rcl -rcf --buffer-size:8M|--drive-starred-only|key|key:value
@@ -157,11 +158,11 @@ Title1 link (required)
 Title2 link -c cmd -inf xx -exf xx
 Title3 link -c cmd -d ratio:time -z password
 
--c command + any arg
+-c command -up mrcc:remote:path/subdir -rcf --buffer-size:8M|key|key:value
 -inf For included words filter.
 -exf For excluded words filter.
 
-Example: Title https://www.rss-url.com inf: 1080 or 720 or 144p|mkv or mp4|hevc exf: flv or web|xxx opt: up: mrcc:remote:path/subdir rcf: --buffer-size:8M|key|key:value
+Example: Title https://www.rss-url.com inf: 1080 or 720 or 144p|mkv or mp4|hevc exf: flv or web|xxx
 This filter will parse links that it's titles contains `(1080 or 720 or 144p) and (mkv or mp4) and hevc` and doesn't conyain (flv or web) and xxx` words. You can add whatever you want.
 
 Another example: inf:  1080  or 720p|.web. or .webrip.|hvec or x264. This will parse titles that contains ( 1080  or 720p) and (.web. or .webrip.) and (hvec or x264). I have added space before and after 1080 to avoid wrong matching. If this `10805695` number in title it will match 1080 if added 1080 without spaces after it.
@@ -181,10 +182,20 @@ Send Gdrive|Gdot|Filepress|Filebee|Appdrive|Gdflix link or rclone path along wit
 <code>/cmd</code> -i 10(number of links/pathies)
 
 <b>Gdrive:</b>
-<code>/cmd</code> gdrivelink
+<code>/cmd</code> gdrivelink/gdl/gdrive_id -up gdl/gdrive_id/gd
 
 <b>Rclone:</b>
-<code>/cmd</code> (rcl or rclone_path) -up (rcl or rclone_path) -rcf flagkey:flagvalue|flagkey|flagkey:flagvalue
+<code>/cmd</code> rcl/rclone_path -up rcl/rclone_path/rc -rcf flagkey:flagvalue|flagkey|flagkey:flagvalue
 
 Note: If -up not specified then rclone destination will be the RCLONE_PATH from config.env
+"""
+
+PASSWORD_ERROR_MESSAGE = """
+<b>This link requires a password!</b>
+- Insert sign <b>::</b> after the link and write the password after the sign.
+
+<b>Example:</b> {}::love you
+
+Note: No spaces between the signs <b>::</b>
+For the password, you can use a space!
 """
