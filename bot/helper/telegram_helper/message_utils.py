@@ -1,45 +1,24 @@
 #!/usr/bin/env python3
 from asyncio import sleep
+from pyrogram.errors import FloodWait
 from time import time
 from re import match as re_match
-from traceback import format_exc
-from random import choice as rchoice
-from aiofiles.os import remove as aioremove
-from pyrogram.errors import ReplyMarkupInvalid, FloodWait, PeerIdInvalid, RPCError, UserNotParticipant, PhotoInvalidDimensions, WebpageCurlFailed, MediaEmpty
 
-from bot import config_dict, LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, user, download_dict_lock, bot_name, OWNER_ID, GLOBAL_BLACKLIST_FILE_KEYWORDS
+from bot import config_dict, LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, user, download_dict_lock
 from bot.helper.ext_utils.bot_utils import get_readable_message, setInterval, sync_to_async
 from bot.helper.ext_utils.exceptions import TgLinkException
-from bot.helper.telegram_helper.button_build import ButtonMaker
 
 
-async def sendMessage(message, text, buttons=None, photo=None):
+async def sendMessage(message, text, buttons=None):
     try:
-        if photo:
-            try:
-                if photo == 'IMAGES':
-                    photo = rchoice(config_dict['IMAGES'])
-                return await message.reply_photo(photo=photo, reply_to_message_id=message.id,
-                                                 caption=text, reply_markup=buttons, disable_notification=True)
-            except IndexError:
-                pass
-            except (PhotoInvalidDimensions, WebpageCurlFailed, MediaEmpty):
-                des_dir = await download_image_url(photo)
-                await sendMessage(message, text, buttons, des_dir)
-                await aioremove(des_dir)
-                return
-            except Exception as e:
-                LOGGER.error(format_exc())
         return await message.reply(text=text, quote=True, disable_web_page_preview=True,
                                    disable_notification=True, reply_markup=buttons)
     except FloodWait as f:
         LOGGER.warning(str(f))
         await sleep(f.value * 1.2)
-        return await sendMessage(message, text, buttons, photo)
-    except ReplyMarkupInvalid:
-        return await sendMessage(message, text, None, photo)
+        return await sendMessage(message, text, buttons)
     except Exception as e:
-        LOGGER.error(format_exc())
+        LOGGER.error(str(e))
         return str(e)
 
 
@@ -110,31 +89,12 @@ async def delete_all_messages():
                 LOGGER.error(str(e))
 
 
-async def delete_links(message):
-    if config_dict['DELETE_LINKS']:
-        if reply_to := message.reply_to_message:
-            await deleteMessage(reply_to)
-        await deleteMessage(message)
-
-
-async def check_filename(message, filename=None):
-    if username := message.from_user.username:
-        tag = f"@{username}"
-    else:
-        tag = message.from_user.mention
-
-    if filename is not None and any(filter_word in filename.lower() for filter_word in GLOBAL_BLACKLIST_FILE_KEYWORDS):
-        msg = f"Hey {tag}.\n\nA Blacklist keyword found in your file/link.\n\n"
-        msg += f"You can not mirror or leech this file/link."
-        await delete_links(message)
-        return await message.reply_photo(photo="https://graph.org/file/e6c2c38bc24feda59ad14.jpg", caption=msg)
-
-
 async def get_tg_link_content(link):
     message = None
     if link.startswith('https://t.me/'):
         private = False
-        msg = re_match(r"https:\/\/t\.me\/(?:c\/)?([^\/]+)(?:\/[^\/]+)?\/([0-9]+)", link)
+        msg = re_match(
+            r"https:\/\/t\.me\/(?:c\/)?([^\/]+)(?:\/[^\/]+)?\/([0-9]+)", link)
     else:
         private = True
         msg = re_match(
@@ -207,81 +167,9 @@ async def sendStatusMessage(msg):
             message = status_reply_dict[chat_id][0]
             await deleteMessage(message)
             del status_reply_dict[chat_id]
-        message = await sendMessage(msg, progress, buttons, photo='IMAGES')
+        message = await sendMessage(msg, progress, buttons)
         message.text = progress
         status_reply_dict[chat_id] = [message, time()]
         if not Interval:
             Interval.append(setInterval(
                 config_dict['STATUS_UPDATE_INTERVAL'], update_all_messages))
-
-
-async def chat_info(channel_id):
-    if channel_id.startswith('-100'):
-        channel_id = int(channel_id)
-    elif channel_id.startswith('@'):
-        channel_id = channel_id.replace('@', '')
-    else:
-        return None
-    try:
-        chat = await bot.get_chat(channel_id)
-        return chat
-    except PeerIdInvalid as e:
-        LOGGER.error(f"{e.NAME}: {e.MESSAGE} for {channel_id}")
-        return None
-
-
-async def forcesub(message, ids, button=None):
-    join_button = {}
-    _msg = ''
-    for channel_id in ids.split():
-        chat = await chat_info(channel_id)
-        try:
-            await chat.get_member(message.from_user.id)
-        except UserNotParticipant:
-            if username := chat.username:
-                invite_link = f"https://t.me/{username}"
-            else:
-                invite_link = chat.invite_link
-            join_button[chat.title] = invite_link
-        except RPCError as e:
-            LOGGER.error(f"{e.NAME}: {e.MESSAGE} for {channel_id}")
-        except Exception as e:
-            LOGGER.error(f'{e} for {channel_id}')
-    if join_button:
-        if button is None:
-            button = ButtonMaker()
-        _msg = "You haven't joined our channel yet!"
-        for key, value in join_button.items():
-            button.ubutton(f'Join {key}', value, 'footer')
-    return _msg, button
-
-
-async def BotPm_check(message, button=None):
-    try:
-        temp_msg = await message._client.send_message(chat_id=message.from_user.id, text='<b>Checking Access...</b>')
-        await temp_msg.delete()
-        return None, button
-    except Exception as e:
-        if button is None:
-            button = ButtonMaker()
-        _msg = "You didn't START the bot in PM (Private)."
-        button.ubutton("Start Bot Now", f"https://t.me/{bot_name}?start=start", 'header')
-        return _msg, button
-
-
-async def send_to_pm(message, text, buttons=None):
-    user_id = message.from_user.id
-    if config_dict['BOT_PM']:
-        try:
-            return await message._client.send_message(chat_id=user_id, text=text, disable_web_page_preview=True, reply_markup=buttons)
-        except:
-            pass
-
-
-async def send_to_log_chat(message, text, buttons=None):
-    if message.from_user.id == OWNER_ID or not config_dict['LOG_CHAT_ID']:
-        return
-    try:
-        return await message._client.send_message(chat_id=config_dict['LOG_CHAT_ID'], text=text, disable_web_page_preview=True, reply_markup=buttons)
-    except:
-        pass
