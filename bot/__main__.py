@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from uuid import uuid4
 from signal import signal, SIGINT
 from aiofiles.os import path as aiopath, remove as aioremove
 from aiofiles import open as aiopen
