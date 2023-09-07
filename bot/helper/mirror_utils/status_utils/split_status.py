@@ -9,8 +9,8 @@ class SplitStatus:
         self.__gid = gid
         self.__size = size
         self.__listener = listener
-        self.message = listener.message
-        self.engine = "ffmpeg"
+        self.message = self.__listener.message
+        self.engine = "FFmpeg"
 
     def gid(self):
         return self.__gid

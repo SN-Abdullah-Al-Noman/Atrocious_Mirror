@@ -10,7 +10,7 @@ class GdriveStatus:
         self.__status = status
         self.message = message
         self.engine = "Google Api"
-    
+
     def processed_bytes(self):
         return get_readable_file_size(self.__obj.processed_bytes)
 

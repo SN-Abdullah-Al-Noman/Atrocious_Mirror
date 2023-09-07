@@ -22,7 +22,7 @@ class Aria2Status:
         self.queued = queued
         self.start_time = 0
         self.seeding = seeding
-        self.message = listener.message
+        self.message = self.__listener.message
         self.engine = "Aria2p"
 
     def __update(self):

@@ -8,8 +8,8 @@ class YtDlpDownloadStatus:
         self.__obj = obj
         self.__listener = listener
         self.__gid = gid
-        self.message = listener.message
-        self.engine = "Yt-dlp"
+        self.message = self.__listener.message
+        self.engine = "Ytdlp"
 
     def gid(self):
         return self.__gid

@@ -22,8 +22,8 @@ class QbittorrentStatus:
         self.__info = get_download(self.__client, f'{self.__listener.uid}')
         self.queued = queued
         self.seeding = seeding
-        self.message = listener.message
-        self.engine = "QBittorrent"
+        self.message = self.__listener.message
+        self.engine = "Qbittorrent Api"
 
     def __update(self):
         new_info = get_download(self.__client, f'{self.__listener.uid}')

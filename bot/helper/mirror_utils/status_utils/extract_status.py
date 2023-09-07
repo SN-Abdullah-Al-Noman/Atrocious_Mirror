@@ -12,9 +12,8 @@ class ExtractStatus:
         self.__size = size
         self.__gid = gid
         self.__listener = listener
-        self.__uid = listener.uid
         self.__start_time = time()
-        self.message = listener.message
+        self.message = self.__listener.message
         self.engine = "7z"
 
     def gid(self):
