@@ -7,7 +7,7 @@ from bot.helper.mirror_utils.status_utils.qbit_status import QbittorrentStatus
 from bot.helper.telegram_helper.message_utils import update_all_messages
 from bot.helper.ext_utils.bot_utils import get_readable_time, getDownloadByGid, new_task, sync_to_async
 from bot.helper.ext_utils.fs_utils import clean_unwanted
-from bot.helper.ext_utils.task_manager import limit_checker, stop_duplicate_check
+from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check
 
 
 async def __remove_torrent(client, hash_, tag):
@@ -65,8 +65,20 @@ async def __size_checked(tor):
     if hasattr(download, 'listener'):
         listener = download.listener()
         size = tor.size
-        if limit_exceeded := await limit_checker(size, listener, True):
-            await __onDownloadError(limit_exceeded, tor)
+        limit_exceeded, button = await limit_checker(size, listener, isTorrent=True)
+        if limit_exceeded:
+            await __onDownloadError(limit_exceeded, tor, button)
+
+
+@new_task
+async def __check_name(tor):
+    download = await getDownloadByGid(tor.hash[:12])
+    if not hasattr(download, 'listener'):
+        return
+    listener = download.listener()
+    name = tor.content_path.rsplit('/', 1)[-1].rsplit('.!qB', 1)[0]
+    if msg := await check_filename(name):
+        __onDownloadError(msg, tor)
 
 
 @new_task
@@ -136,6 +148,7 @@ async def __qb_listener():
                         if any([config_dict['STORAGE_THRESHOLD'], config_dict['TORRENT_LIMIT'], config_dict['LEECH_LIMIT']]) and not QbTorrents[tag]['size_checked']:
                             QbTorrents[tag]['size_checked'] = True
                             __size_checked(tor_info)
+                        __check_name(tor_info)
                     elif state == "stalledDL":
                         TORRENT_TIMEOUT = config_dict['TORRENT_TIMEOUT']
                         if not QbTorrents[tag]['rechecked'] and 0.99989999999999999 < tor_info.progress < 1:

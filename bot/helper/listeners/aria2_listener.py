@@ -5,15 +5,17 @@ from aiofiles.os import remove as aioremove, path as aiopath
 
 from bot import aria2, download_dict_lock, download_dict, LOGGER, config_dict
 from bot.helper.mirror_utils.status_utils.aria2_status import Aria2Status
-from bot.helper.ext_utils.fs_utils import get_base_name, clean_unwanted
+from bot.helper.ext_utils.fs_utils import clean_unwanted
 from bot.helper.ext_utils.bot_utils import getDownloadByGid, new_thread, bt_selection_buttons, sync_to_async
 from bot.helper.telegram_helper.message_utils import sendMessage, deleteMessage, update_all_messages
-from bot.helper.ext_utils.task_manager import limit_checker, stop_duplicate_check
+from bot.helper.ext_utils.atrocious_utils import stop_duplicate_check, check_filename, limit_checker
 
 
 @new_thread
 async def __onDownloadStarted(api, gid):
     download = await sync_to_async(api.get_download, gid)
+    if download.options.follow_torrent == 'false':
+        return
     if download.is_metadata:
         LOGGER.info(f'onDownloadStarted: {gid} METADATA')
         await sleep(1)
@@ -31,54 +33,51 @@ async def __onDownloadStarted(api, gid):
         return
     else:
         LOGGER.info(f'onDownloadStarted: {download.name} - Gid: {gid}')
-    if config_dict['STOP_DUPLICATE']:
         await sleep(1)
-        if dl := await getDownloadByGid(gid):
-            if not hasattr(dl, 'listener'):
-                LOGGER.warning(f"onDownloadStart: {gid}. STOP_DUPLICATE didn't pass since download completed earlier!")
-                return
-            listener = dl.listener()
-            if listener.isLeech or listener.select or listener.upPath != 'gd':
-                return
-            download = await sync_to_async(api.get_download, gid)
-            if not download.is_torrent:
-                await sleep(3)
-                download = download.live
-            name = download.name
-            msg, button = await stop_duplicate_check(name, listener)
-            if msg:
-                await listener.onDownloadError(msg, button)
-                await sync_to_async(api.remove, [download], force=True, files=True)
-                return
-    if any([config_dict['MIRROR_LIMIT'],
-            config_dict['TORRENT_LIMIT'],
-            config_dict['LEECH_LIMIT'],
-            config_dict['STORAGE_THRESHOLD']]):
-        await sleep(1)
-        if dl is None:
-            dl = await getDownloadByGid(gid)
-        if dl is not None:
-            if not hasattr(dl, 'listener'):
-                LOGGER.warning(f"onDownloadStart: {gid}. at Download limit didn't pass since download completed earlier!")
-                return
-            listener = dl.listener()
-            download = await sync_to_async(api.get_download, gid)
+
+    if dl := await getDownloadByGid(gid):
+        if not hasattr(dl, 'listener'):
+            LOGGER.warning(f"onDownloadStart: {gid}. STOP_DUPLICATE didn't pass since download completed earlier!")
+            return
+            
+        listener = dl.listener()
+        download = await sync_to_async(api.get_download, gid)
+        if not download.is_torrent:
+            await sleep(2)
             download = download.live
+        size = download.total_length
+        name = download.name
+
+        msg, button = await stop_duplicate_check(name, listener)
+        if msg:
+            await listener.onDownloadError(msg, button)
+            await sync_to_async(api.remove, [download], force=True, files=True)
+            return
+        
+        if msg := await check_filename(name):
+            await listener.onDownloadError(msg)
+            await sync_to_async(api.remove, [download], force=True, files=True)
+            return
+
+        if config_dict['MIRROR_LIMIT'] or config_dict['TORRENT_LIMIT'] or config_dict['LEECH_LIMIT'] or config_dict['STORAGE_THRESHOLD']:
             if download.total_length == 0:
                 start_time = time()
                 while time() - start_time <= 15:
-                    await sleep(0.5)
-                    download = await sync_to_async(api.get_download, gid)
-                    download = download.live
-                    if download.followed_by_ids:
-                        download = await sync_to_async(api.get_download, download.followed_by_ids[0])
+                    await sleep(2)
                     if download.total_length > 0:
                         break
             size = download.total_length
-            if limit_exceeded := await limit_checker(size, listener, download.is_torrent):
-                await listener.onDownloadError(limit_exceeded)
-                await sync_to_async(api.remove, [download], force=True, files=True)
-                return
+        
+            if download.is_torrent:
+                limit_exceeded, button = await limit_checker(size, listener, isTorrent=True)
+                if limit_exceeded:
+                    await listener.onDownloadError(limit_exceeded, button)
+                    await sync_to_async(api.remove, [download], force=True, files=True)
+            else:
+                limit_exceeded, button = await limit_checker(size, listener)
+                if limit_exceeded:
+                    await listener.onDownloadError(limit_exceeded, button)
+                    await sync_to_async(api.remove, [download], force=True, files=True)
 
 
 @new_thread
@@ -86,6 +85,8 @@ async def __onDownloadComplete(api, gid):
     try:
         download = await sync_to_async(api.get_download, gid)
     except:
+        return
+    if download.options.follow_torrent == 'false':
         return
     if download.followed_by_ids:
         new_gid = download.followed_by_ids[0]
@@ -119,6 +120,8 @@ async def __onBtDownloadComplete(api, gid):
     seed_start_time = time()
     await sleep(1)
     download = await sync_to_async(api.get_download, gid)
+    if download.options.follow_torrent == 'false':
+        return
     LOGGER.info(f"onBtDownloadComplete: {download.name} - Gid: {gid}")
     if dl := await getDownloadByGid(gid):
         listener = dl.listener()
@@ -179,6 +182,8 @@ async def __onDownloadError(api, gid):
     error = "None"
     try:
         download = await sync_to_async(api.get_download, gid)
+        if download.options.follow_torrent == 'false':
+            return
         error = download.error_message
         LOGGER.info(f"Download Error: {error}")
     except:
