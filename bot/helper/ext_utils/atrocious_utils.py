@@ -83,15 +83,18 @@ async def get_user_tasks(user_id, maxtask):
 
 
 async def delete_links(message):
-    try:
-        if config_dict['DELETE_LINKS']:
+    if message.from_user.id != OWNER_ID and message.chat.type != message.chat.type.PRIVATE:
+        return
+
+    if config_dict['DELETE_LINKS']:
+        try:
             if reply_to := message.reply_to_message:
                 await reply_to.delete()
                 await message.delete()
             else:
                 await message.delete()
-    except Exception as e:
-        LOGGER.error(str(e))
+        except Exception as e:
+            LOGGER.error(str(e))
 
 
 async def check_duplicate_file(self, up_name):
