@@ -100,7 +100,7 @@ async def add_to_good_friend(client, message):
             update_user_ldata(id_, 'is_blacklist', False)
             if DATABASE_URL:
                 await DbManger().update_user_data(id_)
-            msg = 'User added in good friend list.'
+            msg = 'User added in good friend list. From now token system will skip for him'
     else:
         msg = "Give ID or Reply To message of whom you want to add in good friend list."
     await sendMessage(message, msg)
