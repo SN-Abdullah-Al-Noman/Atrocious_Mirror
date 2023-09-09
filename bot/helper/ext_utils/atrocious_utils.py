@@ -83,7 +83,7 @@ async def get_user_tasks(user_id, maxtask):
 
 
 async def delete_links(message):
-    if message.from_user.id != OWNER_ID and message.chat.type != message.chat.type.PRIVATE:
+    if message.from_user.id == OWNER_ID and message.chat.type == message.chat.type.PRIVATE:
         return
 
     if config_dict['DELETE_LINKS']:
@@ -177,7 +177,7 @@ def checking_blacklist(message, button=None):
 
 def checking_token_status(message, button=None):
     user_id = message.from_user.id
-    if not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo')):
+    if not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo') or user_id in user_data and user_data[user_id].get('is_good_friend')):
         return None, button
     user_data.setdefault(user_id, {})
     data = user_data[user_id]
