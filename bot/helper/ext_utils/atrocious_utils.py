@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from uuid import uuid4
-from time import sleep
+from time import sleep, time
 from base64 import b64encode
 from shutil import disk_usage
 from urllib.parse import quote
