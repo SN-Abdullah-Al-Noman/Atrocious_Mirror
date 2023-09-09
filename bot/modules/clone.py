@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 from pyrogram.handlers import MessageHandler
 from pyrogram.filters import command
-from random import SystemRandom
-from string import ascii_letters, digits
 from secrets import token_urlsafe
 from asyncio import sleep, gather
 from aiofiles.os import path as aiopath
@@ -213,7 +211,7 @@ async def gdcloneNode(client, link, dest_id, listener):
             msg = await sendMessage(listener.message, f"Cloning: <code>{link}</code>")
         else:
             msg = ''
-            gid = ''.join(SystemRandom().choices(ascii_letters + digits, k=12))
+            gid = token_urlsafe(12)
             async with download_dict_lock:
                 download_dict[listener.uid] = GdriveStatus(
                     drive, size, listener.message, gid, 'cl')
