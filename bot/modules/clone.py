@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from pyrogram.handlers import MessageHandler
 from pyrogram.filters import command
+from random import SystemRandom
+from string import ascii_letters, digits
 from secrets import token_urlsafe
 from asyncio import sleep, gather
 from aiofiles.os import path as aiopath
@@ -171,37 +173,34 @@ async def gdcloneNode(client, link, dest_id, listener):
             await sendMessage(listener.message, name)
             return
         if msg := await check_filename(name):
-            await sendMessage(listener.message, msg)
+            warn = f"Hey {listener.tag}.\n\n{msg}"
+            await sendMessage(listener.message, warn)
             return
         listener.upDest = dest_id
         if dest_id.startswith('mtp:') and listener.user_dict('stop_duplicate', False) or not dest_id.startswith('mtp:') and config_dict['STOP_DUPLICATE']:
             LOGGER.info('Checking File/Folder if already in Drive...')
             message = listener.message
             user_id = message.from_user.id 
-            if username := message.from_user.username:
-                tag = f"@{username}"
-            else:
-                tag = message.from_user.mention
             gds = gdSearch(stopDup=True, noMulti=True)
             if sa:
                 gds.use_sa = True
             telegraph_content, contents_no = await sync_to_async(gds.drive_list, name, dest_id, listener.user_id)
             if telegraph_content:
                 if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
-                    msg = f"Hey {tag}.\n\nFile/Folder is already available in Drive.\n\nI have sent available file link in pm."
-                    pmmsg = f"Hey {tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
+                    msg = f"Hey {listener.tag}.\n\nFile/Folder is already available in Drive.\n\nI have sent available file link in pm."
+                    pmmsg = f"Hey {listener.tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
                     pmbutton = await get_telegraph_list(telegraph_content)
                     button = await get_bot_pm_button()
                     await send_to_chat(chat_id=user_id, text=pmmsg, button=pmbutton)
                 else:
-                    msg = f"Hey {tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
+                    msg = f"Hey {listener.tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
                     button = await get_telegraph_list(telegraph_content)
                 await sendMessage(listener.message, msg, button)
                 return
                 
         limit_exceeded, button = await limit_checker(size, listener, isClone=True)
         if limit_exceeded:
-            msg = f"Hey {tag}.\n\n{limit_exceeded}"
+            msg = f"Hey {listener.tag}.\n\n{limit_exceeded}"
             await sendMessage(listener.message, msg, button)
             return
             
