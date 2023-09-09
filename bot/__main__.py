@@ -54,16 +54,16 @@ async def stats(client, message):
 
 async def start(client, message):
     if len(message.command) > 1:
-        user_id = message.from_user.id
+        userid = message.from_user.id
         input_token = message.command[1]
-        if user_id not in user_data:
+        if userid not in user_data:
             return await sendMessage(message, 'Who are you?')
-        data = user_data[user_id]
+        data = user_data[userid]
         if 'token' not in data or data['token'] != input_token:
             return await sendMessage(message, 'This token already expired')
         data['token'] = str(uuid4())
         data['time'] = time()
-        user_data[user_id].update(data)
+        user_data[userid].update(data)
         return await sendMessage(message, 'Token refreshed successfully!')
     else:
         buttons = ButtonMaker()
