@@ -128,6 +128,8 @@ def get_readable_message():
     if PAGE_NO > PAGES and PAGES != 0:
         globals()['STATUS_START'] = STATUS_LIMIT * (PAGES - 1)
         globals()['PAGE_NO'] = PAGES
+    if config_dict['STATUS_HEADER']:
+        msg += f"<b>{config_dict['STATUS_HEADER']}</b>\n\n"
     for download in list(download_dict.values())[STATUS_START:STATUS_LIMIT+STATUS_START]:
         if config_dict['SAFE_MODE']:
             msg += f"<b>{download.status()}: </b>Safe Mode Enabled"
@@ -181,9 +183,9 @@ def get_readable_message():
         buttons.ibutton("Close", "status close")
         button = buttons.build_menu(2)
     if config_dict['BOT_MAX_TASKS']:
-        TASKS_COUNT = f"<b>Task Limit: </b>{config_dict['BOT_MAX_TASKS']} | <b>Run:</b> {len(download_dict)} | <b>Free:</b> {config_dict['BOT_MAX_TASKS'] - len(download_dict)}"
+        TASKS_COUNT = f"<b>Task Limit: </b>{config_dict['BOT_MAX_TASKS']} | <b>Run:</b> {tasks} | <b>Free:</b> {config_dict['BOT_MAX_TASKS'] - tasks}"
     else:
-        TASKS_COUNT = f"<b>Tasks Running:</b> {len(download_dict)}"
+        TASKS_COUNT = f"<b>Tasks Running:</b> {tasks}"
     msg += f"________________________________"
     msg += f"\n{TASKS_COUNT}\n"
     msg += f"<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(config_dict['DOWNLOAD_DIR']).free)}"
