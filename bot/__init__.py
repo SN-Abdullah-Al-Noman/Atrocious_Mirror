@@ -399,6 +399,10 @@ if len(SAFE_MODE) == 0:
 SET_COMMANDS = environ.get('SET_COMMANDS', '')
 SET_COMMANDS = SET_COMMANDS.lower() == 'true'
 
+STATUS_HEADER = environ.get('STATUS_HEADER', '')
+if len(STATUS_HEADER) == 0:
+    STATUS_HEADER = ''
+
 STORAGE_THRESHOLD = environ.get('STORAGE_THRESHOLD', '')
 STORAGE_THRESHOLD = '' if len(
     STORAGE_THRESHOLD) == 0 else float(STORAGE_THRESHOLD)
