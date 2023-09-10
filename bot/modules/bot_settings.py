@@ -791,6 +791,107 @@ async def load_config():
     if len(UPSTREAM_BRANCH) == 0:
         UPSTREAM_BRANCH = 'master'
 
+    BLACKLIST_FILE_KEYWORDS = environ.get('BLACKLIST_FILE_KEYWORDS', '')
+    if len(BLACKLIST_FILE_KEYWORDS) > 0:
+        fx = BLACKLIST_FILE_KEYWORDS.split()
+        for x in fx:
+            x = x.lstrip('.')
+            GLOBAL_BLACKLIST_FILE_KEYWORDS.append(x.strip().lower())
+
+    BOT_MAX_TASKS = environ.get('BOT_MAX_TASKS', '')
+    BOT_MAX_TASKS = int(BOT_MAX_TASKS) if BOT_MAX_TASKS.isdigit() else ''
+
+    BOT_PM = environ.get('BOT_PM', '')
+    BOT_PM = BOT_PM.lower() == 'true'
+
+    CLONE_ENABLED = environ.get('CLONE_ENABLED', '')
+    CLONE_ENABLED = CLONE_ENABLED.lower() == 'true'
+
+    CLONE_LIMIT = environ.get('CLONE_LIMIT', '')
+    CLONE_LIMIT = '' if len(CLONE_LIMIT) == 0 else float(CLONE_LIMIT)
+
+    DELETE_LINKS = environ.get('DELETE_LINKS', '')
+    DELETE_LINKS = DELETE_LINKS.lower() == 'true'
+
+    DISABLE_DRIVE_LINK = environ.get('DISABLE_DRIVE_LINK', '')
+    DISABLE_DRIVE_LINK = DISABLE_DRIVE_LINK.lower() == 'true'
+
+    USER_TD_ENABLED = environ.get('USER_TD_ENABLED', '')
+    USER_TD_ENABLED = USER_TD_ENABLED.lower() == 'true'
+
+    FSUB_IDS = environ.get('FSUB_IDS', '')
+    if len(FSUB_IDS) == 0:
+        FSUB_IDS = ''
+
+    GDRIVE_ENABLED = environ.get('GDRIVE_ENABLED', '')
+    GDRIVE_ENABLED = GDRIVE_ENABLED.lower() == 'true'
+
+    GDRIVE_LIMIT = environ.get('GDRIVE_LIMIT', '')
+    GDRIVE_LIMIT = '' if len(GDRIVE_LIMIT) == 0 else float(GDRIVE_LIMIT)
+
+    IMAGES = environ.get('IMAGES', '')
+    IMAGES = (IMAGES.replace("'", '').replace('"', '').replace(
+    '[', '').replace(']', '').replace(",", "")).split()
+
+    LEECH_ENABLED = environ.get('LEECH_ENABLED', '')
+    LEECH_ENABLED = LEECH_ENABLED.lower() == 'true'
+
+    LEECH_LIMIT = environ.get('LEECH_LIMIT', '')
+    LEECH_LIMIT = '' if len(LEECH_LIMIT) == 0 else float(LEECH_LIMIT)
+
+    MEGA_ENABLED = environ.get('MEGA_ENABLED', '')
+    MEGA_ENABLED = MEGA_ENABLED.lower() == 'true'
+
+    MEGA_LIMIT = environ.get('MEGA_LIMIT', '')
+    MEGA_LIMIT = '' if len(MEGA_LIMIT) == 0 else float(MEGA_LIMIT)
+
+    MIRROR_ENABLED = environ.get('MIRROR_ENABLED', '')
+    MIRROR_ENABLED = MIRROR_ENABLED.lower() == 'true'
+
+    MIRROR_LIMIT = environ.get('MIRROR_LIMIT', '')
+    MIRROR_LIMIT = '' if len(MIRROR_LIMIT) == 0 else float(MIRROR_LIMIT)
+
+    MIRROR_LOG_CHAT = environ.get('MIRROR_LOG_CHAT', '')
+    MIRROR_LOG_CHAT = '' if len(MIRROR_LOG_CHAT) == 0 else float(MIRROR_LOG_CHAT)
+
+    SA_MAIL = environ.get('SA_MAIL', '')
+    if len(SA_MAIL) == 0:
+        SA_MAIL = ''
+            
+    SAFE_MODE = environ.get('SAFE_MODE', '')
+    if len(SAFE_MODE) == 0:
+        log_warning('SAFE_MODE Is Not Enabled')
+        SAFE_MODE = ''
+            
+    SET_COMMANDS = environ.get('SET_COMMANDS', '')
+    SET_COMMANDS = SET_COMMANDS.lower() == 'true'
+
+    STATUS_HEADER = environ.get('STATUS_HEADER', '')
+    if len(STATUS_HEADER) == 0:
+        STATUS_HEADER = ''
+
+    STORAGE_THRESHOLD = environ.get('STORAGE_THRESHOLD', '')
+    STORAGE_THRESHOLD = '' if len(
+    STORAGE_THRESHOLD) == 0 else float(STORAGE_THRESHOLD)
+
+    TOKEN_TIMEOUT = environ.get('TOKEN_TIMEOUT', '')
+    TOKEN_TIMEOUT = int(TOKEN_TIMEOUT) if TOKEN_TIMEOUT.isdigit() else ''
+
+    TORRENT_ENABLED = environ.get('TORRENT_ENABLED', '')
+    TORRENT_ENABLED = TORRENT_ENABLED.lower() == 'true'
+
+    TORRENT_LIMIT = environ.get('TORRENT_LIMIT', '')
+    TORRENT_LIMIT = '' if len(TORRENT_LIMIT) == 0 else float(TORRENT_LIMIT)
+
+    USER_MAX_TASKS = environ.get('USER_MAX_TASKS', '')
+    USER_MAX_TASKS = int(USER_MAX_TASKS) if USER_MAX_TASKS.isdigit() else ''
+
+    YTDLP_ENABLED = environ.get('YTDLP_ENABLED', '')
+    YTDLP_ENABLED = YTDLP_ENABLED.lower() == 'true'
+
+    YTDLP_LIMIT = environ.get('YTDLP_LIMIT', '')
+    YTDLP_LIMIT = '' if len(YTDLP_LIMIT) == 0 else float(YTDLP_LIMIT)
+
     DRIVES_IDS.clear()
     DRIVES_NAMES.clear()
     INDEX_URLS.clear()
@@ -812,28 +913,52 @@ async def load_config():
                 else:
                     INDEX_URLS.append('')
 
+    if ospath.exists('shorteners.txt'):
+        with open('shorteners.txt', 'r+') as f:
+            lines = f.readlines()
+            for line in lines:
+                temp = line.strip().split()
+                if len(temp) == 2:
+                    shorteneres_list.append({'domain': temp[0],'api_key': temp[1]})
+              
     config_dict.update({'AS_DOCUMENT': AS_DOCUMENT,
                         'AUTHORIZED_CHATS': AUTHORIZED_CHATS,
                         'AUTO_DELETE_MESSAGE_DURATION': AUTO_DELETE_MESSAGE_DURATION,
                         'BASE_URL': BASE_URL,
                         'BASE_URL_PORT': BASE_URL_PORT,
+                        'BLACKLIST_FILE_KEYWORDS': BLACKLIST_FILE_KEYWORDS,
+                        'BOT_MAX_TASKS': BOT_MAX_TASKS,
+                        'BOT_PM': BOT_PM,
                         'BOT_TOKEN': BOT_TOKEN,
+                        'CLONE_ENABLED': CLONE_ENABLED,
+                        'CLONE_LIMIT': CLONE_LIMIT,
                         'CMD_SUFFIX': CMD_SUFFIX,
                         'DATABASE_URL': DATABASE_URL,
                         'DEFAULT_UPLOAD': DEFAULT_UPLOAD,
+                        'DELETE_LINKS': DELETE_LINKS,
+                        'DISABLE_DRIVE_LINK': DISABLE_DRIVE_LINK,
                         'DOWNLOAD_DIR': DOWNLOAD_DIR,
                         'EQUAL_SPLITS': EQUAL_SPLITS,
                         'EXTENSION_FILTER': EXTENSION_FILTER,
+                        'FSUB_IDS': FSUB_IDS,
+                        'GDRIVE_ENABLED': GDRIVE_ENABLED,
                         'GDRIVE_ID': GDRIVE_ID,
+                        'GDRIVE_LIMIT': GDRIVE_LIMIT,
+                        'IMAGES': IMAGES,
                         'INCOMPLETE_TASK_NOTIFIER': INCOMPLETE_TASK_NOTIFIER,
                         'INDEX_URL': INDEX_URL,
                         'IS_TEAM_DRIVE': IS_TEAM_DRIVE,
                         'LEECH_DUMP_CHAT': LEECH_DUMP_CHAT,
+                        'LEECH_ENABLED': LEECH_ENABLED,
                         'LEECH_FILENAME_PREFIX': LEECH_FILENAME_PREFIX,
                         'LEECH_SPLIT_SIZE': LEECH_SPLIT_SIZE,
                         'MEDIA_GROUP': MEDIA_GROUP,
                         'MEGA_EMAIL': MEGA_EMAIL,
+                        'MEGA_LIMIT': MEGA_LIMIT,
                         'MEGA_PASSWORD': MEGA_PASSWORD,
+                        'MIRROR_ENABLED': MIRROR_ENABLED,
+                        'MIRROR_LIMIT': MIRROR_LIMIT,
+                        'MIRROR_LOG_CHAT': MIRROR_LOG_CHAT,
                         'OWNER_ID': OWNER_ID,
                         'QUEUE_ALL': QUEUE_ALL,
                         'QUEUE_DOWNLOAD': QUEUE_DOWNLOAD,
@@ -846,23 +971,34 @@ async def load_config():
                         'RCLONE_SERVE_PORT': RCLONE_SERVE_PORT,
                         'RSS_CHAT': RSS_CHAT,
                         'RSS_DELAY': RSS_DELAY,
+                        'SA_MAIL': SA_MAIL,
+                        'SAFE_MODE': SAFE_MODE,
                         'SEARCH_API_LINK': SEARCH_API_LINK,
                         'SEARCH_LIMIT': SEARCH_LIMIT,
                         'SEARCH_PLUGINS': SEARCH_PLUGINS,
+                        'SET_COMMANDS': SET_COMMANDS,
+                        'STATUS_HEADER': STATUS_HEADER,
                         'STATUS_LIMIT': STATUS_LIMIT,
                         'STATUS_UPDATE_INTERVAL': STATUS_UPDATE_INTERVAL,
                         'STOP_DUPLICATE': STOP_DUPLICATE,
+                        'STORAGE_THRESHOLD': STORAGE_THRESHOLD,
                         'SUDO_USERS': SUDO_USERS,
                         'TELEGRAM_API': TELEGRAM_API,
                         'TELEGRAM_HASH': TELEGRAM_HASH,
+                        'TOKEN_TIMEOUT': TOKEN_TIMEOUT,
+                        'TORRENT_ENABLED': TORRENT_ENABLED,
+                        'TORRENT_LIMIT': TORRENT_LIMIT,
                         'TORRENT_TIMEOUT': TORRENT_TIMEOUT,
                         'USER_LEECH': USER_LEECH,
+                        'USER_MAX_TASKS': USER_MAX_TASKS,
                         'UPSTREAM_REPO': UPSTREAM_REPO,
                         'UPSTREAM_BRANCH': UPSTREAM_BRANCH,
                         'UPTOBOX_TOKEN': UPTOBOX_TOKEN,
                         'USER_SESSION_STRING': USER_SESSION_STRING,
                         'USE_SERVICE_ACCOUNTS': USE_SERVICE_ACCOUNTS,
                         'WEB_PINCODE': WEB_PINCODE,
+                        'YTDLP_ENABLED': YTDLP_ENABLED,
+                        'YTDLP_LIMIT': YTDLP_LIMIT,
                         'YT_DLP_OPTIONS': YT_DLP_OPTIONS})
 
     if DATABASE_URL:
