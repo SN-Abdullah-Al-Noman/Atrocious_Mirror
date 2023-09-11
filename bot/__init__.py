@@ -192,6 +192,10 @@ UPTOBOX_TOKEN = environ.get('UPTOBOX_TOKEN', '')
 if len(UPTOBOX_TOKEN) == 0:
     UPTOBOX_TOKEN = ''
 
+FILELION_API = environ.get('FILELION_API', '')
+if len(FILELION_API) == 0:
+    FILELION_API = ''
+
 INDEX_URL = environ.get('INDEX_URL', '').rstrip("/")
 if len(INDEX_URL) == 0:
     INDEX_URL = ''
@@ -444,6 +448,7 @@ config_dict = {'AS_DOCUMENT': AS_DOCUMENT,
                'DOWNLOAD_DIR': DOWNLOAD_DIR,
                'EQUAL_SPLITS': EQUAL_SPLITS,
                'EXTENSION_FILTER': EXTENSION_FILTER,
+               'FILELION_API': FILELION_API,
                'FSUB_IDS': FSUB_IDS,
                'GDRIVE_ENABLED': GDRIVE_ENABLED,
                'GDRIVE_ID': GDRIVE_ID,
