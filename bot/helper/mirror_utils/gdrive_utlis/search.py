@@ -2,7 +2,7 @@
 from logging import getLogger
 from urllib.parse import quote as rquote
 
-from bot import DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, user_data
+from bot import DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, user_data, config_dict, OWNER_ID
 from bot.helper.ext_utils.bot_utils import get_readable_file_size
 from bot.helper.mirror_utils.gdrive_utlis.helper import GoogleDriveHelper
 
@@ -101,7 +101,13 @@ class gdSearch(GoogleDriveHelper):
                     furl = self.G_DRIVE_DIR_BASE_DOWNLOAD_URL.format(
                         file.get('id'))
                     msg += f"📁 <code>{file.get('name')}<br>(folder)</code><br>"
-                    msg += f"<b><a href={furl}>Drive Link</a></b>"
+                    if config_dict['DISABLE_DRIVE_LINK']:
+                        if user_id == OWNER_ID:
+                            msg += f"<b><a href={furl}>Drive Link</a></b>"
+                        else:
+                            pass
+                    else:
+                        msg += f"<b><a href={furl}>Drive Link</a></b>"
                     if index_url:
                         url = f'{index_url}findpath?id={file.get("id")}'
                         msg += f' <b>| <a href="{url}">Index Link</a></b>'
@@ -114,7 +120,13 @@ class gdSearch(GoogleDriveHelper):
                     furl = self.G_DRIVE_BASE_DOWNLOAD_URL.format(
                         file.get('id'))
                     msg += f"📄 <code>{file.get('name')}<br>({get_readable_file_size(int(file.get('size', 0)))})</code><br>"
-                    msg += f"<b><a href={furl}>Drive Link</a></b>"
+                    if config_dict['DISABLE_DRIVE_LINK']:
+                        if user_id == OWNER_ID:
+                            msg += f"<b><a href={furl}>Drive Link</a></b>"
+                        else:
+                            pass
+                    else:
+                        msg += f"<b><a href={furl}>Drive Link</a></b>"
                     if index_url:
                         url = f'{index_url}findpath?id={file.get("id")}'
                         msg += f' <b>| <a href="{url}">Index Link</a></b>'
