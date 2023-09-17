@@ -858,6 +858,10 @@ async def load_config():
     MIRROR_LOG_CHAT = environ.get('MIRROR_LOG_CHAT', '')
     MIRROR_LOG_CHAT = '' if len(MIRROR_LOG_CHAT) == 0 else float(MIRROR_LOG_CHAT)
 
+    PAID_SERVICE = environ.get('PAID_SERVICE', '')
+    if len(PAID_SERVICE) == 0:
+        PAID_SERVICE = ''
+
     SA_MAIL = environ.get('SA_MAIL', '')
     if len(SA_MAIL) == 0:
         SA_MAIL = ''
@@ -965,6 +969,7 @@ async def load_config():
                         'MIRROR_LIMIT': MIRROR_LIMIT,
                         'MIRROR_LOG_CHAT': MIRROR_LOG_CHAT,
                         'OWNER_ID': OWNER_ID,
+                        'PAID_SERVICE': PAID_SERVICE,
                         'QUEUE_ALL': QUEUE_ALL,
                         'QUEUE_DOWNLOAD': QUEUE_DOWNLOAD,
                         'QUEUE_UPLOAD': QUEUE_UPLOAD,

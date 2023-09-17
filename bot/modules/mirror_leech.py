@@ -64,8 +64,6 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
     file_ = None
     session = ''
 
-    await delete_links(message)
-    
     if not isinstance(seed, bool):
         dargs = seed.split(':')
         ratio = dargs[0] or None
@@ -164,13 +162,14 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
                     return
 
     if reply_to:
-        file_ = reply_to.document or reply_to.photo or reply_to.video or reply_to.audio or reply_to.voice or reply_to.video_note or reply_to.sticker or reply_to.animation or None
+        file_ = reply_to.document or reply_to.photo or reply_to.video or reply_to.audio or \
+            reply_to.voice or reply_to.video_note or reply_to.sticker or reply_to.animation or None
         if file_ is not None:
             if msg := await check_filename(file_.file_name):
                 warn = f"Hey {tag}.\n\n{msg}"
                 await sendMessage(message, warn)
                 return
-            
+
         if file_ is None:
             reply_text = reply_to.text.split('\n', 1)[0].strip()
             if is_url(reply_text) or is_magnet(reply_text):
@@ -198,15 +197,17 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
             error_button = error_button.build_menu(2)
         await sendMessage(message, final_msg, error_button)
         return
-        
+
     if link:
         LOGGER.info(link)
+
+    await delete_links(message)
 
     if msg := await check_filename(link):
         warn = f"Hey {tag}.\n\n{msg}"
         await sendMessage(message, warn)
         return
-        
+
     if not is_mega_link(link) and not isQbit and not is_magnet(link) and not is_rclone_path(link) \
        and not is_gdrive_link(link) and not link.endswith('.torrent') and file_ is None and not is_gdrive_id(link):
         content_type = await get_content_type(link)
@@ -215,7 +216,7 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
                 link = await sync_to_async(direct_link_generator, link)
                 if isinstance(link, tuple):
                     link, headers = link
-                if isinstance(link, str):
+                elif isinstance(link, str):
                     LOGGER.info(f"Generated link: {link}")
             except DirectDownloadLinkException as e:
                 e = str(e)
@@ -224,7 +225,7 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
                 if e.startswith('ERROR:'):
                     await sendMessage(message, e)
                     return
-                    
+
     user_id = message.from_user.id
     if not isLeech:
         user_dict = user_data.get(user_id, {})
@@ -313,12 +314,8 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
         pssw = args['-ap']
         if ussr or pssw:
             auth = f"{ussr}:{pssw}"
-            auth = f"authorization: Basic {b64encode(auth.encode()).decode('ascii')}"
-        else:
-            auth = ''
-        if headers:
-            auth += f'{auth} {headers}'
-        await add_aria2c_download(link, path, listener, name, auth, ratio, seed_time)
+            headers += f" authorization: Basic {b64encode(auth.encode()).decode('ascii')}"
+        await add_aria2c_download(link, path, listener, name, headers, ratio, seed_time)
 
 
 async def mirror(client, message):
