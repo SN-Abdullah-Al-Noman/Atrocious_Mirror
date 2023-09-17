@@ -1,6 +1,44 @@
+![](https://graph.org/file/ae9ff37063aa760ac4918.jpg)
+
+
 This is a Telegram Bot written in Python for mirroring files on the Internet to your Google Drive, Telegram or to any rclone supported cloud. Based on [python-aria-mirror-bot](https://github.com/lzzy12/python-aria-mirror-bot)
 
 # Features
+
+## By [AL-NOMAN](https://github.com/SN-Abdullah-Al-Noman)
+
+### BOT_PM
+
+- File and link will send in BOT_PM if enabled. User can set their own custom destination for receiving leech file.
+
+### DATABASE_NAME
+
+- Provide the database name which you want to use. Default is mltb. If you want to use old database then give the database name.
+
+### DISABLE_DRIVE_LINK
+
+- Drive link won't show if DISABLE_DRIVE_LINK enabled. But if owner mirror or search anything in drive then drive link will show.
+
+### SAFE_MODE 
+
+- File name won't show if SAFE_MODE enabled.
+
+### USER BLACKLIST 
+
+- /addblacklist {user_id}
+- /rmblacklist {user_id}
+
+### User Team Drive Support
+
+- File will mirror or clone in your own share drive. Command- usertd
+
+### BLACKLIST_FILE_KEYWORDS
+
+- If any filename match with BLACKLIST_FILE_KEYWORDS then task will cancel.
+
+### Index Folder Support
+
+- You can mirror or leech index folder link with replying link with /cmd -b like bulk.
 
 ## By [anasty17](https://github.com/anasty17)
 
@@ -37,22 +75,16 @@ In each single file there is a major change from base code, it's almost totaly d
 - Download using premium account if available
 - Download restricted messages (document or link) by tg private/public/super links
 - Custom upload destination for each task or user
-- Choose leech by bot or user session incase you have premium plan
 
 ### Google
 
-- Stop duplicates for all tasks and setting for each user
+- Stop duplicates for all tasks
 - Download from Google Drive
 - Counting Google Drive files/folders
 - Search in multiple Drive folder/TeamDrive
 - Recursive Search (only with `root` or TeamDrive ID, folder ids will be listed with non-recursive method). Based on [Sreeraj](https://github.com/SVR666) searchX-bot.
 - Use Token.pickle if file not found with Service Account, for all Gdrive functions
 - Random Service Account for each task
-- Custom upload destination for each user
-- Ability to choose token, drive and id from list with buttons
-- Token.pickle for each user
-- Default upload destination for each user
-- Index link for each user
 
 ### Status
 
@@ -80,7 +112,7 @@ In each single file there is a major change from base code, it's almost totaly d
 
 - Mongo Database support
 - Store bot settings
-- Store user settings including thumbnails, rclone config and token.pickle in database
+- Store user settings including thumbnails and rclone config in database
 - Store private files
 - Store RSS data
 - Store incompleted task messages
@@ -115,7 +147,6 @@ In each single file there is a major change from base code, it's almost totaly d
 - Rclone.conf for each user
 - Clone server-side
 - Rclone serve for combine remote to use it as index from all remotes
-- Default upload destination for each user
 
 ### Overall
 
@@ -128,12 +159,12 @@ In each single file there is a major change from base code, it's almost totaly d
 - Mirror/Leech/Watch/Clone/Count/Del by reply
 - Mirror/Leech/Clone multi links/files with one command
 - Custom name for all links except torrents. For files you should add extension except yt-dlp links
-- Extensions Filter for the files to be uploaded/cloned for each user
+- Extensions Filter for the files to be uploaded/cloned
 - View Link button. Extra button to open index link in broswer instead of direct download for file
 - Queueing System for all tasks
 - Ability to zip/unzip multi links in same directory. Mostly helpful in unziping tg file parts
 - Bulk download from telegram txt file or text message contains links seperated by new line
-- Join splitted files that have splitted before by split(linux pkg)
+- Join splitted files that have splitted before by split linux pkg
 - Almost all repository functions have been improved and many other details can't mention all of them
 - Many bugs have been fixed
 
@@ -219,7 +250,7 @@ Fill up rest of the fields. Meaning of each field is discussed below. **NOTE**: 
 
 **2. Optional Fields**
 
-- `USER_SESSION_STRING`: To download/upload from your telegram account if user is `PREMIUM` and to send rss. To generate session string use this command `python3 generate_string_session.py` after mounting repo folder for sure. `Str`. **NOTE**: You can't use bot with private message. Use it with superGroup.
+- `USER_SESSION_STRING`: To download/upload from your telegram account and to send rss. To generate session string use this command `python3 generate_string_session.py` after mounting repo folder for sure. `Str`. **NOTE**: You can't use bot with private message. Use it with superGroup.
 - `DATABASE_URL`: Your Mongo Database URL (Connection string). Follow this [Generate Database](https://github.com/anasty17/mirror-leech-telegram-bot/tree/master#generate-database) to generate database. Data will be saved in Database: auth and sudo users, users settings including thumbnails for each user, rss data and incomplete tasks. **NOTE**: You can always edit all settings that saved in database from the official site -> (Browse collections). `Str`
 - `DOWNLOAD_DIR`: The path to the local folder where the downloads should be downloaded to. `Str`
 - `CMD_SUFFIX`: commands index number. This number will added at the end all commands. `Str`|`Int`
@@ -264,9 +295,8 @@ Fill up rest of the fields. Meaning of each field is discussed below. **NOTE**: 
 - `AS_DOCUMENT`: Default type of Telegram file upload. Default is `False` mean as media. `Bool`
 - `EQUAL_SPLITS`: Split files larger than **LEECH_SPLIT_SIZE** into equal parts size (Not working with zip cmd). Default is `False`. `Bool`
 - `MEDIA_GROUP`: View Uploaded splitted file parts in media group. Default is `False`. `Bool`.
-- `USER_LEECH`: Upload/Download by user session. Default is `False`. `Bool`
 - `LEECH_FILENAME_PREFIX`: Add custom word to leeched file name. `Str`
-- `LEECH_DUMP_CHAT`: Chat ID or USERNAME to where files would be uploaded. `Int`|`Str`. **NOTE**: Only available for superGroup/channel. Add `-100` before channel/superGroup id. In short don't add bot or account id!
+- `LOG_CHAT_ID`: Chat ID or USERNAME to where files would be uploaded. `Int`|`Str`. **NOTE**: Only available for superGroup/channel. Add `-100` before channel/superGroup id. In short don't add bot or account id!
 
 ### qBittorrent/Aria2c
 
@@ -278,7 +308,7 @@ Fill up rest of the fields. Meaning of each field is discussed below. **NOTE**: 
 
 ### RSS
 
-- `RSS_DELAY`: Time in seconds for rss refresh interval. Recommended `600` second at least. Default is `600` in sec. `Int`
+- `RSS_DELAY`: Time in seconds for rss refresh interval. Recommended `900` second at least. Default is `900` in sec. `Int`
 - `RSS_CHAT`: Chat ID/USERNAME where rss links will be sent. If you want message to be sent to the channel then add channel id. Add `-100` before channel id. `Int`|`Str`
   - **RSS NOTES**: `RSS_CHAT` is required, otherwise monitor will not work. You must use `USER_STRING_SESSION` --OR-- *CHANNEL*. If using channel then bot should be added in both channel and group(linked to channel) and `RSS_CHAT` is the channel id, so messages sent by the bot to channel will be forwarded to group. Otherwise with `USER_STRING_SESSION` add group id for `RSS_CHAT`. If `DATABASE_URL` not added you will miss the feeds while bot offline.
 
