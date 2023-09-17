@@ -7,7 +7,7 @@ from bot.helper.mirror_utils.status_utils.qbit_status import QbittorrentStatus
 from bot.helper.telegram_helper.message_utils import update_all_messages
 from bot.helper.ext_utils.bot_utils import get_readable_time, getDownloadByGid, new_task, sync_to_async
 from bot.helper.ext_utils.fs_utils import clean_unwanted
-from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check
+from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check, stop_duplicate_leech
 
 
 async def __remove_torrent(client, hash_, tag):
@@ -54,6 +54,11 @@ async def __stop_duplicate(tor):
         return
     listener = download.listener()
     name = tor.content_path.rsplit('/', 1)[-1].rsplit('.!qB', 1)[0]
+    size = tor.size
+    msg = await stop_duplicate_leech(name, size, listener)
+    if msg:
+        __onDownloadError(msg, tor)
+        return
     msg, button = await stop_duplicate_check(name, listener)
     if msg:
         __onDownloadError(msg, tor, button)
@@ -142,7 +147,7 @@ async def __qb_listener():
                             await sync_to_async(client.torrents_reannounce, torrent_hashes=tor_info.hash)
                     elif state == "downloading":
                         QbTorrents[tag]['stalled_time'] = time()
-                        if config_dict['STOP_DUPLICATE'] and not QbTorrents[tag]['stop_dup_check']:
+                        if not QbTorrents[tag]['stop_dup_check']:
                             QbTorrents[tag]['stop_dup_check'] = True
                             __stop_duplicate(tor_info)
                         if any([config_dict['STORAGE_THRESHOLD'], config_dict['TORRENT_LIMIT'], config_dict['LEECH_LIMIT']]) and not QbTorrents[tag]['size_checked']:
