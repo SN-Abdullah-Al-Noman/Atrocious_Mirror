@@ -17,18 +17,13 @@ from bot.helper.ext_utils.fs_utils import clean_unwanted, is_archive, get_base_n
 from bot.helper.ext_utils.bot_utils import sync_to_async
 from bot.helper.ext_utils.leech_utils import get_media_info, get_document_type, take_ss, get_audio_thumb
 from bot.helper.telegram_helper.message_utils import deleteMessage
+from bot.helper.ext_utils.atrocious_utils import update_leech_links
+
 
 LOGGER = getLogger(__name__)
 getLogger("pyrogram").setLevel(ERROR)
 
 client = user if IS_PREMIUM_USER else bot
-
-async def send_file_in_pm(client, chat_id, from_chat_id, message_id):
-    if config_dict['LEECH_DUMP_CHAT'] and config_dict['BOT_PM']:
-        try:
-            await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-        except:
-            pass
 
 
 class TgUploader:
@@ -278,11 +273,6 @@ class TgUploader:
                 if self.__is_cancelled:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_document(document=self.__up_path, quote=True, thumb=thumb, caption=cap_mono, force_document=True, disable_notification=True, progress=self.__upload_progress)
-                if config_dict['LEECH_DUMP_CHAT'] and config_dict['BOT_PM']:
-                    try:
-                        await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                    except:
-                        pass
             elif is_video:
                 key = 'videos'
                 duration = (await get_media_info(self.__up_path))[0]
@@ -309,32 +299,24 @@ class TgUploader:
                 if self.__is_cancelled:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_video(video=self.__up_path, quote=True, caption=cap_mono, duration=duration, width=width, height=height, thumb=thumb, supports_streaming=True, disable_notification=True, progress=self.__upload_progress)
-                if config_dict['LEECH_DUMP_CHAT'] and config_dict['BOT_PM']:
-                    try:
-                        await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                    except:
-                        pass
             elif is_audio:
                 key = 'audios'
                 duration, artist, title = await get_media_info(self.__up_path)
                 if self.__is_cancelled:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_audio(audio=self.__up_path, quote=True, caption=cap_mono, duration=duration, performer=artist, title=title, thumb=thumb, disable_notification=True, progress=self.__upload_progress)
-                if config_dict['LEECH_DUMP_CHAT'] and config_dict['BOT_PM']:
-                    try:
-                        await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                    except:
-                        pass
             else:
                 key = 'photos'
                 if self.__is_cancelled:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_photo(photo=self.__up_path, quote=True, caption=cap_mono, disable_notification=True, progress=self.__upload_progress)
-                if config_dict['LEECH_DUMP_CHAT'] and config_dict['BOT_PM']:
-                    try:
-                        await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                    except:
-                        pass
+            if config_dict['LEECH_DUMP_CHAT'] and config_dict['BOT_PM']:
+                try:
+                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                except:
+                    pass
+            if config_dict['LEECH_DUMP_CHAT']:
+                await update_leech_links(name=self.name, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             if not self.__is_cancelled and self.__media_group and (self.__sent_msg.video or self.__sent_msg.document):
                 key = 'documents' if self.__sent_msg.document else 'videos'
                 if match := re_match(r'.+(?=\.0*\d+$)|.+(?=\.part\d+\..+)', self.__up_path):
