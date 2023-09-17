@@ -4,6 +4,7 @@ from time import sleep, time
 from base64 import b64encode
 from shutil import disk_usage
 from urllib.parse import quote
+from pymongo import MongoClient
 from urllib3 import disable_warnings
 from cloudscraper import create_scraper
 from random import choice, random, randrange
@@ -11,17 +12,45 @@ from pyrogram.errors import PeerIdInvalid, RPCError, UserNotParticipant
 from pyrogram.types import BotCommand, CallbackQuery
 from pyrogram.filters import regex
 
-from bot import bot, bot_name, config_dict, download_dict, DOWNLOAD_DIR, GLOBAL_BLACKLIST_FILE_KEYWORDS, LOGGER, OWNER_ID, shorteneres_list, user_data
-from bot.helper.ext_utils.bot_utils import sync_to_async, get_readable_file_size, get_readable_time, getAllDownload, get_telegraph_list, is_gdrive_id
+from bot import bot, bot_name, config_dict, DATABASE_URL, download_dict, DOWNLOAD_DIR, GLOBAL_BLACKLIST_FILE_KEYWORDS, LOGGER, OWNER_ID, shorteneres_list, user_data
+from bot.helper.ext_utils.bot_utils import sync_to_async, get_readable_file_size, get_readable_time, getAllDownload, get_telegraph_list, is_gdrive_id, is_telegram_link
 from bot.helper.ext_utils.fs_utils import get_base_name
+from bot.helper.telegram_helper.message_utils import get_tg_link_content
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.mirror_utils.gdrive_utlis.search import gdSearch
 
 
+leech_data = {}
+
+async def export_leech_data():
+    if DATABASE_URL:
+        leech_data.clear()
+        client = MongoClient(DATABASE_URL)
+        db = client.mltb
+        collection = db.leech_links
+        for document in collection.find():
+            name = document.get('name')
+            link = document.get('link')
+            from_chat_id = document.get('from_chat_id')
+            message_id = document.get('message_id')
+            leech_data[name] = {"link": link, "from_chat_id": from_chat_id, "message_id": message_id}
+
+
+async def update_leech_links(name, from_chat_id, message_id):
+    if DATABASE_URL:
+        client = MongoClient(DATABASE_URL)
+        db = client.mltb
+        collection = db.leech_links
+        link = f"https://t.me/c/{str(from_chat_id)[4:]}/{message_id}"
+        collection.update_one({'name': name}, {'$set': {'link': link, 'from_chat_id': from_chat_id, 'message_id': message_id}}, upsert=True)
+        LOGGER.info(f"Link for {name} added in database")
+        await export_leech_data()
+
+
 async def get_bot_pm_button():
     buttons = ButtonMaker()
-    buttons.ubutton("Click here to go bot pm", f"https://t.me/{bot_name}")
+    buttons.ubutton("View in inbox", f"https://t.me/{bot_name}")
     button = buttons.build_menu(1)
     return button
 
@@ -67,6 +96,47 @@ async def stop_duplicate_check(name, listener):
                 button = await get_telegraph_list(telegraph_content)
             return msg, button
     return False, None
+
+
+async def stop_duplicate_leech(name, size, listener):
+    LOGGER.info(f"Leech Name: {name}")
+    if not listener.isLeech:
+        return
+    if listener.compress:
+        name = f"{name}.zip"
+    message = listener.message
+    user_id = message.from_user.id
+    if username := message.from_user.username:
+        tag = f"@{username}"
+    else:
+        tag = message.from_user.mention
+
+    leech_dict = leech_data.get(name, {})
+    if leech_dict.get('link') and leech_dict.get('from_chat_id') and leech_dict.get('message_id'):
+        link = leech_dict['link']
+        from_chat_id = leech_dict['from_chat_id']
+        message_id = leech_dict['message_id']
+    
+        if link and is_telegram_link(link):
+            try:
+                reply_to, session = await get_tg_link_content(link)
+            except Exception as e:
+                print({e})
+                return
+            if reply_to:
+                file_ = reply_to.document or reply_to.photo or reply_to.video or reply_to.audio or reply_to.voice or reply_to.video_note or reply_to.sticker or reply_to.animation or None
+                if file_:
+                    file_name = file_.file_name
+                    file_size = file_.file_size
+                    if size == file_size:
+                        if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
+                            msg = f"File already available in Leech Dump Chat.\nI have sent available file in pm."
+                            await bot.copy_message(chat_id=user_id, from_chat_id=from_chat_id, message_id=message_id)
+                        else:
+                            msg = f"File already available in Leech Dump Chat.\nI have forwarded the file here."
+                            await bot.copy_message(chat_id=message.chat.id, from_chat_id=from_chat_id, message_id=message_id)
+                        return msg
+    return
 
 
 async def user_info(user_id):
@@ -176,7 +246,7 @@ def checking_blacklist(message, button=None):
 
 def checking_token_status(message, button=None):
     user_id = message.from_user.id
-    if not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo') or user_id in user_data and user_data[user_id].get('is_good_friend')):
+    if not config_dict['TOKEN_TIMEOUT'] or bool(user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo') or user_id in user_data and user_data[user_id].get('is_good_friend') or user_id in user_data and user_data[user_id].get('is_paid_user')):
         return None, button
     user_data.setdefault(user_id, {})
     data = user_data[user_id]
@@ -273,7 +343,7 @@ async def limit_checker(size, listener, isClone=False, isDriveLink=False, isMega
     buttons.ibutton("See All Limits", "limits_callback")
     button = buttons.build_menu(1)
     user_id = listener.message.from_user.id
-    if user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo'):
+    if user_id == OWNER_ID or user_id in user_data and user_data[user_id].get('is_sudo') or user_id in user_data and user_data[user_id].get('is_paid_user'):
         return None, None
 
     LOGGER.info('Checking Size Limit of link/file/folder/tasks...')
@@ -413,7 +483,6 @@ async def task_utils(message):
     msg = []
     button = None
     user_id = message.from_user.id
-    user_dict = user_data.get(user_id, {})
     user = await message._client.get_users(user_id)
     
     if user_id == OWNER_ID:
@@ -432,7 +501,7 @@ async def task_utils(message):
         if _msg:
             msg.append(_msg)
             
-    if config_dict['BOT_PM'] or user_dict.get('bot_pm'):
+    if config_dict['BOT_PM']:
         if user.status == user.status.LONG_AGO:
             _msg, button = await BotPm_check(message, button)
             if _msg:
@@ -442,5 +511,6 @@ async def task_utils(message):
         msg.append(f"Bot max tasks limit exceeded.\nBot max tasks limit is {config_dict['BOT_MAX_TASKS']}.\nPlease wait for the completion of other tasks.")
     
     if (maxtask := config_dict['USER_MAX_TASKS']) and await get_user_tasks(message.from_user.id, maxtask):
-        msg.append(f"User's max tasks limit is {maxtask}.\nPlease wait to complete your old tasks.")
+        if user_id in user_data and not user_data[user_id].get('is_paid_user'):
+            msg.append(f"User's max tasks limit is {maxtask}.\nPlease wait to complete your old tasks or buy paid service.")
     return msg, button
