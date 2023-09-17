@@ -9,7 +9,7 @@ from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.telegram_helper.message_utils import sendMessage, sendStatusMessage
 from bot.helper.ext_utils.bot_utils import sync_to_async
 from bot.helper.ext_utils.task_manager import is_queued
-from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check
+from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check, stop_duplicate_leech
 
 
 async def add_gd_download(link, path, listener, newname):
@@ -27,9 +27,16 @@ async def add_gd_download(link, path, listener, newname):
         await sendMessage(listener.message, warn)
         return
 
+    msg = await stop_duplicate_leech(name, size, listener)
+    if msg:
+        warn = f"Hey {listener.tag}.\n\n{msg}"
+        await sendMessage(listener.message, warn)
+        return
+
     msg, button = await stop_duplicate_check(name, listener)
     if msg:
-        await sendMessage(listener.message, msg, button)
+        warn = f"Hey {listener.tag}.\n\n{msg}"
+        await sendMessage(listener.message, warn, button)
         return
 
     limit_exceeded, button = await limit_checker(size, listener, isDriveLink=True)

@@ -10,7 +10,7 @@ from bot.helper.ext_utils.bot_utils import get_mega_link_type, async_to_sync, sy
 from bot.helper.mirror_utils.status_utils.mega_download_status import MegaDownloadStatus
 from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.ext_utils.task_manager import is_queued
-from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check
+from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check, stop_duplicate_leech
 
 
 class MegaAppListener(MegaListener):
@@ -148,6 +148,9 @@ async def add_mega_download(mega_link, path, listener, name):
         return
 
     name = name or node.getName()
+    gid = token_urlsafe(8)
+    size = api.getSize(node)
+
     if msg := await check_filename(name):
         warn = f"Hey {listener.tag}.\n\n{msg}"
         await sendMessage(listener.message, warn)
@@ -155,7 +158,16 @@ async def add_mega_download(mega_link, path, listener, name):
         if folder_api is not None:
             await executor.do(folder_api.logout, ())
         return
-        
+
+    msg = await stop_duplicate_leech(name, size, listener)
+    if msg:
+        warn = f"Hey {listener.tag}.\n\n{msg}"
+        await sendMessage(listener.message, msg)
+        await executor.do(api.logout, ())
+        if folder_api is not None:
+            await executor.do(folder_api.logout, ())
+        return
+
     msg, button = await stop_duplicate_check(name, listener)
     if msg:
         await sendMessage(listener.message, msg, button)
@@ -163,10 +175,7 @@ async def add_mega_download(mega_link, path, listener, name):
         if folder_api is not None:
             await executor.do(folder_api.logout, ())
         return
-
-    gid = token_urlsafe(8)
-    size = api.getSize(node)
-    
+        
     limit_exceeded, button = await limit_checker(size, listener, isMega=True)
     if limit_exceeded:
         msg = f"Hey {listener.tag}.\n\n{limit_exceeded}"

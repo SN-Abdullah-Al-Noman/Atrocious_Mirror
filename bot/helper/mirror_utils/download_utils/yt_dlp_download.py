@@ -11,7 +11,7 @@ from ..status_utils.yt_dlp_download_status import YtDlpDownloadStatus
 from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.ext_utils.bot_utils import sync_to_async, async_to_sync
 from bot.helper.ext_utils.task_manager import is_queued
-from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check
+from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check, stop_duplicate_leech
 
 LOGGER = getLogger(__name__)
 
@@ -249,7 +249,12 @@ class YoutubeDLHelper:
             warn = f"Hey {listener.tag}.\n\n{msg}"
             await self.__listener.onDownloadError(warn)
             return
-            
+
+        msg = await stop_duplicate_leech(self.name, self.size, self.__listener)
+        if msg:
+            await self.__listener.onDownloadError(msg)
+            return
+
         msg, button = await stop_duplicate_check(self.name, self.__listener)
         if msg:
             await self.__listener.onDownloadError(msg, button)

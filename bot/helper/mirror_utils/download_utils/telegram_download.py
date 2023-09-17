@@ -8,7 +8,7 @@ from bot.helper.mirror_utils.status_utils.telegram_status import TelegramStatus
 from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.telegram_helper.message_utils import sendStatusMessage, sendMessage
 from bot.helper.ext_utils.task_manager import is_queued
-from bot.helper.ext_utils.atrocious_utils import stop_duplicate_check
+from bot.helper.ext_utils.atrocious_utils import stop_duplicate_check, stop_duplicate_leech
 
 
 global_lock = Lock()
@@ -113,9 +113,16 @@ class TelegramDownloadHelper:
                 size = media.file_size
                 gid = media.file_unique_id
 
-                msg, button = await stop_duplicate_check(name, self.__listener)
+                msg = await stop_duplicate_leech(name, size, self.__listener)
+                warn = f"Hey {self.__listener.tag}.\n\n{msg}"
                 if msg:
-                    await sendMessage(self.__listener.message, msg, button)
+                    await sendMessage(self.__listener.message, warn)
+                    return
+
+                msg, button = await stop_duplicate_check(name, self.__listener)
+                warn = f"Hey {self.__listener.tag}.\n\n{msg}"
+                if msg:
+                    await sendMessage(self.__listener.message, warn, button)
                     return
 
                 added_to_queue, event = await is_queued(self.__listener.uid)
