@@ -15,7 +15,7 @@ def make_theme():
                 'Split': '✂️ Split',
                 'CheckUp': '📝 CheckUp',
                 'Seed': '🌧 Seed',
-                'Process': '✳️',
+                'Process': '📶 Process',
                 'Progress_Bar_Full': '▦',
                 'Progress_Bar_Blank': '▢',
                 'Speed': '⚡ Speed',
@@ -38,7 +38,7 @@ def make_theme():
                 'Repo': '🌐 Repo',
                 'Statistics': '🔄 Statistics',
                 'Tasks Running': '🖥 Tasks Running',
-                'Stop': '🛑 Stop'}
+                'Stop': '🚫'}
     else:
         return {'Upload': 'Upload',
                 'Download': 'Download',
@@ -51,7 +51,7 @@ def make_theme():
                 'Split': 'Split',
                 'CheckUp': 'CheckUp',
                 'Seed': 'Seed',
-                'Process': '',
+                'Process': 'Process',
                 'Progress_Bar_Full': '■',
                 'Progress_Bar_Blank': '□',
                 'Speed': 'Speed',
@@ -73,9 +73,12 @@ def make_theme():
                 'Repo': 'Repo',
                 'Statistics': 'Statistics',
                 'Tasks Running': 'Tasks Running',
-                'Stop': 'Stop'}
+                'Stop': '🚫'}
 
 if ospath.exists('my_theme.py'):
-    from my_theme import make_theme
+    try:
+        from my_theme import make_theme
+    except:
+        pass
 
 theme = make_theme()
