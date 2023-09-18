@@ -9,7 +9,7 @@ from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.bot_utils import sync_to_async, new_task, get_telegraph_list
-from bot.helper.ext_utils.atrocious_utils import send_to_chat
+from bot.helper.ext_utils.atrocious_utils import get_bot_pm_button, send_to_chat
 
 
 async def list_buttons(user_id, isRecursive=True, user_token=False):
@@ -43,10 +43,9 @@ async def _list_drive(key, message, item_type, isRecursive, user_token, user_id)
         msg = f"<b>Hey.\n\nFound {contents_no} result for <i>{key}</i></b>"
         if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
             ibmsg = f"Hey.\n\nSearch result sent in pm."
-            bot_pm_button = ButtonMaker()
-            bot_pm_button.ubutton("View in inbox", f"https://t.me/{bot_name}")
-            await send_to_chat(chat_id=user_id, text=msg, button=button)
-            await editMessage(message, ibmsg, bot_pm_button.build_menu(1))
+            pmbutton = await get_bot_pm_button()
+            await send_to_chat(user_id, msg, button)
+            await editMessage(message, ibmsg, pmbutton)
         else:
             await editMessage(message, msg, button)
     else:
