@@ -16,6 +16,7 @@ from bot import download_dict, download_dict_lock, botStartTime, user_data, conf
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.telegraph_helper import telegraph
+from bot.helper.theme import theme
 
 THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 
@@ -31,17 +32,17 @@ PAGE_NO = 1
 
 
 class MirrorStatus:
-    STATUS_UPLOADING = "Upload"
-    STATUS_DOWNLOADING = "Download"
-    STATUS_CLONING = "Clone"
-    STATUS_QUEUEDL = "QueueDl"
-    STATUS_QUEUEUP = "QueueUp"
-    STATUS_PAUSED = "Pause"
-    STATUS_ARCHIVING = "Archive"
-    STATUS_EXTRACTING = "Extract"
-    STATUS_SPLITTING = "Split"
-    STATUS_CHECKING = "CheckUp"
-    STATUS_SEEDING = "Seed"
+    STATUS_UPLOADING = theme['Upload']
+    STATUS_DOWNLOADING = theme['Download']
+    STATUS_CLONING = theme['Clone']
+    STATUS_QUEUEDL = theme['QueueDl']
+    STATUS_QUEUEUP = theme['QueueUp']
+    STATUS_PAUSED = theme['Pause']
+    STATUS_ARCHIVING = theme['Archive']
+    STATUS_EXTRACTING = theme['Extract']
+    STATUS_SPLITTING = theme['Split']
+    STATUS_CHECKING = theme['CheckUp']
+    STATUS_SEEDING = theme['Seed']
 
 
 class setInterval:
@@ -138,25 +139,25 @@ def get_readable_message():
             msg += f"<code>{escape(f'{download.name()}')}</code>"
         if download.status() not in [MirrorStatus.STATUS_SPLITTING, MirrorStatus.STATUS_SEEDING]:
             msg += f"\n{get_progress_bar_string(download.progress())} {download.progress()}"
-            msg += f"\n<b>Speed: </b>{download.speed()}"
-            msg += f"\n<b>Done: </b>{download.processed_bytes()} of {download.size()}"
-            msg += f"\n<b>ETA: </b>{download.eta()} <b>| Elapsed: </b>{get_readable_time(time() - download.message.date.timestamp())}"
-            msg += f"\n<b>Engine: </b>{download.engine}"
-            msg += f"\n<b>User: </b>{download.message.from_user.mention(style='html')} | <b>ID: </b><code>{download.message.from_user.id}</code>"
+            msg += f"\n<b>{theme['Speed']}: </b>{download.speed()}"
+            msg += f"\n<b>{theme['Done']}: </b>{download.processed_bytes()} of {download.size()}"
+            msg += f"\n<b>{theme['ETA']}: </b>{download.eta()} <b>| Elapsed: </b>{get_readable_time(time() - download.message.date.timestamp())}"
+            msg += f"\n<b>{theme['Engine']}: </b>{download.engine}"
+            msg += f"\n<b>{theme['User']}: </b>{download.message.from_user.mention(style='html')} | <b>ID: </b><code>{download.message.from_user.id}</code>"
             if hasattr(download, 'seeders_num'):
                 try:
-                    msg += f"\n<b>Seeders:</b> {download.seeders_num()} | <b>Leechers:</b> {download.leechers_num()}"
+                    msg += f"\n<b>{theme['Seeders']}:</b> {download.seeders_num()} | <b>Leechers:</b> {download.leechers_num()}"
                 except:
                     pass
         elif download.status() == MirrorStatus.STATUS_SEEDING:
-            msg += f"\n<b>Size: </b>{download.size()}"
-            msg += f"\n<b>Speed: </b>{download.upload_speed()}"
-            msg += f" | <b>Uploaded: </b>{download.uploaded_bytes()}"
-            msg += f"\n<b>Ratio: </b>{download.ratio()}"
-            msg += f" | <b>Time: </b>{download.seeding_time()}"
+            msg += f"\n<b>{theme['Size']}: </b>{download.size()}"
+            msg += f"\n<b>{theme['Speed']}: </b>{download.upload_speed()}"
+            msg += f" | <b>{theme['Uploaded']}: </b>{download.uploaded_bytes()}"
+            msg += f"\n<b>{theme['Ratio']}: </b>{download.ratio()}"
+            msg += f" | <b>{theme['Time']}: </b>{download.seeding_time()}"
         else:
-            msg += f"\n<b>Size: </b>{download.size()}"
-        msg += f"\n<b>Stop: </b><code>/{BotCommands.CancelMirror} {download.gid()}</code>\n\n"
+            msg += f"\n<b>{theme['Size']}: </b>{download.size()}"
+        msg += f"\n<b>{theme['Stop']}: </b><code>/{BotCommands.CancelMirror} {download.gid()}</code>\n\n"
     if len(msg) == 0:
         return None, None
     dl_speed = 0
