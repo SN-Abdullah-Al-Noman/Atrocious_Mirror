@@ -44,6 +44,10 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 
 - To use own theme rename my_theme_sample.py to my_theme.py and open it and edit in right position.
 
+### Paid Service
+- For paid user token, file size limit and user max task will skip. And paid user can use bot in pm.
+
+
 ## By [anasty17](https://github.com/anasty17)
 
 In each single file there is a major change from base code, it's almost totaly different. Here some of features and fixes that I remember.
