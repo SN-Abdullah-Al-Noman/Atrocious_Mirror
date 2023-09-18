@@ -882,6 +882,10 @@ async def load_config():
     STORAGE_THRESHOLD = '' if len(
     STORAGE_THRESHOLD) == 0 else float(STORAGE_THRESHOLD)
 
+    THEME_ENABLED = environ.get('THEME_ENABLED', '')
+    if len(THEME_ENABLED) == 0:
+        THEME_ENABLED = ''
+  
     TOKEN_TIMEOUT = environ.get('TOKEN_TIMEOUT', '')
     TOKEN_TIMEOUT = int(TOKEN_TIMEOUT) if TOKEN_TIMEOUT.isdigit() else ''
 
@@ -995,6 +999,7 @@ async def load_config():
                         'SUDO_USERS': SUDO_USERS,
                         'TELEGRAM_API': TELEGRAM_API,
                         'TELEGRAM_HASH': TELEGRAM_HASH,
+                        'THEME_ENABLED': THEME_ENABLED,
                         'TOKEN_TIMEOUT': TOKEN_TIMEOUT,
                         'TORRENT_ENABLED': TORRENT_ENABLED,
                         'TORRENT_LIMIT': TORRENT_LIMIT,

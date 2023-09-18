@@ -44,7 +44,7 @@ async def _list_drive(key, message, item_type, isRecursive, user_token, user_id)
         if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
             ibmsg = f"Hey.\n\nSearch result sent in pm."
             bot_pm_button = ButtonMaker()
-            bot_pm_button.ubutton("Click here to go bot pm", f"https://t.me/{bot_name}")
+            bot_pm_button.ubutton("View in inbox", f"https://t.me/{bot_name}")
             await send_to_chat(chat_id=user_id, text=msg, button=button)
             await editMessage(message, ibmsg, bot_pm_button.build_menu(1))
         else:

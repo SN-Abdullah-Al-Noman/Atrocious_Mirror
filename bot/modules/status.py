@@ -46,8 +46,8 @@ async def status_pages(_, query):
             return await query.answer(f'Already Refreshed! Try after {get_readable_time(7 - curr)}', show_alert=True)
         else:
             refresh_status[user_id] = time()
-        await editMessage(query.message, f"{(await user_info(user_id)).mention(style='html')}, <i>Refreshing Status...</i>")
-        await sleep(1.5)
+        await editMessage(query.message, f"{(await user_info(user_id)).mention(style='html')}, Refreshing Status...")
+        await sleep(2)
         await update_all_messages(True)
     elif data[1] in ['nex', 'pre']:
         await turn_page(data)
