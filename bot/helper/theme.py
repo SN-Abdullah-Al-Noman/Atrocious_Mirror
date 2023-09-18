@@ -1,7 +1,6 @@
 from os import path as ospath
 from bot import config_dict
 
-
 def make_theme():
     if config_dict['THEME_ENABLED']:
         return {'Upload': '📤 Upload',
