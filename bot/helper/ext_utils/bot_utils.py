@@ -138,9 +138,9 @@ def get_readable_message():
             msg += f"<b><a href='{download.message.link}'>{download.status()}</a>: </b>"
             msg += f"<code>{escape(f'{download.name()}')}</code>"
         if download.status() not in [MirrorStatus.STATUS_SPLITTING, MirrorStatus.STATUS_SEEDING]:
-            msg += f"\n{get_progress_bar_string(download.progress())} {download.progress()}"
+            msg += f"\n<b>{theme['Done']}:</b> {get_progress_bar_string(download.progress())} {download.progress()}"
             msg += f"\n<b>{theme['Speed']}: </b>{download.speed()}"
-            msg += f"\n<b>{theme['Done']}: </b>{download.processed_bytes()} of {download.size()}"
+            msg += f"\n<b>{theme['Process']}: </b>{download.processed_bytes()} of {download.size()}"
             msg += f"\n<b>{theme['ETA']}: </b>{download.eta()} <b>| Elapsed: </b>{get_readable_time(time() - download.message.date.timestamp())}"
             msg += f"\n<b>{theme['Engine']}: </b>{download.engine}"
             msg += f"\n<b>{theme['User']}: </b>{download.message.from_user.mention(style='html')} | <b>ID: </b><code>{download.message.from_user.id}</code>"
