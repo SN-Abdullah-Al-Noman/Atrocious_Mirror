@@ -36,9 +36,13 @@ This is a Telegram Bot written in Python for mirroring files on the Internet to 
 
 - If any filename match with BLACKLIST_FILE_KEYWORDS then task will cancel.
 
-### Index Folder Support
+### Stop Duplicate Leech
 
-- You can mirror or leech index folder link with replying link with /cmd -b like bulk.
+- Need DATABASE_URL. If any file found in LEECH_DUMP_CHAT and file size is same then leech will stop bot will forward the file.
+
+### Own Theme Support
+
+- To use own theme rename my_theme_sample.py to my_theme.py and open it and edit in right position.
 
 ## By [anasty17](https://github.com/anasty17)
 
