@@ -1,7 +1,6 @@
 from os import path as ospath
 from bot import config_dict
 
-
 def make_theme():
     if config_dict['THEME_ENABLED']:
         return {'Upload': '📤 Upload',
@@ -15,12 +14,12 @@ def make_theme():
                 'Split': '✂️ Split',
                 'CheckUp': '📝 CheckUp',
                 'Seed': '🌧 Seed',
-                'Process': '✳️',
+                'Process': '📶 Process',
                 'Progress_Bar_Full': '▦',
                 'Progress_Bar_Blank': '▢',
                 'Speed': '⚡ Speed',
                 'Done': '✅ Done',
-                'ETA': '⏰️ ETA',
+                'ETA': '⏰ ETA',
                 'Engine': '⛓️ Engine',
                 'User': '👨‍✈️ User',
                 'Seeders': '🌱 Seeders',
@@ -38,7 +37,7 @@ def make_theme():
                 'Repo': '🌐 Repo',
                 'Statistics': '🔄 Statistics',
                 'Tasks Running': '🖥 Tasks Running',
-                'Stop': '🛑 Stop'}
+                'Stop': '🚫'}
     else:
         return {'Upload': 'Upload',
                 'Download': 'Download',
@@ -51,7 +50,7 @@ def make_theme():
                 'Split': 'Split',
                 'CheckUp': 'CheckUp',
                 'Seed': 'Seed',
-                'Process': '',
+                'Process': 'Process',
                 'Progress_Bar_Full': '■',
                 'Progress_Bar_Blank': '□',
                 'Speed': 'Speed',
@@ -63,7 +62,7 @@ def make_theme():
                 'Leechers': 'Leechers',
                 'Size': 'Size',
                 'Uploaded': 'Uploaded',
-                'Ratio': ' Ratio',
+                'Ratio': 'Ratio',
                 'Time': 'Time',
                 'Previous': 'Previous',
                 'Next': 'Next',
@@ -73,6 +72,6 @@ def make_theme():
                 'Repo': 'Repo',
                 'Statistics': 'Statistics',
                 'Tasks Running': 'Tasks Running',
-                'Stop': 'Stop'}
+                'Stop': '🚫'}
 
 theme = make_theme()
