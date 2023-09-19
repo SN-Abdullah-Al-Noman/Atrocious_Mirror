@@ -55,11 +55,17 @@ async def get_bot_pm_button():
     return button
 
 
-async def send_to_chat(chat_id, text, button=None):
+async def send_to_chat(chat_id, text, button=None, photo=False):
     try:
-        await bot.send_message(chat_id, text, reply_markup=button)
-    except:
+        photo = choice(config_dict['IMAGES'])
+        if photo:
+            await bot.send_photo(chat_id, photo, caption=text, reply_markup=button)
+        else:
+            await bot.send_message(chat_id, text, reply_markup=button)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
         pass
+
 
 
 async def stop_duplicate_check(name, listener):
