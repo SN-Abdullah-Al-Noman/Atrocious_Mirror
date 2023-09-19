@@ -67,7 +67,6 @@ async def send_to_chat(chat_id, text, button=None, photo=False):
         pass
 
 
-
 async def stop_duplicate_check(name, listener):
     if (not is_gdrive_id(listener.upDest) or listener.isLeech or listener.select or listener.upDest.startswith('mtp:') and not listener.user_dict.get('stop_duplicate', False) or config_dict['STOP_DUPLICATE'] and listener.upDest.startswith('mtp:')):
         return False, None
