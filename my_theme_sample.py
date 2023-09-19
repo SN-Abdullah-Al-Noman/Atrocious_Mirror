@@ -1,4 +1,3 @@
-from os import path as ospath
 from bot import config_dict
 
 def make_theme():
@@ -8,7 +7,7 @@ def make_theme():
                 'Clone': '♻️ Clone',
                 'QueueDl': '💤 QueueDl',
                 'QueueUp': '💤 QueueUp',
-                'Pause': '⛔️ Pause',
+                'Pause': '⏸️ Pause',
                 'Archive': '📁 Archive',
                 'Extract': '🗃 Extract',
                 'Split': '✂️ Split',
@@ -37,7 +36,7 @@ def make_theme():
                 'Repo': '🌐 Repo',
                 'Statistics': '🔄 Statistics',
                 'Tasks Running': '🖥 Tasks Running',
-                'Stop': '🚫'}
+                'Stop': '⛔️ Stop:'}
     else:
         return {'Upload': 'Upload',
                 'Download': 'Download',
@@ -72,6 +71,6 @@ def make_theme():
                 'Repo': 'Repo',
                 'Statistics': 'Statistics',
                 'Tasks Running': 'Tasks Running',
-                'Stop': '🚫'}
+                'Stop': '⛔️'}
 
 theme = make_theme()
