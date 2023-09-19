@@ -8,11 +8,10 @@ from asyncio.subprocess import PIPE
 from functools import partial, wraps
 from concurrent.futures import ThreadPoolExecutor
 from aiohttp import ClientSession
-from pyrogram.handlers import CallbackQueryHandler
-from pyrogram.filters import command, regex
+from pyrogram.filters import regex
 from pyrogram.types import CallbackQuery
 
-from bot import download_dict, download_dict_lock, botStartTime, user_data, config_dict, bot_loop,  bot
+from bot import download_dict, download_dict_lock, botStartTime, user_data, config_dict, bot_loop, bot
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.telegraph_helper import telegraph
@@ -157,7 +156,7 @@ def get_readable_message():
             msg += f" | <b>{theme['Time']}: </b>{download.seeding_time()}"
         else:
             msg += f"\n<b>{theme['Size']}: </b>{download.size()}"
-        msg += f"\n<b>{theme['Stop']}: </b><code>/{BotCommands.CancelMirror} {download.gid()}</code>\n\n"
+        msg += f"\n<b>{theme['Stop']} </b><code>/{BotCommands.CancelMirror} {download.gid()}</code>\n\n"
     if len(msg) == 0:
         return None, None
     dl_speed = 0
