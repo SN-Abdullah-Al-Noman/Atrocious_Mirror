@@ -441,7 +441,7 @@ class MirrorLeechListener:
             msg += f'\n<b>• User ID: </b> <code>{self.message.from_user.id}</code>'
             if config_dict['BOT_PM'] and self.message.chat.type != self.message.chat.type.PRIVATE:
                 bmsg = f'\n\n<b>Links has been sent in private.</b>'
-                await send_to_chat(chat_id=self.message.from_user.id, text=bpmsg + msg, button=button)
+                await send_to_chat(chat_id=self.message.from_user.id, text=bpmsg + msg, button=button, photo=True)
                 pmbutton = await get_bot_pm_button()
                 await sendMessage(self.message, gpmsg+msg+bmsg, pmbutton)
             else:
