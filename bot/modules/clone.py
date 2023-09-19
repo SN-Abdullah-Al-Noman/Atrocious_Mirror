@@ -189,7 +189,7 @@ async def gdcloneNode(client, link, dest_id, listener):
                     pmmsg = f"Hey {listener.tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
                     pmbutton = await get_telegraph_list(telegraph_content)
                     button = await get_bot_pm_button()
-                    await send_to_chat(chat_id=user_id, text=pmmsg, button=pmbutton)
+                    await send_to_chat(chat_id=user_id, text=pmmsg, button=pmbutton, photo=True)
                 else:
                     msg = f"Hey {listener.tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
                     button = await get_telegraph_list(telegraph_content)
