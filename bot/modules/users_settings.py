@@ -140,7 +140,7 @@ Default Upload is <b>{du}</b>
 Excluded Extensions is <code>{ex_ex}</code>
 YT-DLP Options is <b><code>{escape(ytopt)}</code></b>"""
 
-    return text, buttons.build_menu(1)
+    return text, buttons.build_menu(2)
 
 
 async def update_user_settings(query):
@@ -152,7 +152,7 @@ async def user_settings(_, message):
     from_user = message.from_user
     handler_dict[from_user.id] = False
     msg, button = await get_user_settings(from_user)
-    await sendMessage(message, msg, button)
+    await sendMessage(message, msg, button, photo='IMAGES')
 
 
 async def set_thumb(_, message, pre_event):
