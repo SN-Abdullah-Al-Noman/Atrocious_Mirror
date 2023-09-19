@@ -5,15 +5,14 @@ from aiohttp import ClientSession
 from html import escape
 from urllib.parse import quote
 
-from bot import bot, LOGGER, config_dict, get_client, bot_name
+from bot import bot, LOGGER, config_dict, get_client
 from bot.helper.telegram_helper.message_utils import editMessage, sendMessage
 from bot.helper.ext_utils.telegraph_helper import telegraph
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.bot_commands import BotCommands
-from bot.helper.ext_utils.bot_utils import get_readable_file_size, sync_to_async, new_task 
+from bot.helper.ext_utils.bot_utils import get_readable_file_size, sync_to_async, new_task
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.ext_utils.atrocious_utils import delete_links, send_to_chat, task_utils
-
+from bot.helper.ext_utils.atrocious_utils import delete_links, get_bot_pm_button, send_to_chat, task_utils
 
 PLUGINS = []
 SITES = None
@@ -107,20 +106,19 @@ async def __search(key, site, message, method, user_id):
         if total_results == 0:
             await editMessage(message, f"No result found for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i>")
             return
-        msg = f"<b>Hey. Found {min(total_results, TELEGRAPH_LIMIT)}</b>"
+        msg = f"<b>Found {min(total_results, TELEGRAPH_LIMIT)}</b>"
         msg += f" <b>result(s) for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i></b>"
         await sync_to_async(client.search_delete, search_id=search_id)
         await sync_to_async(client.auth_log_out)
     link = await __getResult(search_results, key, message, method)
     buttons = ButtonMaker()
-    buttons.ubutton("🔎 View Search Result", link)
+    buttons.ubutton("🔎 VIEW", link)
     button = buttons.build_menu(1)
     if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
-        ibmsg = f"Hey.\n\nTorrent search result sent in pm."
-        bot_pm_button = ButtonMaker()
-        bot_pm_button.ubutton("View in inbox", f"https://t.me/{bot_name}")
-        await send_to_chat(chat_id=user_id, text=msg, button=button)
-        await editMessage(message, ibmsg, bot_pm_button.build_menu(1))
+        ibmsg = f"Hey.\nTorrent search result sent in pm."
+        bot_pm_button = await get_bot_pm_button()
+        await send_to_chat(chat_id=user_id, text=msg, button=button, photo=True)
+        await editMessage(message, ibmsg, bot_pm_button)
     else:
         await editMessage(message, msg, button)
 
@@ -223,7 +221,7 @@ async def torrentSearch(_, message):
     buttons = ButtonMaker()
     key = message.text.split()
     SEARCH_PLUGINS = config_dict['SEARCH_PLUGINS']
-    
+
     if username := message.from_user.username:
         tag = f"@{username}"
     else:
