@@ -49,7 +49,7 @@ async def stats(client, message):
             f'<b>Memory Total:</b> {get_readable_file_size(memory.total)}\n'\
             f'<b>Memory Free:</b> {get_readable_file_size(memory.available)}\n'\
             f'<b>Memory Used:</b> {get_readable_file_size(memory.used)}\n'
-    await sendMessage(message, stats)
+    await sendMessage(message, stats, photo='IMAGES')
 
 
 async def start(client, message):
@@ -71,7 +71,7 @@ async def start(client, message):
         buttons.ubutton("Owner", "https://t.me/ItsBitDefender")
         reply_markup = buttons.build_menu(2)
         start_string = f'''This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\nType /{BotCommands.HelpCommand} to get a list of available commands'''
-        await sendMessage(message, start_string, reply_markup)
+        await sendMessage(message, start_string, reply_markup, photo='IMAGES')
     await DbManger().update_pm_users(message.from_user.id)
     
 
