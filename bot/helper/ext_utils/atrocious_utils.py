@@ -57,9 +57,9 @@ async def get_bot_pm_button():
 
 async def send_to_chat(chat_id, text, button=None, photo=False):
     try:
-        photo = choice(config_dict['IMAGES'])
-        if photo:
-            await bot.send_photo(chat_id, photo, caption=text, reply_markup=button)
+        if photo and config_dict['IMAGES']:
+            IMAGES = choice(config_dict['IMAGES'])
+            await bot.send_photo(chat_id, IMAGES, text, reply_markup=button)
         else:
             await bot.send_message(chat_id, text, reply_markup=button)
     except Exception as e:
