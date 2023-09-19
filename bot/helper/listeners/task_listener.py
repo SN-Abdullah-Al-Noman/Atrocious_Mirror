@@ -371,16 +371,22 @@ class MirrorLeechListener:
             else:
                 fmsg = ''
                 for index, (link, name) in enumerate(files.items(), start=1):
-                    fmsg += f"{index}. <a href='{link}'>{name}</a>\n"
+                    fmsg += f"{index}. <a href='{link}'>{name}</a>\n\n"
                     if len(fmsg.encode() + msg.encode()) > 4000:
                         await sendMessage(self.message, msg + fmsg)
                         await sleep(1)
                         fmsg = ''
                 if fmsg != '':
                     if config_dict['BOT_PM'] and self.message.chat.type != self.message.chat.type.PRIVATE:
-                        lbpmsg = f'\n<b>Files has been sent in private.</b>'
+                        lbpmsg = f'<b>Files has been sent in private.</b>'
                         button = await get_bot_pm_button()
-                        await sendMessage(self.message, gpmsg + msg + fmsg + lbpmsg, button)
+                        if config_dict['SAFE_MODE']:
+                            if self.message.from_user.id == OWNER_ID and self.message.chat.type == self.message.chat.type.PRIVATE:
+                                await sendMessage(self.message, gpmsg + msg + fmsg + lbpmsg, button)
+                            else:
+                                await sendMessage(self.message, gpmsg + msg + lbpmsg, button)
+                        else:
+                            await sendMessage(self.message, gpmsg + msg + fmsg + lbpmsg, button)
                     else:
                         await sendMessage(self.message, gpmsg + msg + fmsg)
             if self.seed:
