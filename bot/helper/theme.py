@@ -8,7 +8,7 @@ def make_theme():
                 'Clone': '♻️ Clone',
                 'QueueDl': '💤 QueueDl',
                 'QueueUp': '💤 QueueUp',
-                'Pause': '⛔️ Pause',
+                'Pause': '⏸️ Pause',
                 'Archive': '📁 Archive',
                 'Extract': '🗃 Extract',
                 'Split': '✂️ Split',
