@@ -37,7 +37,7 @@ def make_theme():
                 'Repo': '🌐 Repo',
                 'Statistics': '🔄 Statistics',
                 'Tasks Running': '🖥 Tasks Running',
-                'Stop': '🚫'}
+                'Stop': '🚫:'}
     else:
         return {'Upload': 'Upload',
                 'Download': 'Download',
@@ -72,7 +72,7 @@ def make_theme():
                 'Repo': 'Repo',
                 'Statistics': 'Statistics',
                 'Tasks Running': 'Tasks Running',
-                'Stop': '🚫'}
+                'Stop': '🚫:'}
 
 if ospath.exists('my_theme.py'):
     try:
