@@ -117,7 +117,7 @@ Timeout: 60 sec'''
         buttons.ibutton('Empty String', f"botset emptyqbit {key}")
         buttons.ibutton('Close', "botset close")
         msg = f'Send a valid value for {key}. Timeout: 60 sec'
-    button = buttons.build_menu(1) if key is None else buttons.build_menu(2)
+    button = buttons.build_menu(2) if key is None else buttons.build_menu(2)
     return msg, button
 
 
@@ -544,7 +544,7 @@ async def bot_settings(_, message):
     handler_dict[message.chat.id] = False
     msg, button = await get_buttons()
     globals()['START'] = 0
-    await sendMessage(message, msg, button)
+    await sendMessage(message, msg, button, photo='IMAGES')
 
 
 async def load_config():
