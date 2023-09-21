@@ -38,7 +38,7 @@ async def export_leech_data():
 
 
 async def update_leech_links(name, from_chat_id, message_id):
-    if DATABASE_URL:
+    if DATABASE_URL and config_dict['LEECH_DUMP_CHAT']:
         client = MongoClient(DATABASE_URL)
         db = client.mltb
         collection = db.leech_links
@@ -46,6 +46,13 @@ async def update_leech_links(name, from_chat_id, message_id):
         collection.update_one({'name': name}, {'$set': {'link': link, 'from_chat_id': from_chat_id, 'message_id': message_id}}, upsert=True)
         LOGGER.info(f"Link for {name} added in database")
         await export_leech_data()
+
+
+async def copy_message(chat_id, from_chat_id, message_id):
+    try:
+        await bot.copy_message(chat_id=chat_id, from_chat_id=from_chat_id, message_id=message_id)
+    except:
+        pass
 
 
 async def get_bot_pm_button():
