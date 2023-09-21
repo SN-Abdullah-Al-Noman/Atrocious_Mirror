@@ -399,6 +399,10 @@ Rclone Path is <code>{rccpath}</code>"""
         else:
             buttons.ibutton("Enable Stop Duplicate", f"userset {user_id} stop_duplicate")
             sd_msg = 'Disabled'
+        if config_dict['SA_MAIL']:
+            sa_mail = config_dict['SA_MAIL']
+        else:
+            sa_mail = None
         buttons.ibutton("Back", f"userset {user_id} back")
         buttons.ibutton("Close", f"userset {user_id} close")
         tokenmsg = "Exists" if await aiopath.exists(token_pickle) else "Not Exists"
@@ -407,13 +411,16 @@ Rclone Path is <code>{rccpath}</code>"""
         elif GDID := config_dict['GDRIVE_ID']:
             gdrive_id = GDID
         else:
-            gdrive_id = 'None'
+            gdrive_id = ''
         index = user_dict['index_url'] if user_dict.get('index_url', False) else 'None'
         text = f"""<u>Gdrive Tools Settings for {name}</u>
 Gdrive Token <b>{tokenmsg}</b>
 Gdrive ID is <code>{gdrive_id}</code>
 Index URL is <code>{index}</code>
-Stop Duplicate is <b>{sd_msg}</b>"""
+Stop Duplicate is <b>{sd_msg}</b>
+
+Bot Service Account is <b>{sa_mail}</b>
+If you want to use bot service account in your share drive instead own token or service accounts then add this sa mail in your share drive as content manager."""
         await editMessage(message, text, buttons.build_menu(1))
     elif data[2] == 'vthumb':
         await query.answer()
