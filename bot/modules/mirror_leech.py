@@ -190,7 +190,6 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
     task_utilis_msg, error_button = await task_utils(message)
     if task_utilis_msg:
         error_msg.extend(task_utilis_msg)
-
     if error_msg:
         final_msg = f'Hey {tag}.\n'
         for __i, __msg in enumerate(error_msg, 1):
@@ -198,7 +197,7 @@ async def _mirror_leech(client, message, isQbit=False, isLeech=False, sameDir=No
         if error_button is not None:
             error_button = error_button.build_menu(2)
             await sendMessage(message, final_msg, error_button)
-        return
+            return
 
     if link:
         LOGGER.info(link)
