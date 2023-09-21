@@ -17,13 +17,11 @@ from bot.helper.ext_utils.fs_utils import clean_unwanted, is_archive, get_base_n
 from bot.helper.ext_utils.bot_utils import sync_to_async
 from bot.helper.ext_utils.leech_utils import get_media_info, get_document_type, take_ss, get_audio_thumb
 from bot.helper.telegram_helper.message_utils import deleteMessage
-from bot.helper.ext_utils.atrocious_utils import update_leech_links
+from bot.helper.ext_utils.atrocious_utils import copy_message, update_leech_links
 
 
 LOGGER = getLogger(__name__)
 getLogger("pyrogram").setLevel(ERROR)
-
-client = user if IS_PREMIUM_USER else bot
 
 
 class TgUploader:
@@ -68,6 +66,8 @@ class TgUploader:
             'lprefix') or (config_dict['LEECH_FILENAME_PREFIX'] if 'lprefix' not in self.__listener.user_dict else '')
         if not await aiopath.exists(self.__thumb):
             self.__thumb = None
+        if IS_PREMIUM_USER and (self.__listener.user_dict.get('user_leech', False) or 'user_leech' not in self.__listener.user_dict and config_dict['USER_LEECH']):
+            self.__user_leech = True
         if config_dict['LEECH_DUMP_CHAT']:
             self.__upload_dest = config_dict['LEECH_DUMP_CHAT']
         else:
@@ -75,7 +75,16 @@ class TgUploader:
                 self.__upload_dest = self.__listener.message.from_user.id
             else:
                 self.__upload_dest = self.__listener.upDest
-
+        if not isinstance(self.__upload_dest, int):
+            if self.__upload_dest.startswith('b:'):
+                self.__upload_dest = self.__upload_dest.lstrip('b:')
+                self.__user_leech = False
+            elif self.__upload_dest.startswith('u:'):
+                self.__upload_dest = self.__upload_dest.lstrip('u:')
+                self.__user_leech = IS_PREMIUM_USER
+            if self.__upload_dest.isdigit() or self.__upload_dest.startswith('-'):
+                self.__upload_dest = int(self.__upload_dest)
+                
     async def __msg_to_reply(self):
         if self.__upload_dest:
             msg = f"<b>••••• Leech Information: •••••</b>"
@@ -87,7 +96,7 @@ class TgUploader:
             except Exception as e:
                 await self.__listener.onUploadError(str(e))
                 return False
-        elif IS_PREMIUM_USER:
+        elif self.__user_leech:
             if not self.__listener.isSuperGroup:
                 await self.__listener.onUploadError('Use SuperGroup to leech with User!')
                 return False
@@ -311,12 +320,8 @@ class TgUploader:
                     return
                 self.__sent_msg = await self.__sent_msg.reply_photo(photo=self.__up_path, quote=True, caption=cap_mono, disable_notification=True, progress=self.__upload_progress)
             if config_dict['LEECH_DUMP_CHAT'] and config_dict['BOT_PM']:
-                try:
-                    await client.copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
-                except:
-                    pass
-            if config_dict['LEECH_DUMP_CHAT']:
-                await update_leech_links(name=self.name, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+                await copy_message(chat_id=self.__listener.message.from_user.id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
+            await update_leech_links(name=self.name, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
             if not self.__is_cancelled and self.__media_group and (self.__sent_msg.video or self.__sent_msg.document):
                 key = 'documents' if self.__sent_msg.document else 'videos'
                 if match := re_match(r'.+(?=\.0*\d+$)|.+(?=\.part\d+\..+)', self.__up_path):
