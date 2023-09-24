@@ -152,7 +152,7 @@ async def user_settings(_, message):
     from_user = message.from_user
     handler_dict[from_user.id] = False
     msg, button = await get_user_settings(from_user)
-    await sendMessage(message, msg, button, photo='IMAGES')
+    await sendMessage(message, msg, button, photo=True)
 
 
 async def set_thumb(_, message, pre_event):
