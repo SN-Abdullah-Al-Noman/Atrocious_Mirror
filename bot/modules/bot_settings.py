@@ -544,7 +544,7 @@ async def bot_settings(_, message):
     handler_dict[message.chat.id] = False
     msg, button = await get_buttons()
     globals()['START'] = 0
-    await sendMessage(message, msg, button, photo='IMAGES')
+    await sendMessage(message, msg, button, photo=True)
 
 
 async def load_config():
