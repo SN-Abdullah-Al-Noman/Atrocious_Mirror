@@ -188,7 +188,11 @@ async def sendStatusMessage(msg):
             await deleteMessage(message)
             del status_reply_dict[chat_id]
         message = await sendMessage(msg, progress, buttons, photo='IMAGES')
-        message.text = progress
+        if message := await sendMessage(msg, progress, buttons, photo=True):
+            if hasattr(message, 'caption'):
+                message.caption = progress
+            else:
+                message.text = progress
         status_reply_dict[chat_id] = [message, time()]
         if not Interval:
             Interval.append(setInterval(
