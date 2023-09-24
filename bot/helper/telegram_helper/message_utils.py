@@ -2,43 +2,33 @@
 from asyncio import sleep
 from pyrogram.errors import FloodWait
 from time import time
-from traceback import format_exc
-from random import choice as rchoice
 from re import match as re_match
-from pyrogram.errors import ReplyMarkupInvalid, FloodWait, PhotoInvalidDimensions, WebpageCurlFailed, MediaEmpty
+from random import choice as rchoice
 
 from bot import config_dict, LOGGER, status_reply_dict, status_reply_dict_lock, Interval, bot, user, download_dict_lock
 from bot.helper.ext_utils.bot_utils import get_readable_message, setInterval, sync_to_async
 from bot.helper.ext_utils.exceptions import TgLinkException
 
 
-async def sendMessage(message, text, buttons=None, photo=None):
+async def sendMessage(message, text, buttons=None, photo=False):
     try:
-        if photo:
+        if photo and config_dict['IMAGES']:
             try:
-                if photo == 'IMAGES':
-                    photo = rchoice(config_dict['IMAGES'])
-                return await message.reply_photo(photo=photo, reply_to_message_id=message.id,
-                                                 caption=text, reply_markup=buttons, disable_notification=True)
-            except IndexError:
-                pass
-            except (PhotoInvalidDimensions, WebpageCurlFailed, MediaEmpty):
-                des_dir = await download_image_url(photo)
-                await sendMessage(message, text, buttons, des_dir)
-                await aioremove(des_dir)
-                return
+                return await bot.send_photo(chat_id=message.chat.id, photo=rchoice(config_dict['IMAGES']),
+                                   caption=text, reply_to_message_id=message.id, reply_markup=buttons, disable_notification=True)
             except Exception as e:
-                LOGGER.error(format_exc())
-        return await message.reply(text=text, quote=True, disable_web_page_preview=True,
+                LOGGER.error(str(e))
+                return await message.reply(text=text, quote=True, disable_web_page_preview=True,
+                                   disable_notification=True, reply_markup=buttons)
+        else:
+            return await message.reply(text=text, quote=True, disable_web_page_preview=True,
                                    disable_notification=True, reply_markup=buttons)
     except FloodWait as f:
         LOGGER.warning(str(f))
         await sleep(f.value * 1.2)
-        return await sendMessage(message, text, buttons, photo)
-    except ReplyMarkupInvalid:
-        return await sendMessage(message, text, None, photo)
+        return await sendMessage(message, text, buttons)
     except Exception as e:
-        LOGGER.error(format_exc())
+        LOGGER.error(str(e))
         return str(e)
 
 
@@ -187,8 +177,11 @@ async def sendStatusMessage(msg):
             message = status_reply_dict[chat_id][0]
             await deleteMessage(message)
             del status_reply_dict[chat_id]
-        message = await sendMessage(msg, progress, buttons, photo='IMAGES')
-        message.text = progress
+        if message := await sendMessage(msg, progress, buttons, photo=True):
+            if hasattr(message, 'caption'):
+                message.caption = progress
+            else:
+                message.text = progress
         status_reply_dict[chat_id] = [message, time()]
         if not Interval:
             Interval.append(setInterval(
