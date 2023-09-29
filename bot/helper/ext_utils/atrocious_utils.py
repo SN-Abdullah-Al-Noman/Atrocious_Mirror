@@ -455,6 +455,9 @@ async def chat_info(channel_id):
 async def forcesub(message, ids, button=None):
     join_button = {}
     _msg = ''
+    user_id = message.from_user.id
+    if user_id in user_data and user_data[user_id].get('is_good_friend') or user_id in user_data and user_data[user_id].get('is_paid_user'):
+        return None, button
     for channel_id in ids.split():
         chat = await chat_info(channel_id)
         try:
