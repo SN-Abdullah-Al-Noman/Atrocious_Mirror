@@ -5,7 +5,7 @@ from functools import partial
 from asyncio import create_subprocess_exec, create_subprocess_shell, sleep, gather
 from aiofiles.os import remove, rename, path as aiopath
 from aiofiles import open as aiopen
-from os import environ, getcwd
+from os import environ, getcwd, path as ospath
 from dotenv import load_dotenv
 from time import time
 from io import BytesIO
