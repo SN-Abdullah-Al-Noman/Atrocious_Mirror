@@ -132,7 +132,7 @@ def get_readable_message():
         msg += f"<b>{config_dict['STATUS_HEADER']}</b>\n\n"
     for download in list(download_dict.values())[STATUS_START:STATUS_LIMIT+STATUS_START]:
         if config_dict['SAFE_MODE']:
-            msg += f"<b>{download.status()}: </b>Safe Mode Enabled"
+            msg += f"<b>{download.status()}: </b>Safe Mode Activated"
         else:
             msg += f"<b><a href='{download.message.link}'>{download.status()}</a>: </b>"
             msg += f"<code>{escape(f'{download.name()}')}</code>"
