@@ -98,13 +98,13 @@ async def stop_duplicate_check(name, listener):
         telegraph_content, contents_no = await sync_to_async(gdSearch(stopDup=True).drive_list, name, listener.upDest, listener.user_id)
         if telegraph_content:
             if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
-                msg = f"File/Folder is already available in Drive.\n\nI have sent available file link in pm."
+                msg = f"File/Folder is already available in Drive.\nI have sent available file link in pm."
                 pmmsg = f"Hey {tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
                 pmbutton = await get_telegraph_list(telegraph_content)
                 button = await get_bot_pm_button()
                 await send_to_chat(chat_id=user_id, text=pmmsg, button=pmbutton)
             else:
-                msg = f"File/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
+                msg = f"File/Folder is already available in Drive.\nHere are {contents_no} list results:"
                 button = await get_telegraph_list(telegraph_content)
             return msg, button
     return False, None
@@ -185,13 +185,13 @@ async def check_duplicate_file(self, up_name):
     telegraph_content, contents_no = await sync_to_async(gdSearch(stopDup=True).drive_list, up_name, self.upDest, self.user_id)
     if telegraph_content:
         if config_dict['BOT_PM'] and message.chat.type != message.chat.type.PRIVATE:
-            msg = f"\nFile/Folder is already available in Drive.\n\nI have sent available file link in pm."
-            pmmsg = f"Hey {self.tag}.\n\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
+            msg = f"\nFile/Folder is already available in Drive.\nI have sent available file link in pm."
+            pmmsg = f"Hey {self.tag}.\n\nFile/Folder is already available in Drive.\nHere are {contents_no} list results:"
             pmbutton = await get_telegraph_list(telegraph_content)
             button = await get_bot_pm_button()
             await send_to_chat(chat_id=user_id, text=pmmsg, button=pmbutton)
         else:
-            msg = f"\nFile/Folder is already available in Drive.\n\nHere are {contents_no} list results:"
+            msg = f"\nFile/Folder is already available in Drive.\nHere are {contents_no} list results:"
             button = await get_telegraph_list(telegraph_content)
         return msg, button
     return False, None
@@ -282,7 +282,7 @@ def checking_token_status(message, button=None):
 
 async def check_filename(name=None):
     if name is not None and any(filter_word in name.lower() for filter_word in GLOBAL_BLACKLIST_FILE_KEYWORDS):
-        msg = f"A Blacklist keyword found in your file/link.\n\n"
+        msg = f"A Blacklist keyword found in your file/link.\n"
         msg += f"You can not mirror or leech this file/link."
         return msg
 
