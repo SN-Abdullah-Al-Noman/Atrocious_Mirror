@@ -68,7 +68,7 @@ async def start(client, message):
     else:
         buttons = ButtonMaker()
         buttons.ubutton("Repo", "https://github.com/SN-Abdullah-Al-Noman/Atrocious_Mirror")
-        buttons.ubutton("Owner", "https://t.me/ItsBitDefender")
+        buttons.ubutton("Owner", "https://t.me/AtrociousMirrorBackup")
         reply_markup = buttons.build_menu(2)
         start_string = f'''This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.\nType /{BotCommands.HelpCommand} to get a list of available commands'''
         await sendMessage(message, start_string, reply_markup, photo=True)
