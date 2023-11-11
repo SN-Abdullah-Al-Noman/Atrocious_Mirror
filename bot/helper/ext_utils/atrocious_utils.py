@@ -494,37 +494,38 @@ async def BotPm_check(message, button=None):
         return _msg, button
 
 
+async def tasks_limit_check(message, button=None):
+    if config_dict['BOT_MAX_TASKS'] and len(download_dict) >= config_dict['BOT_MAX_TASKS']:
+        t_msg = f"Bot Max Tasks limit exceeded.\nBot max tasks limit is {config_dict['BOT_MAX_TASKS']}.\nPlease wait for the completion of other tasks."
+        return t_msg
+
+
 async def task_utils(message):
     msg = []
     button = None
     user_id = message.from_user.id
     user = await message._client.get_users(user_id)
-    
     if user_id == OWNER_ID:
         return msg, button
- 
     b_msg, button = checking_blacklist(message, button)
     if b_msg is not None:
         msg.append(b_msg)
-        
+    t_msg = await tasks_limit_check(message)
+    if t_msg:
+        msg.append(t_msg)
+        return msg, button
     token_msg, button = checking_token_status(message, button)
     if token_msg is not None:
-        msg.append(token_msg)
-        
+        msg.append(token_msg) 
     if ids := config_dict['FSUB_IDS']:
         _msg, button = await forcesub(message, ids, button)
         if _msg:
-            msg.append(_msg)
-            
+            msg.append(_msg)   
     if config_dict['BOT_PM']:
         if user.status == user.status.LONG_AGO:
             _msg, button = await BotPm_check(message, button)
             if _msg:
                 msg.append(_msg)
-                
-    if len(download_dict) >= config_dict['BOT_MAX_TASKS']:
-        msg.append(f"Bot max tasks limit exceeded.\nBot max tasks limit is {config_dict['BOT_MAX_TASKS']}.\nPlease wait for the completion of other tasks.")
-    
     if (maxtask := config_dict['USER_MAX_TASKS']) and await get_user_tasks(message.from_user.id, maxtask):
         if config_dict['PAID_SERVICE'] and user_id in user_data and not user_data[user_id].get('is_paid_user'):
             msg.append(f"User's max tasks limit is {maxtask}.\nPlease wait to complete your old tasks or buy paid service.")
