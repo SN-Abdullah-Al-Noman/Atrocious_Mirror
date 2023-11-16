@@ -282,9 +282,7 @@ def checking_token_status(message, button=None):
 
 async def check_filename(name=None):
     if name is not None and any(filter_word in name.lower() for filter_word in GLOBAL_BLACKLIST_FILE_KEYWORDS):
-        msg = f"A Blacklist keyword found in your file/link.\n"
-        msg += f"You can not mirror or leech this file/link."
-        return msg
+        return f"A Blacklist keyword found in your file/link.You can not mirror or leech this file/link."
 
 
 def check_storage_threshold(size, threshold, arch=False, alloc=False):
