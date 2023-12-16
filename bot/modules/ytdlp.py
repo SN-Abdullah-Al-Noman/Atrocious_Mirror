@@ -355,11 +355,10 @@ async def _ytdl(client, message, isLeech=False, sameDir=None, bulk=[]):
     error_button = None
     task_utilis_msg, error_button = await task_utils(message)
     if task_utilis_msg:
-        await delete_links(message)
         error_msg.extend(task_utilis_msg)
 
     if error_msg:
-        final_msg = f'Hey {tag}.\n'
+        final_msg = f'<b>Hey: {tag}</b>\n'
         for __i, __msg in enumerate(error_msg, 1):
             final_msg += f'\n<b>{__i}</b>: {__msg}\n'
         if error_button is not None:
