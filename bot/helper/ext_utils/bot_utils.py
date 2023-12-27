@@ -19,6 +19,8 @@ from bot.helper.theme import theme
 
 THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 
+COMMAND_USAGE = {}
+
 MAGNET_REGEX = r'magnet:\?xt=urn:(btih|btmh):[a-zA-Z0-9]*\s*'
 
 URL_REGEX = r'^(?!\/)(rtmps?:\/\/|mms:\/\/|rtsp:\/\/|https?:\/\/|ftp:\/\/)?([^\/:]+:[^\/@]+@)?(www\.)?(?=[^\/:\s]+\.[^\/:\s]+)([^\/:\s]+\.[^\/:\s]+)(:\d+)?(\/[^#\s]*[\s\S]*)?(\?[^#\s]*)?(#.*)?$'
@@ -28,7 +30,6 @@ SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
 STATUS_START = 0
 PAGES = 1
 PAGE_NO = 1
-
 
 class MirrorStatus:
     STATUS_UPLOADING = theme['Upload']
@@ -57,6 +58,22 @@ class setInterval:
 
     def cancel(self):
         self.task.cancel()
+
+
+def speed_string_to_bytes(size_text: str):
+    size = 0
+    size_text = size_text.lower()
+    if "k" in size_text:
+        size += float(size_text.split("k")[0]) * 1024
+    elif "m" in size_text:
+        size += float(size_text.split("m")[0]) * 1048576
+    elif "g" in size_text:
+        size += float(size_text.split("g")[0]) * 1073741824
+    elif "t" in size_text:
+        size += float(size_text.split("t")[0]) * 1099511627776
+    elif "b" in size_text:
+        size += float(size_text.split("b")[0])
+    return size
 
 
 def get_readable_file_size(size_in_bytes):
@@ -186,9 +203,9 @@ def get_readable_message():
         TASKS_COUNT = f"<b>Task Limit: </b>{config_dict['BOT_MAX_TASKS']} | <b>Run:</b> {tasks} | <b>Free:</b> {config_dict['BOT_MAX_TASKS'] - tasks}"
     else:
         TASKS_COUNT = f"<b>Tasks Running:</b> {tasks}"
-    
-    msg += f"\n{TASKS_COUNT}\n"
-    msg += f"<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(config_dict['DOWNLOAD_DIR']).free)}"
+    msg += f"■■■■■■■■■■■■■■■■■■■■"
+    msg += f"\n{TASKS_COUNT}"
+    msg += f"\n<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(config_dict['DOWNLOAD_DIR']).free)}"
     msg += f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>UP:</b> {get_readable_time(time() - botStartTime)}"
     msg += f"\n<b>DL:</b> {get_readable_file_size(dl_speed)}/s | <b>UL:</b> {get_readable_file_size(up_speed)}/s"
     return msg, button
@@ -354,6 +371,22 @@ def text_size_to_bytes(size_text):
         size += float(size_text.split('g')[0]) *1073741824
     elif 't' in size_text:
         size += float(size_text.split('t')[0]) *1099511627776
+    return size
+
+
+def speed_string_to_bytes(size_text: str):
+    size = 0
+    size_text = size_text.lower()
+    if "k" in size_text:
+        size += float(size_text.split("k")[0]) * 1024
+    elif "m" in size_text:
+        size += float(size_text.split("m")[0]) * 1048576
+    elif "g" in size_text:
+        size += float(size_text.split("g")[0]) * 1073741824
+    elif "t" in size_text:
+        size += float(size_text.split("t")[0]) * 1099511627776
+    elif "b" in size_text:
+        size += float(size_text.split("b")[0])
     return size
 
 
