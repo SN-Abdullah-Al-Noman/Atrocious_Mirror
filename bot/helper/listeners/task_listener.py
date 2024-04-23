@@ -7,8 +7,8 @@ from aioshutil import move
 from asyncio import create_subprocess_exec, sleep, Event
 
 from bot import Interval, aria2, DOWNLOAD_DIR, download_dict, download_dict_lock, LOGGER, DATABASE_URL, \
-    MAX_SPLIT_SIZE, config_dict, status_reply_dict_lock, user_data, non_queued_up, non_queued_dl, queued_up, \
-    queued_dl, queue_dict_lock, GLOBAL_EXTENSION_FILTER, IS_PREMIUM_USER, OWNER_ID
+    MAX_SPLIT_SIZE, config_dict, status_reply_dict_lock, user_data, \
+    GLOBAL_EXTENSION_FILTER, IS_PREMIUM_USER, OWNER_ID
 from bot.helper.ext_utils.bot_utils import sync_to_async, get_readable_file_size, is_gdrive_id, get_telegraph_list
 from bot.helper.ext_utils.fs_utils import get_base_name, get_path_size, clean_download, clean_target, \
     is_first_archive_split, is_archive, is_archive_split, join_files
@@ -286,29 +286,6 @@ class MirrorLeechListener:
                             else:
                                 m_size.append(f_size)
                                 o_files.append(file_)
-
-        up_limit = config_dict['QUEUE_UPLOAD']
-        all_limit = config_dict['QUEUE_ALL']
-        added_to_queue = False
-        async with queue_dict_lock:
-            dl = len(non_queued_dl)
-            up = len(non_queued_up)
-            if (all_limit and dl + up >= all_limit and (not up_limit or up >= up_limit)) or (up_limit and up >= up_limit):
-                added_to_queue = True
-                LOGGER.info(f"Added to Queue/Upload: {name}")
-                event = Event()
-                queued_up[self.uid] = event
-        if added_to_queue:
-            async with download_dict_lock:
-                download_dict[self.uid] = QueueStatus(
-                    name, size, gid, self, 'Up')
-            await event.wait()
-            async with download_dict_lock:
-                if self.uid not in download_dict:
-                    return
-            LOGGER.info(f'Start from Queued/Upload: {name}')
-        async with queue_dict_lock:
-            non_queued_up.add(self.uid)
 
         if self.isLeech:
             size = await get_path_size(up_dir)
