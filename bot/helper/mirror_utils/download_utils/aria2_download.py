@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from aiofiles.os import remove as aioremove, path as aiopath
 
-from bot import aria2, download_dict_lock, download_dict, LOGGER, config_dict, aria2_options, aria2c_global
+from bot import aria2, download_dict_lock, download_dict, LOGGER, config_dict, aria2_options, aria2c_global, non_queued_dl, queue_dict_lock
 from bot.helper.ext_utils.bot_utils import bt_selection_buttons, sync_to_async
 from bot.helper.mirror_utils.status_utils.aria2_status import Aria2Status
 from bot.helper.telegram_helper.message_utils import sendStatusMessage, sendMessage
+from bot.helper.ext_utils.task_manager import is_queued
 
 
 async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_time):
@@ -44,23 +45,40 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
     gid = download.gid
     name = download.name
     async with download_dict_lock:
-        download_dict[listener.uid] = Aria2Status(gid, listener)
+        download_dict[listener.uid] = Aria2Status(
+            gid, listener, queued=added_to_queue)
+    if added_to_queue:
+        LOGGER.info(f"Added to Queue/Download: {name}. Gid: {gid}")
+        if not listener.select or not download.is_torrent:
+            await sendStatusMessage(listener.message)
+    else:
+        async with queue_dict_lock:
+            non_queued_dl.add(listener.uid)
         LOGGER.info(f"Aria2Download started: {name}. Gid: {gid}")
+
     await listener.onDownloadStart()
 
-    if not listener.select or not config_dict['BASE_URL']:
+    if not added_to_queue and (not listener.select or not config_dict['BASE_URL']):
         await sendStatusMessage(listener.message)
     elif listener.select and download.is_torrent and not download.is_metadata:
-        await sync_to_async(aria2.client.force_pause, gid)
+        if not added_to_queue:
+            await sync_to_async(aria2.client.force_pause, gid)
         SBUTTONS = bt_selection_buttons(gid)
         msg = "Your download paused. Choose files then press Done Selecting button to start downloading."
         await sendMessage(listener.message, msg, SBUTTONS)
+
+    if added_to_queue:
+        await event.wait()
 
         async with download_dict_lock:
             if listener.uid not in download_dict:
                 return
             download = download_dict[listener.uid]
+            download.queued = False
             new_gid = download.gid()
 
         await sync_to_async(aria2.client.unpause, new_gid)
         LOGGER.info(f'Start Queued Download from Aria2c: {name}. Gid: {gid}')
+
+        async with queue_dict_lock:
+            non_queued_dl.add(listener.uid)
