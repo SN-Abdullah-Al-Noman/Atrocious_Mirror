@@ -37,5 +37,8 @@ async def add_direct_download(details, path, listener, foldername):
     directListener = DirectListener(foldername, size, path, listener, a2c_opt)
     async with download_dict_lock:
         download_dict[listener.uid] = DirectStatus(directListener, gid, listener)
+        LOGGER.info(f"Download from Direct Download: {foldername}")
+        await listener.onDownloadStart()
+        await sendStatusMessage(listener.message)
 
     await sync_to_async(directListener.download, contents
