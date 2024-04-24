@@ -3,12 +3,11 @@ from asyncio import gather
 from json import loads
 from secrets import token_urlsafe
 
-from bot import download_dict, download_dict_lock, queue_dict_lock, non_queued_dl, LOGGER
+from bot import download_dict, download_dict_lock, LOGGER
 from bot.helper.ext_utils.bot_utils import cmd_exec
 from bot.helper.telegram_helper.message_utils import sendMessage, sendStatusMessage
 from bot.helper.ext_utils.task_manager import is_queued
 from bot.helper.mirror_utils.status_utils.rclone_status import RcloneStatus
-from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.mirror_utils.rclone_utils.transfer import RcloneTransferHelper
 from bot.helper.ext_utils.atrocious_utils import check_filename, stop_duplicate_check
 
@@ -53,32 +52,9 @@ async def add_rclone_download(rc_path, config_path, path, name, listener):
         await sendMessage(listener.message, msg, button)
         return
 
-    added_to_queue, event = await is_queued(listener.uid)
-    if added_to_queue:
-        LOGGER.info(f"Added to Queue/Download: {name}")
-        async with download_dict_lock:
-            download_dict[listener.uid] = QueueStatus(
-                name, size, gid, listener, 'dl')
-        await listener.onDownloadStart()
-        await sendStatusMessage(listener.message)
-        await event.wait()
-        async with download_dict_lock:
-            if listener.uid not in download_dict:
-                return
-        from_queue = True
-    else:
-        from_queue = False
-
     RCTransfer = RcloneTransferHelper(listener, name)
     async with download_dict_lock:
-        download_dict[listener.uid] = RcloneStatus(
-            RCTransfer, listener.message, gid, 'dl')
-    async with queue_dict_lock:
-        non_queued_dl.add(listener.uid)
-
-    if from_queue:
-        LOGGER.info(f'Start Queued Download with rclone: {rc_path}')
-    else:
+        download_dict[listener.uid] = RcloneStatus(RCTransfer, listener.message, gid, 'dl')
         await listener.onDownloadStart()
         await sendStatusMessage(listener.message)
         LOGGER.info(f"Download with rclone: {rc_path}")
