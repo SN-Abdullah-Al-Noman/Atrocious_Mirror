@@ -4,7 +4,7 @@ from aiofiles.os import makedirs
 from asyncio import Event
 from mega import (MegaApi, MegaListener, MegaRequest, MegaTransfer, MegaError)
 
-from bot import LOGGER, config_dict, download_dict_lock, download_dict, non_queued_dl, queue_dict_lock
+from bot import LOGGER, config_dict, download_dict_lock, download_dict
 from bot.helper.telegram_helper.message_utils import sendMessage, sendStatusMessage
 from bot.helper.ext_utils.bot_utils import get_mega_link_type, async_to_sync, sync_to_async
 from bot.helper.mirror_utils.status_utils.mega_download_status import MegaDownloadStatus
@@ -185,36 +185,8 @@ async def add_mega_download(mega_link, path, listener, name):
             await executor.do(folder_api.logout, ())
         return
 
-    
-    added_to_queue, event = await is_queued(listener.uid)
-    if added_to_queue:
-        LOGGER.info(f"Added to Queue/Download: {name}")
-        async with download_dict_lock:
-            download_dict[listener.uid] = QueueStatus(
-                name, size, gid, listener, 'Dl')
-        await listener.onDownloadStart()
-        await sendStatusMessage(listener.message)
-        await event.wait()
-        async with download_dict_lock:
-            if listener.uid not in download_dict:
-                await executor.do(api.logout, ())
-                if folder_api is not None:
-                    await executor.do(folder_api.logout, ())
-                return
-        from_queue = True
-        LOGGER.info(f'Start Queued Download from Mega: {name}')
-    else:
-        from_queue = False
-
     async with download_dict_lock:
-        download_dict[listener.uid] = MegaDownloadStatus(
-            name, size, gid, mega_listener, listener.message)
-    async with queue_dict_lock:
-        non_queued_dl.add(listener.uid)
-
-    if from_queue:
-        LOGGER.info(f'Start Queued Download from Mega: {name}')
-    else:
+        download_dict[listener.uid] = MegaDownloadStatus(name, size, gid, mega_listener, listener.message)
         await listener.onDownloadStart()
         await sendStatusMessage(listener.message)
         LOGGER.info(f"Download from Mega: {name}")
