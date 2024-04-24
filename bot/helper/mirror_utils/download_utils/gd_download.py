@@ -47,9 +47,7 @@ async def add_gd_download(link, path, listener, newname):
 
     drive = gdDownload(name, path, listener)
     async with download_dict_lock:
-        download_dict[listener.uid] = GdriveStatus(
-            drive, size, listener.message, gid, 'dl')
-
+        download_dict[listener.uid] = GdriveStatus(drive, size, listener.message, gid, 'dl')
         LOGGER.info(f"Download from GDrive: {name}")
         await listener.onDownloadStart()
         await sendStatusMessage(listener.message)
