@@ -118,7 +118,7 @@ class TelegramDownloadHelper:
                     await sendMessage(self.__listener.message, warn, button)
                     return
 
-                await self.__onDownloadStart(name, size, gid, from_queue)
+                await self.__onDownloadStart(name, size, gid)
                 await self.__download(message, path)
             else:
                 await self.__onDownloadError('File already being downloaded!')
