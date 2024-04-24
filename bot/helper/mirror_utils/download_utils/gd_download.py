@@ -5,10 +5,8 @@ from bot import download_dict, download_dict_lock, LOGGER
 from bot.helper.mirror_utils.gdrive_utlis.download import gdDownload
 from bot.helper.mirror_utils.gdrive_utlis.count import gdCount
 from bot.helper.mirror_utils.status_utils.gdrive_status import GdriveStatus
-from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.telegram_helper.message_utils import sendMessage, sendStatusMessage
 from bot.helper.ext_utils.bot_utils import sync_to_async
-from bot.helper.ext_utils.task_manager import is_queued
 from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check, stop_duplicate_leech
 
 
