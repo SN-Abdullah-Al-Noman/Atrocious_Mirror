@@ -46,7 +46,6 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
     async with download_dict_lock:
         download_dict[listener.uid] = Aria2Status(gid, listener)
         LOGGER.info(f"Aria2Download started: {name}. Gid: {gid}")
-
     await listener.onDownloadStart()
 
     if not listener.select or not config_dict['BASE_URL']:
