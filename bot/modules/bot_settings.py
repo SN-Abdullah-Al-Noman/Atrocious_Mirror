@@ -18,7 +18,6 @@ from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.bot_utils import setInterval, sync_to_async, new_thread
 from bot.helper.ext_utils.db_handler import DbManger
-from bot.helper.ext_utils.task_manager import start_from_queued
 from bot.helper.mirror_utils.rclone_utils.serve import rclone_serve_booter
 from bot.modules.torrent_search import initiate_search_tools
 from bot.modules.rss import addJob
@@ -195,8 +194,6 @@ async def edit_variable(_, message, pre_message, key):
         await DbManger().update_config({key: value})
     if key in ['SEARCH_PLUGINS', 'SEARCH_API_LINK']:
         await initiate_search_tools()
-    elif key in ['QUEUE_ALL', 'QUEUE_DOWNLOAD', 'QUEUE_UPLOAD']:
-        await start_from_queued()
     elif key in ['RCLONE_SERVE_URL', 'RCLONE_SERVE_PORT', 'RCLONE_SERVE_USER', 'RCLONE_SERVE_PASS']:
         await rclone_serve_booter()
 
@@ -406,8 +403,6 @@ async def edit_bot_settings(client, query):
             await DbManger().update_config({data[2]: value})
         if data[2] in ['SEARCH_PLUGINS', 'SEARCH_API_LINK']:
             await initiate_search_tools()
-        elif data[2] in ['QUEUE_ALL', 'QUEUE_DOWNLOAD', 'QUEUE_UPLOAD']:
-            await start_from_queued()
         elif data[2] in ['RCLONE_SERVE_URL', 'RCLONE_SERVE_PORT', 'RCLONE_SERVE_USER', 'RCLONE_SERVE_PASS']:
             await rclone_serve_booter()
     elif data[1] == 'resetaria':
@@ -1018,7 +1013,7 @@ async def load_config():
 
     if DATABASE_URL:
         await DbManger().update_config(config_dict)
-    await gather(initiate_search_tools(), start_from_queued(), rclone_serve_booter())
+    await gather(initiate_search_tools(), rclone_serve_booter())
 
 
 bot.add_handler(MessageHandler(bot_settings, filters=command(
