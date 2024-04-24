@@ -3,9 +3,8 @@ from logging import getLogger, ERROR
 from time import time
 from asyncio import Lock
 
-from bot import LOGGER, download_dict, download_dict_lock, non_queued_dl, queue_dict_lock, bot, user, IS_PREMIUM_USER, config_dict
+from bot import LOGGER, download_dict, download_dict_lock, bot, user, IS_PREMIUM_USER, config_dict
 from bot.helper.mirror_utils.status_utils.telegram_status import TelegramStatus
-from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.telegram_helper.message_utils import sendStatusMessage, sendMessage
 from bot.helper.ext_utils.task_manager import is_queued
 from bot.helper.ext_utils.atrocious_utils import stop_duplicate_check, stop_duplicate_leech
@@ -44,11 +43,6 @@ class TelegramDownloadHelper:
                 self, size, self.__listener.message, file_id[:12], 'dl')
         async with queue_dict_lock:
             non_queued_dl.add(self.__listener.uid)
-        if not from_queue:
-            await self.__listener.onDownloadStart()
-            await sendStatusMessage(self.__listener.message)
-            LOGGER.info(f'Download from Telegram: {name}')
-        else:
             LOGGER.info(f'Start Queued Download from Telegram: {name}')
 
     async def __onDownloadProgress(self, current, total):
@@ -126,20 +120,6 @@ class TelegramDownloadHelper:
                     return
 
                 added_to_queue, event = await is_queued(self.__listener.uid)
-                if added_to_queue:
-                    LOGGER.info(f"Added to Queue/Download: {name}")
-                    async with download_dict_lock:
-                        download_dict[self.__listener.uid] = QueueStatus(
-                            name, size, gid, self.__listener, 'dl')
-                    await self.__listener.onDownloadStart()
-                    await sendStatusMessage(self.__listener.message)
-                    await event.wait()
-                    async with download_dict_lock:
-                        if self.__listener.uid not in download_dict:
-                            return
-                    from_queue = True
-                else:
-                    from_queue = False
                 await self.__onDownloadStart(name, size, gid, from_queue)
                 await self.__download(message, path)
             else:
