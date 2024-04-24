@@ -8,8 +8,6 @@ from bot import LOGGER, config_dict, download_dict_lock, download_dict
 from bot.helper.telegram_helper.message_utils import sendMessage, sendStatusMessage
 from bot.helper.ext_utils.bot_utils import get_mega_link_type, async_to_sync, sync_to_async
 from bot.helper.mirror_utils.status_utils.mega_download_status import MegaDownloadStatus
-from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
-from bot.helper.ext_utils.task_manager import is_queued
 from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check, stop_duplicate_leech
 
 
