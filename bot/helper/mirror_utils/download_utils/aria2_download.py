@@ -44,7 +44,7 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
     gid = download.gid
     name = download.name
     async with download_dict_lock:
-        download_dict[listener.uid] = Aria2Status(gid, listener, queued=added_to_queue)
+        download_dict[listener.uid] = Aria2Status(gid, listener)
         LOGGER.info(f"Aria2Download started: {name}. Gid: {gid}")
 
     await listener.onDownloadStart()
@@ -61,7 +61,6 @@ async def add_aria2c_download(link, path, listener, filename, auth, ratio, seed_
             if listener.uid not in download_dict:
                 return
             download = download_dict[listener.uid]
-            download.queued = False
             new_gid = download.gid()
 
         await sync_to_async(aria2.client.unpause, new_gid)
