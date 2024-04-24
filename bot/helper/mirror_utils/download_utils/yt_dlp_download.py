@@ -5,10 +5,9 @@ from logging import getLogger
 from yt_dlp import YoutubeDL, DownloadError
 from re import search as re_search
 
-from bot import download_dict_lock, download_dict, non_queued_dl, queue_dict_lock
+from bot import download_dict_lock, download_dict
 from bot.helper.telegram_helper.message_utils import sendStatusMessage
 from ..status_utils.yt_dlp_download_status import YtDlpDownloadStatus
-from bot.helper.mirror_utils.status_utils.queue_status import QueueStatus
 from bot.helper.ext_utils.bot_utils import sync_to_async, async_to_sync
 from bot.helper.ext_utils.task_manager import is_queued
 from bot.helper.ext_utils.atrocious_utils import check_filename, limit_checker, stop_duplicate_check, stop_duplicate_leech
@@ -266,22 +265,7 @@ class YoutubeDLHelper:
             return
 
         added_to_queue, event = await is_queued(self.__listener.uid)
-        if added_to_queue:
-            LOGGER.info(f"Added to Queue/Download: {self.name}")
-            async with download_dict_lock:
-                download_dict[self.__listener.uid] = QueueStatus(
-                    self.name, self.__size, self.__gid, self.__listener, 'dl')
-            await event.wait()
-            async with download_dict_lock:
-                if self.__listener.uid not in download_dict:
-                    return
-            LOGGER.info(f'Start Queued Download from YT_DLP: {self.name}')
-            await self.__onDownloadStart(True)
-        else:
-            LOGGER.info(f'Download with YT_DLP: {self.name}')
-
-        async with queue_dict_lock:
-            non_queued_dl.add(self.__listener.uid)
+        LOGGER.info(f'Download with YT_DLP: {self.name}')
 
         await sync_to_async(self.__download, link, path)
 
