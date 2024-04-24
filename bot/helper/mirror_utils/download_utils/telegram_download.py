@@ -118,7 +118,6 @@ class TelegramDownloadHelper:
                     await sendMessage(self.__listener.message, warn, button)
                     return
 
-                added_to_queue, event = await is_queued(self.__listener.uid)
                 await self.__onDownloadStart(name, size, gid, from_queue)
                 await self.__download(message, path)
             else:
