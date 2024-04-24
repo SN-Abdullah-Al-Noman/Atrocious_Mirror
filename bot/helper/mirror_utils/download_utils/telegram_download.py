@@ -32,7 +32,7 @@ class TelegramDownloadHelper:
     def processed_bytes(self):
         return self.__processed_bytes
 
-    async def __onDownloadStart(self, name, size, file_id, from_queue):
+    async def __onDownloadStart(self, name, size, file_id):
         async with global_lock:
             GLOBAL_GID.add(file_id)
         self.name = name
@@ -40,9 +40,6 @@ class TelegramDownloadHelper:
         async with download_dict_lock:
             download_dict[self.__listener.uid] = TelegramStatus(
                 self, size, self.__listener.message, file_id[:12], 'dl')
-        async with queue_dict_lock:
-            non_queued_dl.add(self.__listener.uid)
-            LOGGER.info(f'Start Queued Download from Telegram: {name}')
 
     async def __onDownloadProgress(self, current, total):
         if self.__is_cancelled:
