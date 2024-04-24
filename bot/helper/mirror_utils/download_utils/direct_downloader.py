@@ -3,7 +3,6 @@ from secrets import token_urlsafe
 
 from bot import LOGGER, aria2_options, aria2c_global, download_dict, download_dict_lock
 from bot.helper.ext_utils.bot_utils import sync_to_async
-from bot.helper.ext_utils.task_manager import is_queued
 from bot.helper.listeners.direct_listener import DirectListener
 from bot.helper.mirror_utils.status_utils.direct_status import DirectStatus
 from bot.helper.telegram_helper.message_utils import sendMessage, sendStatusMessage
