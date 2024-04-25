@@ -13,12 +13,13 @@ from pyrogram.types import BotCommand, CallbackQuery
 from pyrogram.filters import regex
 
 from bot import bot, bot_name, config_dict, DATABASE_URL, download_dict, DOWNLOAD_DIR, GLOBAL_BLACKLIST_FILE_KEYWORDS, LOGGER, OWNER_ID, shorteneres_list, user_data
-from bot.helper.ext_utils.bot_utils import sync_to_async, get_readable_file_size, get_readable_time, getAllDownload, get_telegraph_list, is_gdrive_id, is_telegram_link
-from bot.helper.ext_utils.fs_utils import get_base_name
+from bot.helper.ext_utils.bot_utils import sync_to_async, get_readable_file_size, get_readable_time, getAllDownload, get_telegraph_list
 from bot.helper.telegram_helper.message_utils import get_tg_link_content
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.button_build import ButtonMaker
-from bot.helper.mirror_utils.gdrive_utlis.search import gdSearch
+from bot.helper.ext_utils.files_utils import get_base_name
+from bot.helper.ext_utils.links_utils import is_gdrive_id, is_telegram_link
+from bot.helper.mirror_leech_utils.gdrive_utils.search import gdSearch
 
 
 leech_data = {}
