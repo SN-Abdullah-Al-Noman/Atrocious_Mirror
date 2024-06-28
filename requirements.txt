@@ -1,10 +1,10 @@
-aiohttp
 aiofiles
 aioshutil
 anytree
 apscheduler
 aria2p
 asyncio
+beautifulsoup4
 cloudscraper
 dnspython
 feedparser
@@ -20,13 +20,13 @@ motor
 natsort
 pillow
 psutil
+pycryptodome
 pymongo
-pyrogram
+pyrofork==2.2.11
 python-dotenv
 python-magic
 qbittorrent-api
 requests
-speedtest-cli
 telegraph
 tenacity
 tgcrypto
