@@ -153,7 +153,7 @@ async def get_tag(message):
     return tag
 
 
-async def check_filename(message, file_name, link=None):
+async def check_filename(message, file_name=None, link=None):
     LOGGER.info(f"Checking {file_name}")
     tag = await get_tag(message)
     owner_msg = f"<b>Blackist File Name:</b> <code>{file_name}</code>\n\n"
@@ -161,10 +161,11 @@ async def check_filename(message, file_name, link=None):
         owner_msg += f"<b>Link:</b> {link}\n\n"
     owner_msg += f"<b>User ID:</b> <code>{message.from_user.id}</code>\n"
     owner_msg += f"<b>User:</b> {tag}\n\n<b>This user is trying to download blacklist file.</b>"
-    if any(filter_word in file_name.lower() for filter_word in GLOBAL_BLACKLIST_FILE_KEYWORDS):
-        await bot.send_message(chat_id=OWNER_ID, text=owner_msg)
-        msg = f"A Blacklist keyword found in your file/link.You can not download this file/link."
-        return msg
+    if file_name is not None:
+        if any(filter_word in file_name.lower() for filter_word in GLOBAL_BLACKLIST_FILE_KEYWORDS):
+            await bot.send_message(chat_id=OWNER_ID, text=owner_msg)
+            msg = f"A Blacklist keyword found in your file/link.You can not download this file/link."
+            return msg
 
 
 async def getDownloadByGid(gid):
