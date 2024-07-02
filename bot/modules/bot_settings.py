@@ -951,6 +951,10 @@ async def load_config():
     if len(UPSTREAM_BRANCH) == 0:
         UPSTREAM_BRANCH = "master"
 
+    REMOVE_CAPTION = environ.get("REMOVE_CAPTION", "")
+    if len(REMOVE_CAPTION) == 0:
+        REMOVE_CAPTION = ""
+
     DRIVES_IDS.clear()
     DRIVES_NAMES.clear()
     INDEX_URLS.clear()
