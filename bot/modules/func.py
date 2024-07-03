@@ -17,7 +17,6 @@ from asyncio import create_subprocess_exec
 from pyrogram.filters import regex, command
 from pyrogram.handlers import MessageHandler
 from random import choice, random, randrange
-from aiohttp import ClientSession as aClientSession
 from pyrogram.types import BotCommand, CallbackQuery
 from re import findall as refindall, search as re_search
 from subprocess import run as srun, check_output as scheck_output
