@@ -598,6 +598,14 @@ if ospath.exists("list_drives.txt"):
                 INDEX_URLS.append(temp[2])
             else:
                 INDEX_URLS.append("")
+                
+if ospath.exists('shorteners.txt'):
+    with open('shorteners.txt', 'r+') as f:
+        lines = f.readlines()
+        for line in lines:
+            temp = line.strip().split()
+            if len(temp) == 2:
+                shorteneres_list.append({'domain': temp[0],'api_key': temp[1]})
 
 if BASE_URL:
     Popen(

@@ -24,6 +24,7 @@ from bot import (
     DRIVES_IDS,
     DRIVES_NAMES,
     INDEX_URLS,
+    shorteneres_list,
     aria2,
     GLOBAL_EXTENSION_FILTER,
     Intervals,
@@ -138,7 +139,7 @@ async def get_buttons(key=None, edit_type=None):
     elif key == "private":
         buttons.ibutton("Back", "botset back")
         buttons.ibutton("Close", "botset close")
-        msg = """Send private file: config.env, token.pickle, rclone.conf, accounts.zip, list_drives.txt, cookies.txt, terabox.txt, .netrc or any other private file!
+        msg = """Send private file: config.env, token.pickle, rclone.conf, accounts.zip, list_drives.txt, cookies.txt, terabox.txt, shorteners.txt, .netrc or any other private file!
 To delete private file send only the file name as text message.
 Note: Changing .netrc will not take effect for aria2c until restart.
 Timeout: 60 sec"""
@@ -362,6 +363,9 @@ async def update_private_file(_, message, pre_message):
             await (await create_subprocess_exec("touch", ".netrc")).wait()
             await (await create_subprocess_exec("chmod", "600", ".netrc")).wait()
             await (await create_subprocess_exec("cp", ".netrc", "/root/.netrc")).wait()
+            await deleteMessage(message)
+        elif file_name in ['shorteners.txt', 'shorteners']:
+            shorteneres_list.clear()
         await deleteMessage(message)
     elif doc := message.document:
         file_name = doc.file_name
@@ -406,6 +410,14 @@ async def update_private_file(_, message, pre_message):
         elif file_name == "config.env":
             load_dotenv("config.env", override=True)
             await load_config()
+        elif file_name == 'shorteners.txt':
+            shorteneres_list.clear()
+            with open('shorteners.txt', 'r+') as f:
+                lines = f.readlines()
+                for line in lines:
+                    temp = line.strip().split()
+                    if len(temp) == 2:
+                        shorteneres_list.append({'domain': temp[0],'api_key': temp[1]})
         if "@github.com" in config_dict["UPSTREAM_REPO"]:
             buttons = ButtonMaker()
             msg = "Push to UPSTREAM_REPO ?"
@@ -963,7 +975,7 @@ async def load_config():
         DRIVES_NAMES.append("Main")
         DRIVES_IDS.append(GDRIVE_ID)
         INDEX_URLS.append(INDEX_URL)
-
+ 
     if await aiopath.exists("list_drives.txt"):
         async with aiopen("list_drives.txt", "r+") as f:
             lines = await f.readlines()
@@ -975,7 +987,16 @@ async def load_config():
                     INDEX_URLS.append(temp[2])
                 else:
                     INDEX_URLS.append("")
-
+                    
+    shorteneres_list.clear()               
+    if await aiopath.exists('shorteners.txt'):
+        async with aiopen('shorteners.txt', 'r+') as f:
+            lines = await f.readlines()
+            for line in lines:
+                temp = line.strip().split()
+                if len(temp) == 2:
+                    shorteneres_list.append({'domain': temp[0],'api_key': temp[1]})
+                    
     config_dict.update(
         {
             "AS_DOCUMENT": AS_DOCUMENT,
@@ -1014,6 +1035,7 @@ async def load_config():
             "RCLONE_SERVE_PORT": RCLONE_SERVE_PORT,
             "RSS_CHAT": RSS_CHAT,
             "RSS_DELAY": RSS_DELAY,
+            "REMOVE_CAPTION": REMOVE_CAPTION,
             "SEARCH_API_LINK": SEARCH_API_LINK,
             "SEARCH_LIMIT": SEARCH_LIMIT,
             "SEARCH_PLUGINS": SEARCH_PLUGINS,
