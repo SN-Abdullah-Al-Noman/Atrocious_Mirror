@@ -490,6 +490,10 @@ REMOVE_CAPTION = environ.get("REMOVE_CAPTION", "")
 if len(REMOVE_CAPTION) == 0:
     REMOVE_CAPTION = ""
 
+MIRROR_LOG_CHAT = environ.get("MIRROR_LOG_CHAT", "")
+MIRROR_LOG_CHAT = "" if len(MIRROR_LOG_CHAT) == 0 else MIRROR_LOG_CHAT
+if MIRROR_LOG_CHAT.isdigit() or MIRROR_LOG_CHAT.startswith("-"):
+    MIRROR_LOG_CHAT = int(MIRROR_LOG_CHAT)
 
 config_dict = {
     "AS_DOCUMENT": AS_DOCUMENT,
