@@ -8,7 +8,7 @@ from bot import bot
 async def welcome(client, message):
     for new_member in message.new_chat_members:
         member_name = new_member.first_name if new_member.first_name else "there"
-        user_name = f"@{new_member.username}" if new_member.username else ""
+        user_name = f"\nYour Username: @{new_member.username}" if new_member.username else ""
         user_id = new_member.id
         now = datetime.now()
         join_date = now.strftime("%Y-%m-%d")
