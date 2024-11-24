@@ -1,3 +1,4 @@
+mltbenv/*
 config.env
 *.pyc
 data*
@@ -11,9 +12,9 @@ accounts/*
 Thumbnails/*
 rclone/*
 tokens/*
+sabnzbd/*
 list_drives.txt
 cookies.txt
 downloads
 bot.session*
-terabox.txt
 rclone.conf
